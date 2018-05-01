@@ -11,6 +11,11 @@ variable "logs_cloudwatch_retention" {
   default     = 90
 }
 
+variable "ecs_use_fargate" {
+  description = "Whether to use Fargate for the task definition."
+  default     = false
+}
+
 variable "ecs_cluster_arn" {
   description = "The ARN of the ECS cluster."
 }
@@ -22,6 +27,16 @@ variable "ecs_vpc_id" {
 variable "ecs_subnet_ids" {
   description = "Subnet IDs for the ECS tasks."
   type        = "list"
+}
+
+variable "fargate_task_cpu" {
+  description = "The number of cpu units used by the task. Default is minimum."
+  default     = 256
+}
+
+variable "fargate_task_memory" {
+  description = "The amount (in MiB) of memory used by the task. Default is minimum."
+  default     = 512
 }
 
 variable "tasks_desired_count" {

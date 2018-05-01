@@ -43,8 +43,11 @@ module "app_ecs_service" {
 | container_port | The port on which the container will receive traffic. | string | `80` | no |
 | ecs_cluster_arn | The ARN of the ECS cluster. | string | - | yes |
 | ecs_subnet_ids | Subnet IDs for the ECS tasks. | list | - | yes |
+| ecs_use_fargate | Whether to use Fargate for the task definition. | string | `false` | no |
 | ecs_vpc_id | VPC ID to be used by ECS. | string | - | yes |
 | environment | Environment tag, e.g prod. | string | - | yes |
+| fargate_task_cpu | The number of cpu units used by the task. Default is minimum. | string | `256` | no |
+| fargate_task_memory | The amount (in MiB) of memory used by the task. Default is minimum. | string | `512` | no |
 | logs_cloudwatch_retention | Specifies the number of days you want to retain log events in the log group. | string | `90` | no |
 | name | The service name. | string | - | yes |
 | tasks_desired_count | The number of instances of a task definition. | string | `1` | no |

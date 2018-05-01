@@ -93,7 +93,7 @@ resource "aws_security_group_rule" "app_ecs_allow_https_from_alb" {
 # IAM
 #
 
-data "aws_iam_policy_document" "task_role_assume_role_policy" {
+data "aws_iam_policy_document" "ecs_assume_role_policy" {
   statement {
     actions = ["sts:AssumeRole"]
 
@@ -106,7 +106,21 @@ data "aws_iam_policy_document" "task_role_assume_role_policy" {
 
 resource "aws_iam_role" "task_role" {
   name               = "ecs-task-role-${var.name}-${var.environment}"
-  assume_role_policy = "${data.aws_iam_policy_document.task_role_assume_role_policy.json}"
+  assume_role_policy = "${data.aws_iam_policy_document.ecs_assume_role_policy.json}"
+}
+
+resource "aws_iam_role" "task_execution_role" {
+  count = "${var.ecs_use_fargate ? 1 : 0}"
+
+  name               = "ecs-task-execution-role-${var.name}-${var.environment}"
+  assume_role_policy = "${data.aws_iam_policy_document.ecs_assume_role_policy.json}"
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_instance_role_policy" {
+  count = "${var.ecs_use_fargate ? 1 : 0}"
+
+  role       = "${aws_iam_role.task_execution_role.name}"
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
 #
@@ -121,6 +135,12 @@ resource "aws_ecs_task_definition" "main" {
   family        = "${var.name}-${var.environment}"
   network_mode  = "awsvpc"
   task_role_arn = "${aws_iam_role.task_role.arn}"
+
+  # Fargate requirements
+  requires_compatibilities = "${compact(list(var.ecs_use_fargate ? "FARGATE" : ""))}"
+  cpu                      = "${var.ecs_use_fargate ? var.fargate_task_cpu : ""}"
+  memory                   = "${var.ecs_use_fargate ? var.fargate_task_memory : ""}"
+  execution_role_arn       = "${join("", aws_iam_role.task_execution_role.*.arn)}"
 
   container_definitions = <<EOF
 [
@@ -159,9 +179,38 @@ data "aws_ecs_task_definition" "main" {
   depends_on      = ["aws_ecs_task_definition.main"]         # ensures at least one task def exists
 }
 
+locals {
+  ecs_service_launch_type = "${var.ecs_use_fargate ? "FARGATE" : "EC2"}"
+
+  ecs_service_placement_strategy = {
+    EC2 = [
+      {
+        type  = "spread"
+        field = "attribute:ecs.availability-zone"
+      },
+      {
+        type  = "spread"
+        field = "instanceId"
+      },
+    ]
+
+    FARGATE = []
+  }
+
+  ecs_service_placement_constraints = {
+    EC2 = [{
+      type = "distinctInstance"
+    }]
+
+    FARGATE = []
+  }
+}
+
 resource "aws_ecs_service" "main" {
   name    = "${var.name}"
   cluster = "${var.ecs_cluster_arn}"
+
+  launch_type = "${local.ecs_service_launch_type}"
 
   # Use latest active revision
   task_definition = "${aws_ecs_task_definition.main.family}:${max(
@@ -172,19 +221,8 @@ resource "aws_ecs_service" "main" {
   deployment_minimum_healthy_percent = "${var.tasks_minimum_healthy_percent}"
   deployment_maximum_percent         = "${var.tasks_maximum_percent}"
 
-  placement_strategy {
-    type  = "spread"
-    field = "attribute:ecs.availability-zone"
-  }
-
-  placement_strategy {
-    type  = "spread"
-    field = "instanceId"
-  }
-
-  placement_constraints {
-    type = "distinctInstance"
-  }
+  placement_strategy    = "${local.ecs_service_placement_strategy[local.ecs_service_launch_type]}"
+  placement_constraints = "${local.ecs_service_placement_constraints[local.ecs_service_launch_type]}"
 
   network_configuration {
     subnets          = ["${var.ecs_subnet_ids}"]
