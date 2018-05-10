@@ -182,7 +182,7 @@ data "aws_ecs_task_definition" "main" {
 locals {
   ecs_service_launch_type = "${var.ecs_use_fargate ? "FARGATE" : "EC2"}"
 
-  ecs_service_placement_strategy = {
+  ecs_service_ordered_placement_strategy = {
     EC2 = [
       {
         type  = "spread"
@@ -221,8 +221,8 @@ resource "aws_ecs_service" "main" {
   deployment_minimum_healthy_percent = "${var.tasks_minimum_healthy_percent}"
   deployment_maximum_percent         = "${var.tasks_maximum_percent}"
 
-  placement_strategy    = "${local.ecs_service_placement_strategy[local.ecs_service_launch_type]}"
-  placement_constraints = "${local.ecs_service_placement_constraints[local.ecs_service_launch_type]}"
+  ordered_placement_strategy = "${local.ecs_service_ordered_placement_strategy[local.ecs_service_launch_type]}"
+  placement_constraints      = "${local.ecs_service_placement_constraints[local.ecs_service_launch_type]}"
 
   network_configuration {
     subnets          = ["${var.ecs_subnet_ids}"]
