@@ -49,7 +49,7 @@ module "app_ecs_service" {
 | environment | Environment tag, e.g prod. | string | - | yes |
 | fargate_task_cpu | The number of cpu units used by the task. Default is minimum. | string | `256` | no |
 | fargate_task_memory | The amount (in MiB) of memory used by the task. Default is minimum. | string | `512` | no |
-| logs_cloudwatch_retention | Specifies the number of days you want to retain log events in the log group. | string | `90` | no |
+| logs_cloudwatch_retention | Number of days you want to retain log events in the log group. | string | `90` | no |
 | name | The service name. | string | - | yes |
 | tasks_desired_count | The number of instances of a task definition. | string | `1` | no |
 | tasks_maximum_percent | Upper limit on the number of running tasks. | string | `200` | no |
