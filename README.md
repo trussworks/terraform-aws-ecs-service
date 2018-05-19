@@ -1,3 +1,4 @@
+<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 Creates an ECS service.
 
 Creates the following resources:
@@ -63,3 +64,4 @@ module "app_ecs_service" {
 | task_role_arn | The ARN of the IAM role assumed by Amazon ECS container tasks. |
 | task_role_name | The name of the IAM role assumed by Amazon ECS container tasks. |
 
+<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
