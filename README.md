@@ -43,6 +43,7 @@ module "app_ecs_service" {
 | alb_target_group | ALB target group ARN tasks will register with. | string | - | yes |
 | container_port | The port on which the container will receive traffic. | string | `80` | no |
 | ecs_cluster_arn | The ARN of the ECS cluster. | string | - | yes |
+| ecs_instance_role | The name of the ECS instance role. | string | `` | no |
 | ecs_subnet_ids | Subnet IDs for the ECS tasks. | list | - | yes |
 | ecs_use_fargate | Whether to use Fargate for the task definition. | string | `false` | no |
 | ecs_vpc_id | VPC ID to be used by ECS. | string | - | yes |

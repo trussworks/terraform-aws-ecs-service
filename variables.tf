@@ -20,6 +20,12 @@ variable "ecs_cluster_arn" {
   description = "The ARN of the ECS cluster."
 }
 
+variable "ecs_instance_role" {
+  description = "The name of the ECS instance role."
+  type        = "string"
+  default     = ""
+}
+
 variable "ecs_vpc_id" {
   description = "VPC ID to be used by ECS."
 }

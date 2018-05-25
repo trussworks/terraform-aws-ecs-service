@@ -90,7 +90,77 @@ resource "aws_security_group_rule" "app_ecs_allow_https_from_alb" {
 }
 
 #
-# IAM
+# IAM - instance (optional)
+#
+
+data "aws_iam_policy_document" "instance_role_policy_doc" {
+  count = "${var.ecs_instance_role != "" ? 1 : 0}"
+
+  statement {
+    actions = [
+      "ecs:DeregisterContainerInstance",
+      "ecs:RegisterContainerInstance",
+      "ecs:Submit*",
+    ]
+
+    resources = ["${var.ecs_cluster_arn}"]
+  }
+
+  statement {
+    actions = [
+      "ecs:UpdateContainerInstancesState",
+    ]
+
+    resources = ["*"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "ecs:cluster"
+      values   = ["${var.ecs_cluster_arn}"]
+    }
+  }
+
+  statement {
+    actions = [
+      "ecs:DiscoverPollEndpoint",
+      "ecs:Poll",
+      "ecs:StartTelemetrySession",
+    ]
+
+    resources = ["*"]
+  }
+
+  statement {
+    actions = [
+      "logs:CreateLogStream",
+      "logs:PutLogEvents",
+    ]
+
+    resources = ["${aws_cloudwatch_log_group.main.arn}"]
+  }
+
+  statement {
+    actions = [
+      "ecr:GetAuthorizationToken",
+      "ecr:BatchCheckLayerAvailability",
+      "ecr:GetDownloadUrlForLayer",
+      "ecr:BatchGetImage",
+    ]
+
+    resources = ["*"]
+  }
+}
+
+resource "aws_iam_role_policy" "instance_role_policy" {
+  count = "${var.ecs_instance_role != "" ? 1 : 0}"
+
+  name   = "${var.ecs_instance_role}-policy"
+  role   = "${var.ecs_instance_role}"
+  policy = "${data.aws_iam_policy_document.instance_role_policy_doc.json}"
+}
+
+#
+# IAM - task
 #
 
 data "aws_iam_policy_document" "ecs_assume_role_policy" {
@@ -101,6 +171,28 @@ data "aws_iam_policy_document" "ecs_assume_role_policy" {
       type        = "Service"
       identifiers = ["ecs-tasks.amazonaws.com"]
     }
+  }
+}
+
+data "aws_iam_policy_document" "task_execution_role_policy_doc" {
+  statement {
+    actions = [
+      "logs:CreateLogStream",
+      "logs:PutLogEvents",
+    ]
+
+    resources = ["${aws_cloudwatch_log_group.main.arn}"]
+  }
+
+  statement {
+    actions = [
+      "ecr:GetAuthorizationToken",
+      "ecr:BatchCheckLayerAvailability",
+      "ecr:GetDownloadUrlForLayer",
+      "ecr:BatchGetImage",
+    ]
+
+    resources = ["*"]
   }
 }
 
@@ -116,11 +208,12 @@ resource "aws_iam_role" "task_execution_role" {
   assume_role_policy = "${data.aws_iam_policy_document.ecs_assume_role_policy.json}"
 }
 
-resource "aws_iam_role_policy_attachment" "ecs_instance_role_policy" {
+resource "aws_iam_role_policy" "task_execution_role_policy" {
   count = "${var.ecs_use_fargate ? 1 : 0}"
 
-  role       = "${aws_iam_role.task_execution_role.name}"
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+  name   = "${aws_iam_role.task_execution_role.name}-policy"
+  role   = "${aws_iam_role.task_execution_role.name}"
+  policy = "${data.aws_iam_policy_document.task_execution_role_policy_doc.json}"
 }
 
 #
