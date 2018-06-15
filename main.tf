@@ -264,6 +264,16 @@ resource "aws_ecs_task_definition" "main" {
   }
 ]
 EOF
+
+  lifecycle {
+    ignore_changes = [
+      "requires_compatibilities",
+      "cpu",
+      "memory",
+      "execution_role_arn",
+      "container_definitions",
+    ]
+  }
 }
 
 # Create a data source to pull the latest active revision from
