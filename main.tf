@@ -47,9 +47,10 @@ resource "aws_cloudwatch_log_group" "main" {
   name              = "${local.awslogs_group}"
   retention_in_days = "${var.logs_cloudwatch_retention}"
 
-  tags {
+  tags = {
     Name        = "${var.name}-${var.environment}"
     Environment = "${var.environment}"
+    Automation  = "Terraform"
   }
 }
 
@@ -63,7 +64,9 @@ resource "aws_security_group" "ecs_sg" {
   vpc_id      = "${var.ecs_vpc_id}"
 
   tags = {
+    Name        = "ecs-${var.name}-${var.environment}"
     Environment = "${var.environment}"
+    Automation  = "Terraform"
   }
 }
 
