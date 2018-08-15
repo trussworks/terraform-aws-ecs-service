@@ -11,6 +11,11 @@ variable "logs_cloudwatch_retention" {
   default     = 90
 }
 
+variable "logs_cloudwatch_group" {
+  description = "CloudWatch log group to create and use. Default: /ecs/{name}-{environment}"
+  default     = ""
+}
+
 variable "ecs_use_fargate" {
   description = "Whether to use Fargate for the task definition."
   default     = false
