@@ -36,7 +36,7 @@
  */
 
 locals {
-  awslogs_group = "ecs-tasks-${var.name}-${var.environment}"
+  awslogs_group = "${var.logs_cloudwatch_group == "" ? "/ecs/${var.name}-${var.environment}" : var.logs_cloudwatch_group}"
 }
 
 #
