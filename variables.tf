@@ -41,12 +41,12 @@ variable "ecs_subnet_ids" {
 }
 
 variable "fargate_task_cpu" {
-  description = "The number of cpu units used by the task. Default is minimum."
+  description = "Number of cpu units used in initial task definition. Default is minimum."
   default     = 256
 }
 
 variable "fargate_task_memory" {
-  description = "The amount (in MiB) of memory used by the task. Default is minimum."
+  description = "Amount (in MiB) of memory used in initiail task definition. Default is minimum."
   default     = 512
 }
 
