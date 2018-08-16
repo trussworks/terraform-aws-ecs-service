@@ -36,7 +36,7 @@
  */
 
 locals {
-  awslogs_group = "${var.logs_cloudwatch_group == "" ? "/ecs/${var.name}-${var.environment}" : var.logs_cloudwatch_group}"
+  awslogs_group = "${var.logs_cloudwatch_group == "" ? "/ecs/${var.environment}/${var.name}" : var.logs_cloudwatch_group}"
 
   default_container_definitions = <<EOF
 [
