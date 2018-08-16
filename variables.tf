@@ -70,6 +70,11 @@ variable "container_port" {
   default     = 80
 }
 
+variable "container_definitions" {
+  description = "Container definitions provided as valid JSON document. Default uses nginx:stable."
+  default     = ""
+}
+
 variable alb_security_group {
   description = "ALB security group ID to allow traffic from."
 }

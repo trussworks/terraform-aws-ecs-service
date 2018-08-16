@@ -41,6 +41,7 @@ module "app_ecs_service" {
 |------|-------------|:----:|:-----:|:-----:|
 | alb_security_group | ALB security group ID to allow traffic from. | string | - | yes |
 | alb_target_group | ALB target group ARN tasks will register with. | string | - | yes |
+| container_definitions | Container definitions provided as valid JSON document. Default uses nginx:stable. | string | `` | no |
 | container_port | The port on which the container will receive traffic. | string | `80` | no |
 | ecs_cluster_arn | The ARN of the ECS cluster. | string | - | yes |
 | ecs_instance_role | The name of the ECS instance role. | string | `` | no |

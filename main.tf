@@ -37,6 +37,36 @@
 
 locals {
   awslogs_group = "${var.logs_cloudwatch_group == "" ? "/ecs/${var.name}-${var.environment}" : var.logs_cloudwatch_group}"
+
+  default_container_definitions = <<EOF
+[
+  {
+    "name": "${var.name}-${var.environment}",
+    "image": "nginx:stable",
+    "cpu": 128,
+    "memory": 128,
+    "essential": true,
+    "portMappings": [
+      {
+        "containerPort": 80,
+        "hostPort": 80,
+        "protocol": "tcp"
+      }
+    ],
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "${local.awslogs_group}",
+        "awslogs-region": "${data.aws_region.current.name}",
+        "awslogs-stream-prefix": "nginx"
+      }
+    },
+    "environment": [],
+    "mountPoints": [],
+    "volumesFrom": []
+  }
+]
+EOF
 }
 
 #
@@ -238,45 +268,7 @@ resource "aws_ecs_task_definition" "main" {
   memory                   = "${var.ecs_use_fargate ? var.fargate_task_memory : ""}"
   execution_role_arn       = "${join("", aws_iam_role.task_execution_role.*.arn)}"
 
-  container_definitions = <<EOF
-[
-  {
-    "name": "${var.name}-${var.environment}",
-    "image": "nginx:stable",
-    "cpu": 128,
-    "memory": 128,
-    "essential": true,
-    "portMappings": [
-      {
-        "containerPort": 80,
-        "hostPort": 80,
-        "protocol": "tcp"
-      }
-    ],
-    "logConfiguration": {
-      "logDriver": "awslogs",
-      "options": {
-        "awslogs-group": "${local.awslogs_group}",
-        "awslogs-region": "${data.aws_region.current.name}",
-        "awslogs-stream-prefix": "nginx"
-      }
-    },
-    "environment": [],
-    "mountPoints": [],
-    "volumesFrom": []
-  }
-]
-EOF
-
-  lifecycle {
-    ignore_changes = [
-      "requires_compatibilities",
-      "cpu",
-      "memory",
-      "execution_role_arn",
-      "container_definitions",
-    ]
-  }
+  container_definitions = "${var.container_definitions == "" ? local.default_container_definitions : var.container_definitions}"
 }
 
 # Create a data source to pull the latest active revision from
