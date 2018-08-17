@@ -112,6 +112,8 @@ resource "aws_security_group_rule" "app_ecs_allow_outbound" {
 }
 
 resource "aws_security_group_rule" "app_ecs_allow_https_from_alb" {
+  count = "${var.alb_security_group == "" ? 0 : 1}"
+
   description       = "Allow in ALB"
   security_group_id = "${aws_security_group.ecs_sg.id}"
 
@@ -305,6 +307,8 @@ locals {
 }
 
 resource "aws_ecs_service" "main" {
+  count = "${var.alb_target_group == "" ? 0 : 1}"
+
   name    = "${var.name}"
   cluster = "${var.ecs_cluster_arn}"
 
@@ -332,6 +336,40 @@ resource "aws_ecs_service" "main" {
     target_group_arn = "${var.alb_target_group}"
     container_name   = "${aws_ecs_task_definition.main.family}"
     container_port   = "${var.container_port}"
+  }
+
+  lifecycle {
+    ignore_changes = ["task_definition"]
+  }
+}
+
+# XXX: We have to duplicate this resource with a count instead of parameterizing
+# the load_balancer argument due to this Terraform bug:
+# https://github.com/hashicorp/terraform/issues/16856
+resource "aws_ecs_service" "main_no_lb" {
+  count = "${var.alb_target_group != "" ? 0 : 1}"
+
+  name    = "${var.name}"
+  cluster = "${var.ecs_cluster_arn}"
+
+  launch_type = "${local.ecs_service_launch_type}"
+
+  # Use latest active revision
+  task_definition = "${aws_ecs_task_definition.main.family}:${max(
+    "${aws_ecs_task_definition.main.revision}",
+    "${data.aws_ecs_task_definition.main.revision}")}"
+
+  desired_count                      = "${var.tasks_desired_count}"
+  deployment_minimum_healthy_percent = "${var.tasks_minimum_healthy_percent}"
+  deployment_maximum_percent         = "${var.tasks_maximum_percent}"
+
+  ordered_placement_strategy = "${local.ecs_service_ordered_placement_strategy[local.ecs_service_launch_type]}"
+  placement_constraints      = "${local.ecs_service_placement_constraints[local.ecs_service_launch_type]}"
+
+  network_configuration {
+    subnets          = ["${var.ecs_subnet_ids}"]
+    security_groups  = ["${aws_security_group.ecs_sg.id}"]
+    assign_public_ip = false
   }
 
   lifecycle {

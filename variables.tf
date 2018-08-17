@@ -77,8 +77,10 @@ variable "container_definitions" {
 
 variable alb_security_group {
   description = "ALB security group ID to allow traffic from."
+  default     = ""
 }
 
 variable alb_target_group {
   description = "ALB target group ARN tasks will register with."
+  default     = ""
 }
