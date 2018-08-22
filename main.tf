@@ -29,8 +29,9 @@
  *   tasks_minimum_healthy_percent = 50
  *   tasks_maximum_percent         = 200
  *
- *   alb_security_group = "${module.security_group.id}"
- *   alb_target_group   = "${module.target_group.id}"
+ *   associate_lb      = true
+ *   lb_security_group = "${module.security_group.id}"
+ *   lb_target_group   = "${module.target_group.id}"
  * }
  * ```
  */
@@ -112,7 +113,7 @@ resource "aws_security_group_rule" "app_ecs_allow_outbound" {
 }
 
 resource "aws_security_group_rule" "app_ecs_allow_https_from_alb" {
-  count = "${var.alb_security_group == "" ? 0 : 1}"
+  count = "${var.associate_lb}"
 
   description       = "Allow in ALB"
   security_group_id = "${aws_security_group.ecs_sg.id}"
@@ -121,7 +122,7 @@ resource "aws_security_group_rule" "app_ecs_allow_https_from_alb" {
   from_port                = "${var.container_port}"
   to_port                  = "${var.container_port}"
   protocol                 = "tcp"
-  source_security_group_id = "${var.alb_security_group}"
+  source_security_group_id = "${var.lb_security_group}"
 }
 
 #
@@ -307,7 +308,7 @@ locals {
 }
 
 resource "aws_ecs_service" "main" {
-  count = "${var.alb_target_group == "" ? 0 : 1}"
+  count = "${var.associate_lb}"
 
   name    = "${var.name}"
   cluster = "${var.ecs_cluster_arn}"
@@ -333,7 +334,7 @@ resource "aws_ecs_service" "main" {
   }
 
   load_balancer {
-    target_group_arn = "${var.alb_target_group}"
+    target_group_arn = "${var.lb_target_group}"
     container_name   = "${aws_ecs_task_definition.main.family}"
     container_port   = "${var.container_port}"
   }
@@ -347,7 +348,7 @@ resource "aws_ecs_service" "main" {
 # the load_balancer argument due to this Terraform bug:
 # https://github.com/hashicorp/terraform/issues/16856
 resource "aws_ecs_service" "main_no_lb" {
-  count = "${var.alb_target_group != "" ? 0 : 1}"
+  count = "${var.associate_lb}"
 
   name    = "${var.name}"
   cluster = "${var.ecs_cluster_arn}"

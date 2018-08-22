@@ -75,12 +75,17 @@ variable "container_definitions" {
   default     = ""
 }
 
-variable alb_security_group {
-  description = "ALB security group ID to allow traffic from."
+variable "associate_lb" {
+  description = "Whether to associate a Load Balancer with the ECS service."
+  default     = false
+}
+
+variable lb_security_group {
+  description = "Load Balancer security group ID to allow traffic from."
   default     = ""
 }
 
-variable alb_target_group {
-  description = "ALB target group ARN tasks will register with."
+variable lb_target_group {
+  description = "Load Balancer target group ARN tasks will register with."
   default     = ""
 }
