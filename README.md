@@ -64,7 +64,7 @@ module "app_ecs_service" {
 
 | Name | Description |
 |------|-------------|
-| awslogs_group | Name of the CloudWatch Logs log group containers should use. |
+| awslogs_group | ARN of the CloudWatch Logs log group containers should use. |
 | ecs_security_group_id | Security Group ID assigned to the ECS tasks. |
 | task_execution_role_arn | The ARN of the task execution role that the Amazon ECS container agent and the Docker daemon can assume. |
 | task_role_arn | The ARN of the IAM role assumed by Amazon ECS container tasks. |
