@@ -29,8 +29,9 @@ module "app_ecs_service" {
   tasks_minimum_healthy_percent = 50
   tasks_maximum_percent         = 200
 
-  alb_security_group = "${module.security_group.id}"
-  alb_target_group   = "${module.target_group.id}"
+  associate_lb      = true
+  lb_security_group = "${module.security_group.id}"
+  lb_target_group   = "${module.target_group.id}"
 }
 ```
 
@@ -39,8 +40,7 @@ module "app_ecs_service" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|:----:|:-----:|:-----:|
-| alb_security_group | ALB security group ID to allow traffic from. | string | `` | no |
-| alb_target_group | ALB target group ARN tasks will register with. | string | `` | no |
+| associate_lb | Whether to associate a Load Balancer with the ECS service. | string | `false` | no |
 | container_definitions | Container definitions provided as valid JSON document. Default uses nginx:stable. | string | `` | no |
 | container_port | The port on which the container will receive traffic. | string | `80` | no |
 | ecs_cluster_arn | The ARN of the ECS cluster. | string | - | yes |
@@ -51,6 +51,8 @@ module "app_ecs_service" {
 | environment | Environment tag, e.g prod. | string | - | yes |
 | fargate_task_cpu | Number of cpu units used in initial task definition. Default is minimum. | string | `256` | no |
 | fargate_task_memory | Amount (in MiB) of memory used in initiail task definition. Default is minimum. | string | `512` | no |
+| lb_security_group | Load Balancer security group ID to allow traffic from. | string | `` | no |
+| lb_target_group | Load Balancer target group ARN tasks will register with. | string | `` | no |
 | logs_cloudwatch_group | CloudWatch log group to create and use. Default: /ecs/{name}-{environment} | string | `` | no |
 | logs_cloudwatch_retention | Number of days you want to retain log events in the log group. | string | `90` | no |
 | name | The service name. | string | - | yes |
