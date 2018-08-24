@@ -22,3 +22,8 @@ output "awslogs_group" {
   description = "Name of the CloudWatch Logs log group containers should use."
   value       = "${local.awslogs_group}"
 }
+
+output "awslogs_group_arn" {
+  description = "ARN of the CloudWatch Logs log group containers should use."
+  value       = "${aws_cloudwatch_log_group.main.arn}"
+}
