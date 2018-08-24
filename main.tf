@@ -348,7 +348,7 @@ resource "aws_ecs_service" "main" {
 # the load_balancer argument due to this Terraform bug:
 # https://github.com/hashicorp/terraform/issues/16856
 resource "aws_ecs_service" "main_no_lb" {
-  count = "${var.associate_lb}"
+  count = "${var.associate_lb == 1 ? 0 : 1}"
 
   name    = "${var.name}"
   cluster = "${var.ecs_cluster_arn}"
