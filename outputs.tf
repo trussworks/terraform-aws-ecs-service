@@ -19,6 +19,6 @@ output "task_role_name" {
 }
 
 output "awslogs_group" {
-  description = "ARN of the CloudWatch Logs log group containers should use."
-  value       = "${aws_cloudwatch_log_group.main.arn}"
+  description = "Name of the CloudWatch Logs log group containers should use."
+  value       = "${local.awslogs_group}"
 }
