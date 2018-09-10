@@ -18,6 +18,11 @@ output "task_role_name" {
   value       = "${aws_iam_role.task_role.name}"
 }
 
+output "task_definition_family" {
+  description = "The family of the Task Definition."
+  value       = "${aws_ecs_task_definition.main.family}"
+}
+
 output "awslogs_group" {
   description = "Name of the CloudWatch Logs log group containers should use."
   value       = "${local.awslogs_group}"
