@@ -18,6 +18,11 @@ output "task_role_name" {
   value       = "${aws_iam_role.task_role.name}"
 }
 
+output "task_definition_arn" {
+  description = "Full ARN of the Task Definition (including both family and revision)."
+  value       = "${aws_ecs_task_definition.main.arn}"
+}
+
 output "task_definition_family" {
   description = "The family of the Task Definition."
   value       = "${aws_ecs_task_definition.main.family}"
