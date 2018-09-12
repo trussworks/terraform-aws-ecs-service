@@ -346,7 +346,7 @@ locals {
 }
 
 resource "aws_ecs_service" "main" {
-  count = "${var.associate_alb || var.associate_nlb}"
+  count = "${var.associate_alb || var.associate_nlb ? 1 : 0}"
 
   name    = "${var.name}"
   cluster = "${var.ecs_cluster_arn}"
