@@ -74,17 +74,17 @@ locals {
     "essential": true,
     "portMappings": [
       {
-	"containerPort": 80,
-	"hostPort": 80,
-	"protocol": "tcp"
+        "containerPort": 80,
+        "hostPort": 80,
+        "protocol": "tcp"
       }
     ],
     "logConfiguration": {
       "logDriver": "awslogs",
       "options": {
-	"awslogs-group": "${local.awslogs_group}",
-	"awslogs-region": "${data.aws_region.current.name}",
-	"awslogs-stream-prefix": "nginx"
+        "awslogs-group": "${local.awslogs_group}",
+        "awslogs-region": "${data.aws_region.current.name}",
+        "awslogs-stream-prefix": "nginx"
       }
     },
     "environment": [],
@@ -346,7 +346,7 @@ locals {
 }
 
 resource "aws_ecs_service" "main" {
-  count = "${var.associate_alb || var.associate_nlb ? 1 : 0}"
+  count = "${var.associate_alb || var.associate_nlb}"
 
   name    = "${var.name}"
   cluster = "${var.ecs_cluster_arn}"
