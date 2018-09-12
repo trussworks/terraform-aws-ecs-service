@@ -7,6 +7,7 @@
  * * Security Groups for the ECS service.
  * * ECS service.
  * * Task definition using `nginx:stable` (see below).
+ * * Configurable associations with Network Load Balancers (NLB) and Application Load Balancers (ALB).
  *
  * We create an initial task definition using the `nginx:stable` image as a way
  * to validate the initial infrastructure is working: visiting the site shows
@@ -14,6 +15,8 @@
  * definitions going forward, not Terraform.
  *
  * ## Usage
+ *
+ * ### ECS service associated with an Application Load Balancer (ALB)
  *
  * ```hcl
  * module "app_ecs_service" {
@@ -29,8 +32,30 @@
  *   tasks_minimum_healthy_percent = 50
  *   tasks_maximum_percent         = 200
  *
- *   associate_lb      = true
- *   lb_security_group = "${module.security_group.id}"
+ *   associate_alb      = true
+ *   alb_security_group = "${module.security_group.id}"
+ *   lb_target_group   = "${module.target_group.id}"
+ * }
+ * ```
+ *
+ * ### ECS Service associated with a Network Load Balancer(NLB)
+ *
+ * ```hcl
+ * module "app_ecs_service" {
+ *   source = "../../modules/aws-ecs-service"
+ *
+ *   name        = "app"
+ *   environment = "prod"
+ *
+ *   ecs_cluster_arn               = "${module.app_ecs_cluster.ecs_cluster_arn}"
+ *   ecs_vpc_id                    = "${module.vpc.vpc_id}"
+ *   ecs_subnet_ids                = "${module.vpc.private_subnets}"
+ *   tasks_desired_count           = 2
+ *   tasks_minimum_healthy_percent = 50
+ *   tasks_maximum_percent         = 200
+ *
+ *   associate_nlb          = true
+ *   nlb_subnet_cidr_blocks = ["10.0.0.0/24", "10.0.1.0/24", "10.0.2.0/24"]
  *   lb_target_group   = "${module.target_group.id}"
  * }
  * ```
@@ -49,17 +74,17 @@ locals {
     "essential": true,
     "portMappings": [
       {
-        "containerPort": 80,
-        "hostPort": 80,
-        "protocol": "tcp"
+	"containerPort": 80,
+	"hostPort": 80,
+	"protocol": "tcp"
       }
     ],
     "logConfiguration": {
       "logDriver": "awslogs",
       "options": {
-        "awslogs-group": "${local.awslogs_group}",
-        "awslogs-region": "${data.aws_region.current.name}",
-        "awslogs-stream-prefix": "nginx"
+	"awslogs-group": "${local.awslogs_group}",
+	"awslogs-region": "${data.aws_region.current.name}",
+	"awslogs-stream-prefix": "nginx"
       }
     },
     "environment": [],
@@ -113,7 +138,7 @@ resource "aws_security_group_rule" "app_ecs_allow_outbound" {
 }
 
 resource "aws_security_group_rule" "app_ecs_allow_https_from_alb" {
-  count = "${var.associate_lb}"
+  count = "${var.associate_alb}"
 
   description       = "Allow in ALB"
   security_group_id = "${aws_security_group.ecs_sg.id}"
@@ -122,7 +147,20 @@ resource "aws_security_group_rule" "app_ecs_allow_https_from_alb" {
   from_port                = "${var.container_port}"
   to_port                  = "${var.container_port}"
   protocol                 = "tcp"
-  source_security_group_id = "${var.lb_security_group}"
+  source_security_group_id = "${var.alb_security_group}"
+}
+
+resource "aws_security_group_rule" "app_ecs_allow_tcp_from_nlb" {
+  count = "${var.associate_nlb}"
+
+  description       = "Allow in NLB"
+  security_group_id = "${aws_security_group.ecs_sg.id}"
+
+  type        = "ingress"
+  from_port   = "${var.container_port}"
+  to_port     = "${var.container_port}"
+  protocol    = "tcp"
+  cidr_blocks = ["${var.nlb_subnet_cidr_blocks}"]
 }
 
 #
@@ -308,7 +346,7 @@ locals {
 }
 
 resource "aws_ecs_service" "main" {
-  count = "${var.associate_lb}"
+  count = "${var.associate_alb || var.associate_nlb ? 1 : 0}"
 
   name    = "${var.name}"
   cluster = "${var.ecs_cluster_arn}"
@@ -348,7 +386,7 @@ resource "aws_ecs_service" "main" {
 # the load_balancer argument due to this Terraform bug:
 # https://github.com/hashicorp/terraform/issues/16856
 resource "aws_ecs_service" "main_no_lb" {
-  count = "${var.associate_lb == 1 ? 0 : 1}"
+  count = "${var.associate_alb || var.associate_nlb ? 0 : 1}"
 
   name    = "${var.name}"
   cluster = "${var.ecs_cluster_arn}"
