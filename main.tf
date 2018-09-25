@@ -150,6 +150,19 @@ resource "aws_security_group_rule" "app_ecs_allow_https_from_alb" {
   source_security_group_id = "${var.alb_security_group}"
 }
 
+resource "aws_security_group_rule" "app_ecs_allow_health_check_from_alb" {
+  count = "${var.associate_alb > 0 && var.container_health_check_port > 0 ? 1 : 0}"
+
+  description       = "Allow in health check from ALB"
+  security_group_id = "${aws_security_group.ecs_sg.id}"
+
+  type                     = "ingress"
+  from_port                = "${var.container_health_check_port}"
+  to_port                  = "${var.container_health_check_port}"
+  protocol                 = "tcp"
+  source_security_group_id = "${var.alb_security_group}"
+}
+
 resource "aws_security_group_rule" "app_ecs_allow_tcp_from_nlb" {
   count = "${var.associate_nlb}"
 
@@ -159,6 +172,19 @@ resource "aws_security_group_rule" "app_ecs_allow_tcp_from_nlb" {
   type        = "ingress"
   from_port   = "${var.container_port}"
   to_port     = "${var.container_port}"
+  protocol    = "tcp"
+  cidr_blocks = ["${var.nlb_subnet_cidr_blocks}"]
+}
+
+resource "aws_security_group_rule" "app_ecs_allow_health_check_from_nlb" {
+  count = "${var.associate_nlb > 0 && var.container_health_check_port > 0 ? 1 : 0}"
+
+  description       = "Allow in health check from NLB"
+  security_group_id = "${aws_security_group.ecs_sg.id}"
+
+  type        = "ingress"
+  from_port   = "${var.container_health_check_port}"
+  to_port     = "${var.container_health_check_port}"
   protocol    = "tcp"
   cidr_blocks = ["${var.nlb_subnet_cidr_blocks}"]
 }
