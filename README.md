@@ -69,6 +69,7 @@ module "app_ecs_service" {
 | associate_alb | Whether to associate an Application Load Balancer (ALB) with the ECS service. | string | `false` | no |
 | associate_nlb | Whether to associate a Network Load Balancer (NLB) with the ECS service. | string | `false` | no |
 | container_definitions | Container definitions provided as valid JSON document. Default uses nginx:stable. | string | `` | no |
+| container_health_check_port | An additional port on which the container can receive a health check.  Zero means the container port can only receive a health check on the port set by the container_port variable. | string | `0` | no |
 | container_port | The port on which the container will receive traffic. | string | `80` | no |
 | ecs_cluster_arn | The ARN of the ECS cluster. | string | - | yes |
 | ecs_instance_role | The name of the ECS instance role. | string | `` | no |

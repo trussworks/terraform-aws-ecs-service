@@ -83,6 +83,12 @@ variable "container_port" {
   type        = "string"
 }
 
+variable "container_health_check_port" {
+  description = "An additional port on which the container can receive a health check.  Zero means the container port can only receive a health check on the port set by the container_port variable."
+  default     = 0
+  type        = "string"
+}
+
 variable "container_definitions" {
   description = "Container definitions provided as valid JSON document. Default uses nginx:stable."
   default     = ""
