@@ -62,12 +62,13 @@
  */
 
 locals {
-  awslogs_group = "${var.logs_cloudwatch_group == "" ? "/ecs/${var.environment}/${var.name}" : var.logs_cloudwatch_group}"
+  awslogs_group         = "${var.logs_cloudwatch_group == "" ? "/ecs/${var.environment}/${var.name}" : var.logs_cloudwatch_group}"
+  target_container_name = "${var.target_container_name == "" ? "${var.name}-${var.environment}" : var.target_container_name}"
 
   default_container_definitions = <<EOF
 [
   {
-    "name": "${var.name}-${var.environment}",
+    "name": "${local.target_container_name}",
     "image": "nginx:stable",
     "cpu": 128,
     "memory": 128,
@@ -399,7 +400,7 @@ resource "aws_ecs_service" "main" {
 
   load_balancer {
     target_group_arn = "${var.lb_target_group}"
-    container_name   = "${aws_ecs_task_definition.main.family}"
+    container_name   = "${local.target_container_name}"
     container_port   = "${var.container_port}"
   }
 
