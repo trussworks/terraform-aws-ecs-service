@@ -20,7 +20,7 @@
  *
  * ```hcl
  * module "app_ecs_service" {
- *   source = "../../modules/aws-ecs-service"
+ *   source = "trussworks/ecs-service/aws"
  *
  *   name        = "app"
  *   environment = "prod"
@@ -42,7 +42,7 @@
  *
  * ```hcl
  * module "app_ecs_service" {
- *   source = "../../modules/aws-ecs-service"
+ *   source = "trussworks/ecs-service/aws"
  *
  *   name        = "app"
  *   environment = "prod"
