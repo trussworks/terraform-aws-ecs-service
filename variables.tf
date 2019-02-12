@@ -54,7 +54,7 @@ variable "fargate_task_cpu" {
 }
 
 variable "fargate_task_memory" {
-  description = "Amount (in MiB) of memory used in initiail task definition. Default is minimum."
+  description = "Amount (in MiB) of memory used in initial task definition. Default is minimum."
   default     = 512
   type        = "string"
 }

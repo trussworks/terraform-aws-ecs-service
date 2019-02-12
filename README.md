@@ -77,7 +77,7 @@ module "app_ecs_service" {
 | ecs\_vpc\_id | VPC ID to be used by ECS. | string | - | yes |
 | environment | Environment tag, e.g prod. | string | - | yes |
 | fargate\_task\_cpu | Number of cpu units used in initial task definition. Default is minimum. | string | `256` | no |
-| fargate\_task\_memory | Amount (in MiB) of memory used in initiail task definition. Default is minimum. | string | `512` | no |
+| fargate\_task\_memory | Amount (in MiB) of memory used in initial task definition. Default is minimum. | string | `512` | no |
 | lb\_target\_group | Either Application Load Balancer (ALB) or Network Load Balancer (NLB) target group ARN tasks will register with. | string | `` | no |
 | logs\_cloudwatch\_group | CloudWatch log group to create and use. Default: /ecs/{name}-{environment} | string | `` | no |
 | logs\_cloudwatch\_retention | Number of days you want to retain log events in the log group. | string | `90` | no |
