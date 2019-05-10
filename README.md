@@ -6,12 +6,12 @@ Creates the following resources:
 * CloudWatch log group.
 * Security Groups for the ECS service.
 * ECS service.
-* Task definition using `nginx:stable` (see below).
+* Task definition using `golang:1.12.5-alpine` (see below).
 * Configurable associations with Network Load Balancers (NLB) and Application Load Balancers (ALB).
 
-We create an initial task definition using the `nginx:stable` image as a way
+We create an initial task definition using the `golang:1.12.5-alpine` image as a way
 to validate the initial infrastructure is working: visiting the site shows
-the Nginx welcome page. We expect deployments to manage the container
+a simple Go hello world page. We expect deployments to manage the container
 definitions going forward, not Terraform.
 
 ## Usage
@@ -20,7 +20,7 @@ definitions going forward, not Terraform.
 
 ```hcl
 module "app_ecs_service" {
-  source = "../../modules/aws-ecs-service"
+  source = "trussworks/ecs-service/aws"
 
   name        = "app"
   environment = "prod"
@@ -42,7 +42,7 @@ module "app_ecs_service" {
 
 ```hcl
 module "app_ecs_service" {
-  source = "../../modules/aws-ecs-service"
+  source = "trussworks/ecs-service/aws"
 
   name        = "app"
   environment = "prod"
@@ -64,29 +64,30 @@ module "app_ecs_service" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|:----:|:-----:|:-----:|
-| alb\_security\_group | Application Load Balancer (ALB) security group ID to allow traffic from. | string | `` | no |
-| associate\_alb | Whether to associate an Application Load Balancer (ALB) with the ECS service. | string | `false` | no |
-| associate\_nlb | Whether to associate a Network Load Balancer (NLB) with the ECS service. | string | `false` | no |
-| container\_definitions | Container definitions provided as valid JSON document. Default uses nginx:stable. | string | `` | no |
-| container\_health\_check\_port | An additional port on which the container can receive a health check.  Zero means the container port can only receive a health check on the port set by the container_port variable. | string | `0` | no |
-| container\_port | The port on which the container will receive traffic. | string | `80` | no |
-| ecs\_cluster\_arn | The ARN of the ECS cluster. | string | - | yes |
-| ecs\_instance\_role | The name of the ECS instance role. | string | `` | no |
-| ecs\_subnet\_ids | Subnet IDs for the ECS tasks. | list | - | yes |
-| ecs\_use\_fargate | Whether to use Fargate for the task definition. | string | `false` | no |
-| ecs\_vpc\_id | VPC ID to be used by ECS. | string | - | yes |
-| environment | Environment tag, e.g prod. | string | - | yes |
-| fargate\_task\_cpu | Number of cpu units used in initial task definition. Default is minimum. | string | `256` | no |
-| fargate\_task\_memory | Amount (in MiB) of memory used in initial task definition. Default is minimum. | string | `512` | no |
-| lb\_target\_group | Either Application Load Balancer (ALB) or Network Load Balancer (NLB) target group ARN tasks will register with. | string | `` | no |
-| logs\_cloudwatch\_group | CloudWatch log group to create and use. Default: /ecs/{name}-{environment} | string | `` | no |
-| logs\_cloudwatch\_retention | Number of days you want to retain log events in the log group. | string | `90` | no |
-| name | The service name. | string | - | yes |
-| nlb\_subnet\_cidr\_blocks | List of Network Load Balancer (NLB) CIDR blocks to allow traffic from. | list | `<list>` | no |
-| target\_container\_name | Name of the container the Load Balancer should target. Default: {name}-{environment} | string | `` | no |
-| tasks\_desired\_count | The number of instances of a task definition. | string | `1` | no |
-| tasks\_maximum\_percent | Upper limit on the number of running tasks. | string | `200` | no |
-| tasks\_minimum\_healthy\_percent | Lower limit on the number of running tasks. | string | `100` | no |
+| alb\_security\_group | Application Load Balancer (ALB) security group ID to allow traffic from. | string | `""` | no |
+| associate\_alb | Whether to associate an Application Load Balancer (ALB) with the ECS service. | string | `"false"` | no |
+| associate\_nlb | Whether to associate a Network Load Balancer (NLB) with the ECS service. | string | `"false"` | no |
+| container\_definitions | Container definitions provided as valid JSON document. Default uses nginx:stable. | string | `""` | no |
+| container\_health\_check\_port | An additional port on which the container can receive a health check.  Zero means the container port can only receive a health check on the port set by the container_port variable. | string | `"0"` | no |
+| container\_image | The image of the container. | string | `"golang:1.12.5-alpine"` | no |
+| container\_port | The port on which the container will receive traffic. | string | `"80"` | no |
+| ecs\_cluster\_arn | The ARN of the ECS cluster. | string | n/a | yes |
+| ecs\_instance\_role | The name of the ECS instance role. | string | `""` | no |
+| ecs\_subnet\_ids | Subnet IDs for the ECS tasks. | list | n/a | yes |
+| ecs\_use\_fargate | Whether to use Fargate for the task definition. | string | `"false"` | no |
+| ecs\_vpc\_id | VPC ID to be used by ECS. | string | n/a | yes |
+| environment | Environment tag, e.g prod. | string | n/a | yes |
+| fargate\_task\_cpu | Number of cpu units used in initial task definition. Default is minimum. | string | `"256"` | no |
+| fargate\_task\_memory | Amount (in MiB) of memory used in initial task definition. Default is minimum. | string | `"512"` | no |
+| lb\_target\_group | Either Application Load Balancer (ALB) or Network Load Balancer (NLB) target group ARN tasks will register with. | string | `""` | no |
+| logs\_cloudwatch\_group | CloudWatch log group to create and use. Default: /ecs/{name}-{environment} | string | `""` | no |
+| logs\_cloudwatch\_retention | Number of days you want to retain log events in the log group. | string | `"90"` | no |
+| name | The service name. | string | n/a | yes |
+| nlb\_subnet\_cidr\_blocks | List of Network Load Balancer (NLB) CIDR blocks to allow traffic from. | list | `[]` | no |
+| target\_container\_name | Name of the container the Load Balancer should target. Default: {name}-{environment} | string | `""` | no |
+| tasks\_desired\_count | The number of instances of a task definition. | string | `"1"` | no |
+| tasks\_maximum\_percent | Upper limit on the number of running tasks. | string | `"200"` | no |
+| tasks\_minimum\_healthy\_percent | Lower limit on the number of running tasks. | string | `"100"` | no |
 
 ## Outputs
 
