@@ -6,12 +6,12 @@
  * * CloudWatch log group.
  * * Security Groups for the ECS service.
  * * ECS service.
- * * Task definition using `nginx:stable` (see below).
+ * * Task definition using `golang:1.12.5-alpine` (see below).
  * * Configurable associations with Network Load Balancers (NLB) and Application Load Balancers (ALB).
  *
- * We create an initial task definition using the `nginx:stable` image as a way
+ * We create an initial task definition using the `golang:1.12.5-alpine` image as a way
  * to validate the initial infrastructure is working: visiting the site shows
- * the Nginx welcome page. We expect deployments to manage the container
+ * a simple Go hello world page. We expect deployments to manage the container
  * definitions going forward, not Terraform.
  *
  * ## Usage
@@ -20,7 +20,7 @@
  *
  * ```hcl
  * module "app_ecs_service" {
- *   source = "../../modules/aws-ecs-service"
+ *   source = "trussworks/ecs-service/aws"
  *
  *   name        = "app"
  *   environment = "prod"
@@ -42,7 +42,7 @@
  *
  * ```hcl
  * module "app_ecs_service" {
- *   source = "../../modules/aws-ecs-service"
+ *   source = "trussworks/ecs-service/aws"
  *
  *   name        = "app"
  *   environment = "prod"
@@ -69,14 +69,14 @@ locals {
 [
   {
     "name": "${local.target_container_name}",
-    "image": "nginx:stable",
+    "image": "${var.container_image}",
     "cpu": 128,
     "memory": 128,
     "essential": true,
     "portMappings": [
       {
-        "containerPort": 80,
-        "hostPort": 80,
+        "containerPort": ${var.container_port},
+        "hostPort": ${var.container_port},
         "protocol": "tcp"
       }
     ],
@@ -85,12 +85,22 @@ locals {
       "options": {
         "awslogs-group": "${local.awslogs_group}",
         "awslogs-region": "${data.aws_region.current.name}",
-        "awslogs-stream-prefix": "nginx"
+        "awslogs-stream-prefix": "helloworld"
       }
     },
-    "environment": [],
+    "environment": [
+      {
+        "name": "PORT",
+        "value": "${var.container_port}"
+      }
+    ],
     "mountPoints": [],
-    "volumesFrom": []
+    "volumesFrom": [],
+    "entryPoint": [
+      "/bin/sh",
+      "-c",
+      "echo 'cGFja2FnZSBtYWluCgppbXBvcnQgKAoJImZtdCIKCSJsb2ciCgkibmV0L2h0dHAiCgkib3MiCgkic3RyY29udiIKKQoKZnVuYyBtYWluKCkgewoKCXBvcnQsIGVyciA6PSBzdHJjb252LkF0b2kob3MuR2V0ZW52KCJQT1JUIikpCglpZiBlcnIgIT0gbmlsIHsKCQlwYW5pYyhlcnIpCgl9CglodHRwLkhhbmRsZUZ1bmMoIi8iLCBmdW5jKHcgaHR0cC5SZXNwb25zZVdyaXRlciwgciAqaHR0cC5SZXF1ZXN0KSB7CgkJZm10LkZwcmludGYodywgIkhlbGxvLCB3b3JsZCEiKQoJfSkKCWZtdC5QcmludGxuKCJMaXN0ZW5pbmcgb24gcG9ydCIsIHBvcnQpCglsb2cuRmF0YWwoaHR0cC5MaXN0ZW5BbmRTZXJ2ZShmbXQuU3ByaW50ZigiOiVkIiwgcG9ydCksIG5pbCkpCn0K' | base64 -d > helloworld.go && go run helloworld.go"
+    ]
   }
 ]
 EOF
@@ -323,7 +333,7 @@ resource "aws_iam_role_policy" "task_execution_role_policy" {
 
 data "aws_region" "current" {}
 
-# Create a task definition with an Nginx image so the ecs service can be easily
+# Create a task definition with a golang image so the ecs service can be easily
 # tested. We expect deployments will manage the future container definitions.
 resource "aws_ecs_task_definition" "main" {
   family        = "${var.name}-${var.environment}"
@@ -337,6 +347,16 @@ resource "aws_ecs_task_definition" "main" {
   execution_role_arn       = "${join("", aws_iam_role.task_execution_role.*.arn)}"
 
   container_definitions = "${var.container_definitions == "" ? local.default_container_definitions : var.container_definitions}"
+
+  lifecycle {
+    ignore_changes = [
+      "requires_compatibilities",
+      "cpu",
+      "memory",
+      "execution_role_arn",
+      "container_definitions",
+    ]
+  }
 }
 
 # Create a data source to pull the latest active revision from

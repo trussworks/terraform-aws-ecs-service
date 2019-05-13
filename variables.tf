@@ -77,6 +77,12 @@ variable "tasks_maximum_percent" {
   type        = "string"
 }
 
+variable "container_image" {
+  description = "The image of the container."
+  default     = "golang:1.12.5-alpine"
+  type        = "string"
+}
+
 variable "container_port" {
   description = "The port on which the container will receive traffic."
   default     = 80
