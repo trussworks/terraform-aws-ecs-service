@@ -253,12 +253,19 @@ data "aws_iam_policy_document" "instance_role_policy_doc" {
   statement {
     actions = [
       "ecr:GetAuthorizationToken",
+    ]
+
+    resources = ["*"]
+  }
+
+  statement {
+    actions = [
       "ecr:BatchCheckLayerAvailability",
       "ecr:GetDownloadUrlForLayer",
       "ecr:BatchGetImage",
     ]
 
-    resources = ["*"]
+    resources = ["${var.ecr_repo_arn}"]
   }
 }
 
@@ -298,12 +305,19 @@ data "aws_iam_policy_document" "task_execution_role_policy_doc" {
   statement {
     actions = [
       "ecr:GetAuthorizationToken",
+    ]
+
+    resources = ["*"]
+  }
+
+  statement {
+    actions = [
       "ecr:BatchCheckLayerAvailability",
       "ecr:GetDownloadUrlForLayer",
       "ecr:BatchGetImage",
     ]
 
-    resources = ["*"]
+    resources = ["${var.ecr_repo_arn}"]
   }
 }
 

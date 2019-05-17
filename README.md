@@ -71,6 +71,7 @@ module "app_ecs_service" {
 | container\_health\_check\_port | An additional port on which the container can receive a health check.  Zero means the container port can only receive a health check on the port set by the container_port variable. | string | `"0"` | no |
 | container\_image | The image of the container. | string | `"golang:1.12.5-alpine"` | no |
 | container\_port | The port on which the container will receive traffic. | string | `"80"` | no |
+| ecr\_repo\_arn | The ARN of the ECR repo.  By default, allows all repositories. | string | `"*"` | no |
 | ecs\_cluster\_arn | The ARN of the ECS cluster. | string | n/a | yes |
 | ecs\_instance\_role | The name of the ECS instance role. | string | `""` | no |
 | ecs\_subnet\_ids | Subnet IDs for the ECS tasks. | list | n/a | yes |
