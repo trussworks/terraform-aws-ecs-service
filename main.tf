@@ -265,7 +265,7 @@ data "aws_iam_policy_document" "instance_role_policy_doc" {
       "ecr:BatchGetImage",
     ]
 
-    resources = ["${var.ecr_repo_arn}"]
+    resources = ["${var.ecr_repo_arns}"]
   }
 }
 
@@ -317,7 +317,7 @@ data "aws_iam_policy_document" "task_execution_role_policy_doc" {
       "ecr:BatchGetImage",
     ]
 
-    resources = ["${var.ecr_repo_arn}"]
+    resources = ["${var.ecr_repo_arns}"]
   }
 }
 

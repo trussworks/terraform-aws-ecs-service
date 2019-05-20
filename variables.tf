@@ -20,10 +20,10 @@ variable "logs_cloudwatch_group" {
   type        = "string"
 }
 
-variable "ecr_repo_arn" {
-  description = "The ARN of the ECR repo.  By default, allows all repositories."
-  type        = "string"
-  default     = "*"
+variable "ecr_repo_arns" {
+  description = "The ARNs of the ECR repos.  By default, allows all repositories."
+  type        = "list"
+  default     = ["*"]
 }
 
 variable "ecs_use_fargate" {
