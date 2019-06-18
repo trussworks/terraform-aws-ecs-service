@@ -512,11 +512,18 @@ resource "aws_ecs_service" "main" {
   deployment_minimum_healthy_percent = "${var.tasks_minimum_healthy_percent}"
   deployment_maximum_percent         = "${var.tasks_maximum_percent}"
 
-  ordered_placement_strategy {
-    local.ecs_service_ordered_placement_strategy[local.ecs_service_launch_type]
+  dynamic "ordered_placement_strategy" {
+    for_each = local.ecs_service_ordered_placement_strategy[local.ecs_service_launch_type]
+    content {
+      type = ordered_placement_strategy.value.type
+      field = ordered_placement_strategy.value.field
+    }
   }
-  placement_constraints {
-    local.ecs_service_placement_constraints[local.ecs_service_launch_type]
+  dynamic "placement_constraints" {
+    for_each = local.ecs_service_placement_constraints[local.ecs_service_launch_type]
+    content {
+        type = placement_constraints.value.type
+    }
   }
 
   network_configuration {
@@ -556,8 +563,19 @@ resource "aws_ecs_service" "main_no_lb" {
   deployment_minimum_healthy_percent = "${var.tasks_minimum_healthy_percent}"
   deployment_maximum_percent         = "${var.tasks_maximum_percent}"
 
-  ordered_placement_strategy = local.ecs_service_ordered_placement_strategy[local.ecs_service_launch_type]
-  placement_constraints = local.ecs_service_placement_constraints[local.ecs_service_launch_type]
+  dynamic "ordered_placement_strategy" {
+    for_each = local.ecs_service_ordered_placement_strategy[local.ecs_service_launch_type]
+    content {
+      type = ordered_placement_strategy.value.type
+      field = ordered_placement_strategy.value.field
+    }
+  }
+  dynamic "placement_constraints" {
+    for_each = local.ecs_service_placement_constraints[local.ecs_service_launch_type]
+    content {
+        type = placement_constraints.value.type
+    }
+  }
 
   network_configuration {
     subnets          = "${var.ecs_subnet_ids}"
