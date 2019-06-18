@@ -184,7 +184,7 @@ resource "aws_security_group_rule" "app_ecs_allow_tcp_from_nlb" {
   from_port   = "${var.container_port}"
   to_port     = "${var.container_port}"
   protocol    = "tcp"
-  cidr_blocks = ["${var.nlb_subnet_cidr_blocks}"]
+  cidr_blocks = "${var.nlb_subnet_cidr_blocks}"
 }
 
 resource "aws_security_group_rule" "app_ecs_allow_health_check_from_nlb" {
@@ -197,7 +197,7 @@ resource "aws_security_group_rule" "app_ecs_allow_health_check_from_nlb" {
   from_port   = "${var.container_health_check_port}"
   to_port     = "${var.container_health_check_port}"
   protocol    = "tcp"
-  cidr_blocks = ["${var.nlb_subnet_cidr_blocks}"]
+  cidr_blocks = "${var.nlb_subnet_cidr_blocks}"
 }
 
 #
@@ -265,7 +265,7 @@ data "aws_iam_policy_document" "instance_role_policy_doc" {
       "ecr:BatchGetImage",
     ]
 
-    resources = ["${var.ecr_repo_arns}"]
+    resources = "${var.ecr_repo_arns}"
   }
 }
 
@@ -274,7 +274,7 @@ resource "aws_iam_role_policy" "instance_role_policy" {
 
   name   = "${var.ecs_instance_role}-policy"
   role   = "${var.ecs_instance_role}"
-  policy = "${data.aws_iam_policy_document.instance_role_policy_doc.json}"
+  policy = "${data.aws_iam_policy_document.instance_role_policy_doc[count.index].json}"
 }
 
 #
@@ -317,7 +317,7 @@ data "aws_iam_policy_document" "task_execution_role_policy_doc" {
       "ecr:BatchGetImage",
     ]
 
-    resources = ["${var.ecr_repo_arns}"]
+    resources = "${var.ecr_repo_arns}"
   }
 }
 
@@ -330,15 +330,15 @@ resource "aws_iam_role" "task_execution_role" {
   count = "${var.ecs_use_fargate ? 1 : 0}"
 
   name               = "ecs-task-execution-role-${var.name}-${var.environment}"
-  assume_role_policy = "${data.aws_iam_policy_document.ecs_assume_role_policy.json}"
+  assume_role_policy = "${data.aws_iam_policy_document.ecs_assume_role_policy[count.index].json}"
 }
 
 resource "aws_iam_role_policy" "task_execution_role_policy" {
   count = "${var.ecs_use_fargate ? 1 : 0}"
 
-  name   = "${aws_iam_role.task_execution_role.name}-policy"
-  role   = "${aws_iam_role.task_execution_role.name}"
-  policy = "${data.aws_iam_policy_document.task_execution_role_policy_doc.json}"
+  name   = "${aws_iam_role.task_execution_role[count.index].name}-policy"
+  role   = "${aws_iam_role.task_execution_role[count.index].name}"
+  policy = "${data.aws_iam_policy_document.task_execution_role_policy_doc[count.index].json}"
 }
 
 #
@@ -423,12 +423,16 @@ resource "aws_ecs_service" "main" {
   deployment_minimum_healthy_percent = "${var.tasks_minimum_healthy_percent}"
   deployment_maximum_percent         = "${var.tasks_maximum_percent}"
 
-  ordered_placement_strategy = "${local.ecs_service_ordered_placement_strategy[local.ecs_service_launch_type]}"
-  placement_constraints      = "${local.ecs_service_placement_constraints[local.ecs_service_launch_type]}"
+  ordered_placement_strategy {
+    local.ecs_service_ordered_placement_strategy[local.ecs_service_launch_type]
+  }
+  placement_constraints {
+    local.ecs_service_placement_constraints[local.ecs_service_launch_type]
+  }
 
   network_configuration {
-    subnets          = ["${var.ecs_subnet_ids}"]
-    security_groups  = ["${aws_security_group.ecs_sg.id}"]
+    subnets          = "${var.ecs_subnet_ids}"
+    security_groups  = "${aws_security_group.ecs_sg.id}"
     assign_public_ip = false
   }
 
@@ -463,12 +467,12 @@ resource "aws_ecs_service" "main_no_lb" {
   deployment_minimum_healthy_percent = "${var.tasks_minimum_healthy_percent}"
   deployment_maximum_percent         = "${var.tasks_maximum_percent}"
 
-  ordered_placement_strategy = "${local.ecs_service_ordered_placement_strategy[local.ecs_service_launch_type]}"
-  placement_constraints      = "${local.ecs_service_placement_constraints[local.ecs_service_launch_type]}"
+  ordered_placement_strategy = local.ecs_service_ordered_placement_strategy[local.ecs_service_launch_type]
+  placement_constraints = local.ecs_service_placement_constraints[local.ecs_service_launch_type]
 
   network_configuration {
-    subnets          = ["${var.ecs_subnet_ids}"]
-    security_groups  = ["${aws_security_group.ecs_sg.id}"]
+    subnets          = "${var.ecs_subnet_ids}"
+    security_groups  = "${aws_security_group.ecs_sg.id}"
     assign_public_ip = false
   }
 
