@@ -238,7 +238,7 @@ resource "aws_security_group_rule" "app_ecs_allow_outbound" {
 }
 
 resource "aws_security_group_rule" "app_ecs_allow_https_from_alb" {
-  count = "${var.associate_alb}"
+  count = "${var.associate_alb ? 1 : 0}"
 
   description       = "Allow in ALB"
   security_group_id = "${aws_security_group.ecs_sg.id}"
@@ -251,7 +251,7 @@ resource "aws_security_group_rule" "app_ecs_allow_https_from_alb" {
 }
 
 resource "aws_security_group_rule" "app_ecs_allow_health_check_from_alb" {
-  count = "${var.associate_alb > 0 && var.container_health_check_port > 0 ? 1 : 0}"
+  count = "${var.associate_alb && var.container_health_check_port > 0 ? 1 : 0}"
 
   description       = "Allow in health check from ALB"
   security_group_id = "${aws_security_group.ecs_sg.id}"
@@ -264,7 +264,7 @@ resource "aws_security_group_rule" "app_ecs_allow_health_check_from_alb" {
 }
 
 resource "aws_security_group_rule" "app_ecs_allow_tcp_from_nlb" {
-  count = "${var.associate_nlb}"
+  count = "${var.associate_nlb ? 1 : 0}"
 
   description       = "Allow in NLB"
   security_group_id = "${aws_security_group.ecs_sg.id}"
@@ -277,7 +277,7 @@ resource "aws_security_group_rule" "app_ecs_allow_tcp_from_nlb" {
 }
 
 resource "aws_security_group_rule" "app_ecs_allow_health_check_from_nlb" {
-  count = "${var.associate_nlb > 0 && var.container_health_check_port > 0 ? 1 : 0}"
+  count = "${var.associate_nlb && var.container_health_check_port > 0 ? 1 : 0}"
 
   description       = "Allow in health check from NLB"
   security_group_id = "${aws_security_group.ecs_sg.id}"
