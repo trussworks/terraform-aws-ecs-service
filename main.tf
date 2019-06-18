@@ -419,7 +419,7 @@ resource "aws_iam_role" "task_execution_role" {
   count = "${var.ecs_use_fargate ? 1 : 0}"
 
   name               = "ecs-task-execution-role-${var.name}-${var.environment}"
-  assume_role_policy = "${data.aws_iam_policy_document.ecs_assume_role_policy[count.index].json}"
+  assume_role_policy = "${data.aws_iam_policy_document.ecs_assume_role_policy.json}"
 }
 
 resource "aws_iam_role_policy" "task_execution_role_policy" {
@@ -427,7 +427,7 @@ resource "aws_iam_role_policy" "task_execution_role_policy" {
 
   name   = "${aws_iam_role.task_execution_role[count.index].name}-policy"
   role   = "${aws_iam_role.task_execution_role[count.index].name}"
-  policy = "${data.aws_iam_policy_document.task_execution_role_policy_doc[count.index].json}"
+  policy = "${data.aws_iam_policy_document.task_execution_role_policy_doc.json}"
 }
 
 #
@@ -528,7 +528,7 @@ resource "aws_ecs_service" "main" {
 
   network_configuration {
     subnets          = "${var.ecs_subnet_ids}"
-    security_groups  = "${aws_security_group.ecs_sg.id}"
+    security_groups  = ["${aws_security_group.ecs_sg.id}"]
     assign_public_ip = false
   }
 
