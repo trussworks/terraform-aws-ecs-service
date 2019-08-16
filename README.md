@@ -110,3 +110,18 @@ module "app_ecs_service" {
 | task\_role\_name | The name of the IAM role assumed by Amazon ECS container tasks. |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+
+## Upgrade Path
+
+### 1.14.0 to 1.15.0
+
+In upgrading to this version you need to pass through the ECS Cluster Name and not the ECS Cluster ARN.
+The difference would be changing `ecs_cluster_arn` to `ecs_cluster_name` and passing in the name info.
+The module will take care of pulling the ARN from the ECS Cluster data resource on your behalf.
+
+If you decide you do not want metric alarms you can also set two more settings:
+
+```hcl
+  cloudwatch_alarm_cpu_enable = false
+  cloudwatch_alarm_mem_enable = false
+```
