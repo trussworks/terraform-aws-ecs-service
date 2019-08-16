@@ -8,6 +8,42 @@ variable "environment" {
   type        = "string"
 }
 
+variable "cloudwatch_alarm_name" {
+  description = "Generic name used for CPU and Memory Cloudwatch Alarms"
+  default     = ""
+  type        = "string"
+}
+
+variable "cloudwatch_alarm_actions" {
+  description = "The list of actions to take for cloudwatch alarms"
+  type        = "list"
+  default     = []
+}
+
+variable "cloudwatch_alarm_cpu_enable" {
+  description = "Enable the CPU Utilization CloudWatch metric alarm"
+  type        = "string"
+  default     = true
+}
+
+variable "cloudwatch_alarm_cpu_threshold" {
+  description = "The CPU Utilization threshold for the CloudWatch metric alarm"
+  default     = 80
+  type        = "string"
+}
+
+variable "cloudwatch_alarm_mem_enable" {
+  description = "Enable the Memory Utilization CloudWatch metric alarm"
+  type        = "string"
+  default     = true
+}
+
+variable "cloudwatch_alarm_mem_threshold" {
+  description = "The Memory Utilization threshold for the CloudWatch metric alarm"
+  default     = 80
+  type        = "string"
+}
+
 variable "logs_cloudwatch_retention" {
   description = "Number of days you want to retain log events in the log group."
   default     = 90
@@ -32,8 +68,8 @@ variable "ecs_use_fargate" {
   type        = "string"
 }
 
-variable "ecs_cluster_arn" {
-  description = "The ARN of the ECS cluster."
+variable "ecs_cluster_name" {
+  description = "The name  of the ECS cluster."
   type        = "string"
 }
 
