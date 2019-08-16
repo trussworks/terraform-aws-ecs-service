@@ -25,7 +25,7 @@ module "app_ecs_service" {
   name        = "app"
   environment = "prod"
 
-  ecs_cluster_arn               = "${module.app_ecs_cluster.ecs_cluster_arn}"
+  ecs_cluster_name              = "cluster-name"
   ecs_vpc_id                    = "${module.vpc.vpc_id}"
   ecs_subnet_ids                = "${module.vpc.private_subnets}"
   tasks_desired_count           = 2
@@ -47,7 +47,7 @@ module "app_ecs_service" {
   name        = "app"
   environment = "prod"
 
-  ecs_cluster_arn               = "${module.app_ecs_cluster.ecs_cluster_arn}"
+  ecs_cluster_name              = "cluster-name"
   ecs_vpc_id                    = "${module.vpc.vpc_id}"
   ecs_subnet_ids                = "${module.vpc.private_subnets}"
   tasks_desired_count           = 2
@@ -67,12 +67,18 @@ module "app_ecs_service" {
 | alb\_security\_group | Application Load Balancer (ALB) security group ID to allow traffic from. | string | `""` | no |
 | associate\_alb | Whether to associate an Application Load Balancer (ALB) with the ECS service. | string | `"false"` | no |
 | associate\_nlb | Whether to associate a Network Load Balancer (NLB) with the ECS service. | string | `"false"` | no |
+| cloudwatch\_alarm\_actions | The list of actions to take for cloudwatch alarms | list | `[]` | no |
+| cloudwatch\_alarm\_cpu\_enable | Enable the CPU Utilization CloudWatch metric alarm | string | `"true"` | no |
+| cloudwatch\_alarm\_cpu\_threshold | The CPU Utilization threshold for the CloudWatch metric alarm | string | `"80"` | no |
+| cloudwatch\_alarm\_mem\_enable | Enable the Memory Utilization CloudWatch metric alarm | string | `"true"` | no |
+| cloudwatch\_alarm\_mem\_threshold | The Memory Utilization threshold for the CloudWatch metric alarm | string | `"80"` | no |
+| cloudwatch\_alarm\_name | Generic name used for CPU and Memory Cloudwatch Alarms | string | `""` | no |
 | container\_definitions | Container definitions provided as valid JSON document. Default uses nginx:stable. | string | `""` | no |
 | container\_health\_check\_port | An additional port on which the container can receive a health check.  Zero means the container port can only receive a health check on the port set by the container_port variable. | string | `"0"` | no |
 | container\_image | The image of the container. | string | `"golang:1.12.5-alpine"` | no |
 | container\_port | The port on which the container will receive traffic. | string | `"80"` | no |
 | ecr\_repo\_arns | The ARNs of the ECR repos.  By default, allows all repositories. | list | `[ "*" ]` | no |
-| ecs\_cluster\_arn | The ARN of the ECS cluster. | string | n/a | yes |
+| ecs\_cluster\_name | The name  of the ECS cluster. | string | n/a | yes |
 | ecs\_instance\_role | The name of the ECS instance role. | string | `""` | no |
 | ecs\_subnet\_ids | Subnet IDs for the ECS tasks. | list | n/a | yes |
 | ecs\_use\_fargate | Whether to use Fargate for the task definition. | string | `"false"` | no |

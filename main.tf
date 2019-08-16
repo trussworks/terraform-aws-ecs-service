@@ -25,7 +25,7 @@
  *   name        = "app"
  *   environment = "prod"
  *
- *   ecs_cluster_arn               = "${module.app_ecs_cluster.ecs_cluster_arn}"
+ *   ecs_cluster_name              = "cluster-name"
  *   ecs_vpc_id                    = "${module.vpc.vpc_id}"
  *   ecs_subnet_ids                = "${module.vpc.private_subnets}"
  *   tasks_desired_count           = 2
@@ -47,7 +47,7 @@
  *   name        = "app"
  *   environment = "prod"
  *
- *   ecs_cluster_arn               = "${module.app_ecs_cluster.ecs_cluster_arn}"
+ *   ecs_cluster_name              = "cluster-name"
  *   ecs_vpc_id                    = "${module.vpc.vpc_id}"
  *   ecs_subnet_ids                = "${module.vpc.private_subnets}"
  *   tasks_desired_count           = 2
@@ -61,9 +61,14 @@
  * ```
  */
 
+data "aws_ecs_cluster" "main" {
+  cluster_name = "${var.ecs_cluster_name}"
+}
+
 locals {
   awslogs_group         = "${var.logs_cloudwatch_group == "" ? "/ecs/${var.environment}/${var.name}" : var.logs_cloudwatch_group}"
   target_container_name = "${var.target_container_name == "" ? "${var.name}-${var.environment}" : var.target_container_name}"
+  cloudwatch_alarm_name = "${var.cloudwatch_alarm_name == "" ? "${var.name}-${var.environment}" : var.cloudwatch_alarm_name}"
 
   default_container_definitions = <<EOF
 [
@@ -118,6 +123,48 @@ resource "aws_cloudwatch_log_group" "main" {
     Name        = "${var.name}-${var.environment}"
     Environment = "${var.environment}"
     Automation  = "Terraform"
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "alarm_cpu" {
+  count = "${var.cloudwatch_alarm_cpu_enable ? 1 : 0}"
+
+  alarm_name        = "${local.cloudwatch_alarm_name}-cpu"
+  alarm_description = "Monitors ECS CPU Utilization"
+  alarm_actions     = ["${var.cloudwatch_alarm_actions}"]
+
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = "2"
+  metric_name         = "CPUUtilization"
+  namespace           = "AWS/ECS"
+  period              = "120"
+  statistic           = "Average"
+  threshold           = "${var.cloudwatch_alarm_cpu_threshold}"
+
+  dimensions = {
+    "ClusterName" = "${var.ecs_cluster_name}"
+    "ServiceName" = "${aws_ecs_service.main.name}"
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "alarm_mem" {
+  count = "${var.cloudwatch_alarm_mem_enable ? 1 : 0}"
+
+  alarm_name        = "${local.cloudwatch_alarm_name}-mem"
+  alarm_description = "Monitors ECS CPU Utilization"
+  alarm_actions     = ["${var.cloudwatch_alarm_actions}"]
+
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = "2"
+  metric_name         = "MemoryUtilization"
+  namespace           = "AWS/ECS"
+  period              = "120"
+  statistic           = "Average"
+  threshold           = "${var.cloudwatch_alarm_mem_threshold}"
+
+  dimensions = {
+    "ClusterName" = "${var.ecs_cluster_name}"
+    "ServiceName" = "${aws_ecs_service.main.name}"
   }
 }
 
@@ -214,7 +261,7 @@ data "aws_iam_policy_document" "instance_role_policy_doc" {
       "ecs:Submit*",
     ]
 
-    resources = ["${var.ecs_cluster_arn}"]
+    resources = ["${data.aws_ecs_cluster.main.arn}"]
   }
 
   statement {
@@ -227,7 +274,7 @@ data "aws_iam_policy_document" "instance_role_policy_doc" {
     condition {
       test     = "StringEquals"
       variable = "ecs:cluster"
-      values   = ["${var.ecs_cluster_arn}"]
+      values   = ["${data.aws_ecs_cluster.main.arn}"]
     }
   }
 
@@ -410,7 +457,7 @@ resource "aws_ecs_service" "main" {
   count = "${var.associate_alb || var.associate_nlb ? 1 : 0}"
 
   name    = "${var.name}"
-  cluster = "${var.ecs_cluster_arn}"
+  cluster = "${data.aws_ecs_cluster.main.arn}"
 
   launch_type = "${local.ecs_service_launch_type}"
 
@@ -450,7 +497,7 @@ resource "aws_ecs_service" "main_no_lb" {
   count = "${var.associate_alb || var.associate_nlb ? 0 : 1}"
 
   name    = "${var.name}"
-  cluster = "${var.ecs_cluster_arn}"
+  cluster = "${data.aws_ecs_cluster.main.arn}"
 
   launch_type = "${local.ecs_service_launch_type}"
 
