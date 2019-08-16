@@ -127,7 +127,7 @@ resource "aws_cloudwatch_log_group" "main" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "alarm_cpu" {
-  count = "${var.cloudwatch_alarm_cpu_enable ? 1 : 0}"
+  count = "${var.cloudwatch_alarm_cpu_enable && (var.associate_alb || var.associate_nlb) ? 1 : 0}"
 
   alarm_name        = "${local.cloudwatch_alarm_name}-cpu"
   alarm_description = "Monitors ECS CPU Utilization"
@@ -148,7 +148,7 @@ resource "aws_cloudwatch_metric_alarm" "alarm_cpu" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "alarm_mem" {
-  count = "${var.cloudwatch_alarm_mem_enable ? 1 : 0}"
+  count = "${var.cloudwatch_alarm_cpu_enable && (var.associate_alb || var.associate_nlb) ? 1 : 0}"
 
   alarm_name        = "${local.cloudwatch_alarm_name}-mem"
   alarm_description = "Monitors ECS CPU Utilization"
@@ -165,6 +165,48 @@ resource "aws_cloudwatch_metric_alarm" "alarm_mem" {
   dimensions = {
     "ClusterName" = "${var.ecs_cluster_name}"
     "ServiceName" = "${aws_ecs_service.main.name}"
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "alarm_cpu_no_lb" {
+  count = "${var.cloudwatch_alarm_cpu_enable && !(var.associate_alb || var.associate_nlb) ? 1 : 0}"
+
+  alarm_name        = "${local.cloudwatch_alarm_name}-cpu"
+  alarm_description = "Monitors ECS CPU Utilization"
+  alarm_actions     = ["${var.cloudwatch_alarm_actions}"]
+
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = "2"
+  metric_name         = "CPUUtilization"
+  namespace           = "AWS/ECS"
+  period              = "120"
+  statistic           = "Average"
+  threshold           = "${var.cloudwatch_alarm_cpu_threshold}"
+
+  dimensions = {
+    "ClusterName" = "${var.ecs_cluster_name}"
+    "ServiceName" = "${aws_ecs_service.main_no_lb.name}"
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "alarm_mem_no_lb" {
+  count = "${var.cloudwatch_alarm_cpu_enable && !(var.associate_alb || var.associate_nlb) ? 1 : 0}"
+
+  alarm_name        = "${local.cloudwatch_alarm_name}-mem"
+  alarm_description = "Monitors ECS CPU Utilization"
+  alarm_actions     = ["${var.cloudwatch_alarm_actions}"]
+
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = "2"
+  metric_name         = "MemoryUtilization"
+  namespace           = "AWS/ECS"
+  period              = "120"
+  statistic           = "Average"
+  threshold           = "${var.cloudwatch_alarm_mem_threshold}"
+
+  dimensions = {
+    "ClusterName" = "${var.ecs_cluster_name}"
+    "ServiceName" = "${aws_ecs_service.main_no_lb.name}"
   }
 }
 
