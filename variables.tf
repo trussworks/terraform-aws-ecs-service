@@ -138,7 +138,7 @@ variable "container_health_check_port" {
 }
 
 variable "container_definitions" {
-  description = "Container definitions provided as valid JSON document. Default uses nginx:stable."
+  description = "Container definitions provided as valid JSON document. Default uses golang:1.12.5-alpine running a simple hello world."
   default     = ""
   type        = "string"
 }

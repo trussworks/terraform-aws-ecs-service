@@ -169,7 +169,7 @@ resource "aws_cloudwatch_metric_alarm" "alarm_mem" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "alarm_cpu_no_lb" {
-  count = "${var.cloudwatch_alarm_cpu_enable && !(var.associate_alb || var.associate_nlb) ? 1 : 0}"
+  count = "${var.cloudwatch_alarm_cpu_enable && ! (var.associate_alb || var.associate_nlb) ? 1 : 0}"
 
   alarm_name        = "${local.cloudwatch_alarm_name}-cpu"
   alarm_description = "Monitors ECS CPU Utilization"
@@ -190,7 +190,7 @@ resource "aws_cloudwatch_metric_alarm" "alarm_cpu_no_lb" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "alarm_mem_no_lb" {
-  count = "${var.cloudwatch_alarm_cpu_enable && !(var.associate_alb || var.associate_nlb) ? 1 : 0}"
+  count = "${var.cloudwatch_alarm_cpu_enable && ! (var.associate_alb || var.associate_nlb) ? 1 : 0}"
 
   alarm_name        = "${local.cloudwatch_alarm_name}-mem"
   alarm_description = "Monitors ECS CPU Utilization"
@@ -506,7 +506,7 @@ resource "aws_ecs_service" "main" {
   # Use latest active revision
   task_definition = "${aws_ecs_task_definition.main.family}:${max(
     "${aws_ecs_task_definition.main.revision}",
-    "${data.aws_ecs_task_definition.main.revision}")}"
+  "${data.aws_ecs_task_definition.main.revision}")}"
 
   desired_count                      = "${var.tasks_desired_count}"
   deployment_minimum_healthy_percent = "${var.tasks_minimum_healthy_percent}"
@@ -546,7 +546,7 @@ resource "aws_ecs_service" "main_no_lb" {
   # Use latest active revision
   task_definition = "${aws_ecs_task_definition.main.family}:${max(
     "${aws_ecs_task_definition.main.revision}",
-    "${data.aws_ecs_task_definition.main.revision}")}"
+  "${data.aws_ecs_task_definition.main.revision}")}"
 
   desired_count                      = "${var.tasks_desired_count}"
   deployment_minimum_healthy_percent = "${var.tasks_minimum_healthy_percent}"

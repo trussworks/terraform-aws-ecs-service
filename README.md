@@ -73,7 +73,7 @@ module "app_ecs_service" {
 | cloudwatch\_alarm\_mem\_enable | Enable the Memory Utilization CloudWatch metric alarm | string | `"true"` | no |
 | cloudwatch\_alarm\_mem\_threshold | The Memory Utilization threshold for the CloudWatch metric alarm | string | `"80"` | no |
 | cloudwatch\_alarm\_name | Generic name used for CPU and Memory Cloudwatch Alarms | string | `""` | no |
-| container\_definitions | Container definitions provided as valid JSON document. Default uses nginx:stable. | string | `""` | no |
+| container\_definitions | Container definitions provided as valid JSON document. Default uses golang:1.12.5-alpine running a simple hello world. | string | `""` | no |
 | container\_health\_check\_port | An additional port on which the container can receive a health check.  Zero means the container port can only receive a health check on the port set by the container_port variable. | string | `"0"` | no |
 | container\_image | The image of the container. | string | `"golang:1.12.5-alpine"` | no |
 | container\_port | The port on which the container will receive traffic. | string | `"80"` | no |
