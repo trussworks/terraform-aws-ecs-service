@@ -117,13 +117,13 @@ EOF
 #
 
 resource "aws_cloudwatch_log_group" "main" {
-  name = local.awslogs_group
+  name              = local.awslogs_group
   retention_in_days = var.logs_cloudwatch_retention
 
   tags = {
-    Name = "${var.name}-${var.environment}"
+    Name        = "${var.name}-${var.environment}"
     Environment = var.environment
-    Automation = "Terraform"
+    Automation  = "Terraform"
   }
 }
 
@@ -216,77 +216,77 @@ resource "aws_cloudwatch_metric_alarm" "alarm_mem_no_lb" {
 #
 
 resource "aws_security_group" "ecs_sg" {
-  name = "ecs-${var.name}-${var.environment}"
+  name        = "ecs-${var.name}-${var.environment}"
   description = "${var.name}-${var.environment} container security group"
-  vpc_id = var.ecs_vpc_id
+  vpc_id      = var.ecs_vpc_id
 
   tags = {
-    Name = "ecs-${var.name}-${var.environment}"
+    Name        = "ecs-${var.name}-${var.environment}"
     Environment = var.environment
-    Automation = "Terraform"
+    Automation  = "Terraform"
   }
 }
 
 resource "aws_security_group_rule" "app_ecs_allow_outbound" {
-  description = "All outbound"
+  description       = "All outbound"
   security_group_id = aws_security_group.ecs_sg.id
 
-  type = "egress"
-  from_port = 0
-  to_port = 0
-  protocol = "-1"
+  type        = "egress"
+  from_port   = 0
+  to_port     = 0
+  protocol    = "-1"
   cidr_blocks = ["0.0.0.0/0"]
 }
 
 resource "aws_security_group_rule" "app_ecs_allow_https_from_alb" {
   count = var.associate_alb ? 1 : 0
 
-  description = "Allow in ALB"
+  description       = "Allow in ALB"
   security_group_id = aws_security_group.ecs_sg.id
 
-  type = "ingress"
-  from_port = var.container_port
-  to_port = var.container_port
-  protocol = "tcp"
+  type                     = "ingress"
+  from_port                = var.container_port
+  to_port                  = var.container_port
+  protocol                 = "tcp"
   source_security_group_id = var.alb_security_group
 }
 
 resource "aws_security_group_rule" "app_ecs_allow_health_check_from_alb" {
   count = var.associate_alb && var.container_health_check_port > 0 ? 1 : 0
 
-  description = "Allow in health check from ALB"
+  description       = "Allow in health check from ALB"
   security_group_id = aws_security_group.ecs_sg.id
 
-  type = "ingress"
-  from_port = var.container_health_check_port
-  to_port = var.container_health_check_port
-  protocol = "tcp"
+  type                     = "ingress"
+  from_port                = var.container_health_check_port
+  to_port                  = var.container_health_check_port
+  protocol                 = "tcp"
   source_security_group_id = var.alb_security_group
 }
 
 resource "aws_security_group_rule" "app_ecs_allow_tcp_from_nlb" {
   count = var.associate_nlb ? 1 : 0
 
-  description = "Allow in NLB"
+  description       = "Allow in NLB"
   security_group_id = aws_security_group.ecs_sg.id
 
-  type = "ingress"
-  from_port = var.container_port
-  to_port = var.container_port
-  protocol = "tcp"
+  type        = "ingress"
+  from_port   = var.container_port
+  to_port     = var.container_port
+  protocol    = "tcp"
   cidr_blocks = var.nlb_subnet_cidr_blocks
 }
 
 resource "aws_security_group_rule" "app_ecs_allow_health_check_from_nlb" {
   count = var.associate_nlb && var.container_health_check_port > 0 ? 1 : 0
 
-  description = "Allow in health check from NLB"
+  description       = "Allow in health check from NLB"
   security_group_id = aws_security_group.ecs_sg.id
 
-  type = "ingress"
-  from_port = var.container_health_check_port
-  to_port = var.container_health_check_port
-  protocol = "tcp"
+  type        = "ingress"
+  from_port   = var.container_health_check_port
+  to_port     = var.container_health_check_port
+  protocol    = "tcp"
   cidr_blocks = var.nlb_subnet_cidr_blocks
 }
 
@@ -315,7 +315,7 @@ data "aws_iam_policy_document" "instance_role_policy_doc" {
     resources = ["*"]
 
     condition {
-      test = "StringEquals"
+      test     = "StringEquals"
       variable = "ecs:cluster"
       values   = ["${data.aws_ecs_cluster.main.arn}"]
     }
@@ -362,8 +362,8 @@ data "aws_iam_policy_document" "instance_role_policy_doc" {
 resource "aws_iam_role_policy" "instance_role_policy" {
   count = var.ecs_instance_role != "" ? 1 : 0
 
-  name = "${var.ecs_instance_role}-policy"
-  role = var.ecs_instance_role
+  name   = "${var.ecs_instance_role}-policy"
+  role   = var.ecs_instance_role
   policy = data.aws_iam_policy_document.instance_role_policy_doc[0].json
 }
 
@@ -376,7 +376,7 @@ data "aws_iam_policy_document" "ecs_assume_role_policy" {
     actions = ["sts:AssumeRole"]
 
     principals {
-      type = "Service"
+      type        = "Service"
       identifiers = ["ecs-tasks.amazonaws.com"]
     }
   }
@@ -412,22 +412,22 @@ data "aws_iam_policy_document" "task_execution_role_policy_doc" {
 }
 
 resource "aws_iam_role" "task_role" {
-  name = "ecs-task-role-${var.name}-${var.environment}"
+  name               = "ecs-task-role-${var.name}-${var.environment}"
   assume_role_policy = data.aws_iam_policy_document.ecs_assume_role_policy.json
 }
 
 resource "aws_iam_role" "task_execution_role" {
   count = var.ecs_use_fargate ? 1 : 0
 
-  name = "ecs-task-execution-role-${var.name}-${var.environment}"
+  name               = "ecs-task-execution-role-${var.name}-${var.environment}"
   assume_role_policy = data.aws_iam_policy_document.ecs_assume_role_policy.json
 }
 
 resource "aws_iam_role_policy" "task_execution_role_policy" {
   count = var.ecs_use_fargate ? 1 : 0
 
-  name = "${aws_iam_role.task_execution_role[0].name}-policy"
-  role = aws_iam_role.task_execution_role[0].name
+  name   = "${aws_iam_role.task_execution_role[0].name}-policy"
+  role   = aws_iam_role.task_execution_role[0].name
   policy = data.aws_iam_policy_document.task_execution_role_policy_doc.json
 }
 
@@ -441,15 +441,15 @@ data "aws_region" "current" {
 # Create a task definition with a golang image so the ecs service can be easily
 # tested. We expect deployments will manage the future container definitions.
 resource "aws_ecs_task_definition" "main" {
-  family = "${var.name}-${var.environment}"
-  network_mode = "awsvpc"
+  family        = "${var.name}-${var.environment}"
+  network_mode  = "awsvpc"
   task_role_arn = aws_iam_role.task_role.arn
 
   # Fargate requirements
   requires_compatibilities = compact([var.ecs_use_fargate ? "FARGATE" : ""])
-  cpu = var.ecs_use_fargate ? var.fargate_task_cpu : ""
-  memory = var.ecs_use_fargate ? var.fargate_task_memory : ""
-  execution_role_arn = join("", aws_iam_role.task_execution_role.*.arn)
+  cpu                      = var.ecs_use_fargate ? var.fargate_task_cpu : ""
+  memory                   = var.ecs_use_fargate ? var.fargate_task_memory : ""
+  execution_role_arn       = join("", aws_iam_role.task_execution_role.*.arn)
 
   container_definitions = var.container_definitions == "" ? local.default_container_definitions : var.container_definitions
 
@@ -467,7 +467,7 @@ resource "aws_ecs_task_definition" "main" {
 # Create a data source to pull the latest active revision from
 data "aws_ecs_task_definition" "main" {
   task_definition = aws_ecs_task_definition.main.family
-  depends_on = [aws_ecs_task_definition.main] # ensures at least one task def exists
+  depends_on      = [aws_ecs_task_definition.main] # ensures at least one task def exists
 }
 
 locals {
@@ -476,11 +476,11 @@ locals {
   ecs_service_ordered_placement_strategy = {
     EC2 = [
       {
-        type = "spread"
+        type  = "spread"
         field = "attribute:ecs.availability-zone"
       },
       {
-        type = "spread"
+        type  = "spread"
         field = "instanceId"
       },
     ]
@@ -511,14 +511,14 @@ resource "aws_ecs_service" "main" {
     data.aws_ecs_task_definition.main.revision,
   )}"
 
-  desired_count = var.tasks_desired_count
+  desired_count                      = var.tasks_desired_count
   deployment_minimum_healthy_percent = var.tasks_minimum_healthy_percent
-  deployment_maximum_percent = var.tasks_maximum_percent
+  deployment_maximum_percent         = var.tasks_maximum_percent
 
   dynamic "ordered_placement_strategy" {
     for_each = local.ecs_service_ordered_placement_strategy[local.ecs_service_launch_type]
     content {
-      type = ordered_placement_strategy.value.type
+      type  = ordered_placement_strategy.value.type
       field = ordered_placement_strategy.value.field
     }
   }
@@ -530,15 +530,15 @@ resource "aws_ecs_service" "main" {
   }
 
   network_configuration {
-    subnets = var.ecs_subnet_ids
-    security_groups = [aws_security_group.ecs_sg.id]
+    subnets          = var.ecs_subnet_ids
+    security_groups  = [aws_security_group.ecs_sg.id]
     assign_public_ip = false
   }
 
   load_balancer {
     target_group_arn = var.lb_target_group
-    container_name = local.target_container_name
-    container_port = var.container_port
+    container_name   = local.target_container_name
+    container_port   = var.container_port
   }
 
   lifecycle {
@@ -563,14 +563,14 @@ resource "aws_ecs_service" "main_no_lb" {
     data.aws_ecs_task_definition.main.revision,
   )}"
 
-  desired_count = var.tasks_desired_count
+  desired_count                      = var.tasks_desired_count
   deployment_minimum_healthy_percent = var.tasks_minimum_healthy_percent
-  deployment_maximum_percent = var.tasks_maximum_percent
+  deployment_maximum_percent         = var.tasks_maximum_percent
 
   dynamic "ordered_placement_strategy" {
     for_each = local.ecs_service_ordered_placement_strategy[local.ecs_service_launch_type]
     content {
-      type = ordered_placement_strategy.value.type
+      type  = ordered_placement_strategy.value.type
       field = ordered_placement_strategy.value.field
     }
   }
@@ -582,8 +582,8 @@ resource "aws_ecs_service" "main_no_lb" {
   }
 
   network_configuration {
-    subnets = var.ecs_subnet_ids
-    security_groups = aws_security_group.ecs_sg.id
+    subnets          = var.ecs_subnet_ids
+    security_groups  = aws_security_group.ecs_sg.id
     assign_public_ip = false
   }
 
