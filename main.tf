@@ -132,7 +132,7 @@ resource "aws_cloudwatch_metric_alarm" "alarm_cpu" {
 
   alarm_name        = "${local.cloudwatch_alarm_name}-cpu"
   alarm_description = "Monitors ECS CPU Utilization"
-  alarm_actions     = ["${var.cloudwatch_alarm_actions}"]
+  alarm_actions     = var.cloudwatch_alarm_actions
 
   comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods  = "2"
@@ -140,11 +140,11 @@ resource "aws_cloudwatch_metric_alarm" "alarm_cpu" {
   namespace           = "AWS/ECS"
   period              = "120"
   statistic           = "Average"
-  threshold           = "${var.cloudwatch_alarm_cpu_threshold}"
+  threshold           = var.cloudwatch_alarm_cpu_threshold
 
   dimensions = {
-    "ClusterName" = "${var.ecs_cluster_name}"
-    "ServiceName" = "${aws_ecs_service.main.name}"
+    "ClusterName" = var.ecs_cluster_name
+    "ServiceName" = aws_ecs_service.main[count.index].name
   }
 }
 
@@ -153,7 +153,7 @@ resource "aws_cloudwatch_metric_alarm" "alarm_mem" {
 
   alarm_name        = "${local.cloudwatch_alarm_name}-mem"
   alarm_description = "Monitors ECS CPU Utilization"
-  alarm_actions     = ["${var.cloudwatch_alarm_actions}"]
+  alarm_actions     = var.cloudwatch_alarm_actions
 
   comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods  = "2"
@@ -161,11 +161,11 @@ resource "aws_cloudwatch_metric_alarm" "alarm_mem" {
   namespace           = "AWS/ECS"
   period              = "120"
   statistic           = "Average"
-  threshold           = "${var.cloudwatch_alarm_mem_threshold}"
+  threshold           = var.cloudwatch_alarm_mem_threshold
 
   dimensions = {
-    "ClusterName" = "${var.ecs_cluster_name}"
-    "ServiceName" = "${aws_ecs_service.main.name}"
+    "ClusterName" = var.ecs_cluster_name
+    "ServiceName" = aws_ecs_service.main[count.index].name
   }
 }
 
@@ -174,7 +174,7 @@ resource "aws_cloudwatch_metric_alarm" "alarm_cpu_no_lb" {
 
   alarm_name        = "${local.cloudwatch_alarm_name}-cpu"
   alarm_description = "Monitors ECS CPU Utilization"
-  alarm_actions     = ["${var.cloudwatch_alarm_actions}"]
+  alarm_actions     = var.cloudwatch_alarm_actions
 
   comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods  = "2"
@@ -182,11 +182,11 @@ resource "aws_cloudwatch_metric_alarm" "alarm_cpu_no_lb" {
   namespace           = "AWS/ECS"
   period              = "120"
   statistic           = "Average"
-  threshold           = "${var.cloudwatch_alarm_cpu_threshold}"
+  threshold           = var.cloudwatch_alarm_cpu_threshold
 
   dimensions = {
-    "ClusterName" = "${var.ecs_cluster_name}"
-    "ServiceName" = "${aws_ecs_service.main_no_lb.name}"
+    "ClusterName" = var.ecs_cluster_name
+    "ServiceName" = aws_ecs_service.main_no_lb[count.index].name
   }
 }
 
@@ -195,7 +195,7 @@ resource "aws_cloudwatch_metric_alarm" "alarm_mem_no_lb" {
 
   alarm_name        = "${local.cloudwatch_alarm_name}-mem"
   alarm_description = "Monitors ECS CPU Utilization"
-  alarm_actions     = ["${var.cloudwatch_alarm_actions}"]
+  alarm_actions     = var.cloudwatch_alarm_actions
 
   comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods  = "2"
@@ -203,11 +203,11 @@ resource "aws_cloudwatch_metric_alarm" "alarm_mem_no_lb" {
   namespace           = "AWS/ECS"
   period              = "120"
   statistic           = "Average"
-  threshold           = "${var.cloudwatch_alarm_mem_threshold}"
+  threshold           = var.cloudwatch_alarm_mem_threshold
 
   dimensions = {
-    "ClusterName" = "${var.ecs_cluster_name}"
-    "ServiceName" = "${aws_ecs_service.main_no_lb.name}"
+    "ClusterName" = var.ecs_cluster_name
+    "ServiceName" = aws_ecs_service.main_no_lb[count.index].name
   }
 }
 
@@ -500,8 +500,8 @@ locals {
 resource "aws_ecs_service" "main" {
   count = var.associate_alb || var.associate_nlb ? 1 : 0
 
-  name    = "${var.name}"
-  cluster = "${data.aws_ecs_cluster.main.arn}"
+  name    = var.name
+  cluster = data.aws_ecs_cluster.main.arn
 
   launch_type = local.ecs_service_launch_type
 
@@ -515,17 +515,20 @@ resource "aws_ecs_service" "main" {
   deployment_minimum_healthy_percent = var.tasks_minimum_healthy_percent
   deployment_maximum_percent         = var.tasks_maximum_percent
 
-  dynamic "ordered_placement_strategy" {
-    for_each = local.ecs_service_ordered_placement_strategy[local.ecs_service_launch_type]
+  dynamic ordered_placement_strategy {
+    for_each = var.ecs_use_fargate ? [] : ["attribute:ecs.availability-zone", "instanceId"]
+
     content {
-      type  = ordered_placement_strategy.value.type
-      field = ordered_placement_strategy.value.field
+      type = "spread"
+      field = ordered_placement_strategy.value
     }
   }
-  dynamic "placement_constraints" {
-    for_each = local.ecs_service_placement_constraints[local.ecs_service_launch_type]
+
+  dynamic placement_constraints {
+    for_each = var.ecs_use_fargate ? [] : ["distinctInstance"]
+
     content {
-      type = placement_constraints.value.type
+      type = placement_constraints.value
     }
   }
 
@@ -552,8 +555,8 @@ resource "aws_ecs_service" "main" {
 resource "aws_ecs_service" "main_no_lb" {
   count = var.associate_alb || var.associate_nlb ? 0 : 1
 
-  name    = "${var.name}"
-  cluster = "${data.aws_ecs_cluster.main.arn}"
+  name    = var.name
+  cluster = data.aws_ecs_cluster.main.arn
 
   launch_type = local.ecs_service_launch_type
 
@@ -568,16 +571,19 @@ resource "aws_ecs_service" "main_no_lb" {
   deployment_maximum_percent         = var.tasks_maximum_percent
 
   dynamic "ordered_placement_strategy" {
-    for_each = local.ecs_service_ordered_placement_strategy[local.ecs_service_launch_type]
+    for_each = var.ecs_use_fargate ? [] : ["attribute:ecs.availability-zone", "instanceId"]
+
     content {
-      type  = ordered_placement_strategy.value.type
-      field = ordered_placement_strategy.value.field
+      type  = spread
+      field = ordered_placement_strategy.value
     }
   }
+
   dynamic "placement_constraints" {
-    for_each = local.ecs_service_placement_constraints[local.ecs_service_launch_type]
+    for_each = var.ecs_use_fargate ? [] : ["distinctInstance"]
+
     content {
-      type = placement_constraints.value.type
+      type = placement_constraints.value
     }
   }
 
