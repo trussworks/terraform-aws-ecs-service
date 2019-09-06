@@ -16,7 +16,7 @@
 | container\_health\_check\_port | An additional port on which the container can receive a health check.  Zero means the container port can only receive a health check on the port set by the container_port variable. | string | `"0"` | no |
 | container\_image | The image of the container. | string | `"golang:1.12.5-alpine"` | no |
 | container\_port | The port on which the container will receive traffic. | string | `"80"` | no |
-| ecr\_repo\_arns | The ARNs of the ECR repos.  By default, allows all repositories. | list | `[ "*" ]` | no |
+| ecr\_repo\_arns | The ARNs of the ECR repos.  By default, allows all repositories. | list(string) | `[ "*" ]` | no |
 | ecs\_cluster\_name | The name  of the ECS cluster. | string | n/a | yes |
 | ecs\_instance\_role | The name of the ECS instance role. | string | `""` | no |
 | ecs\_subnet\_ids | Subnet IDs for the ECS tasks. | list(string) | n/a | yes |
@@ -52,15 +52,12 @@
 
 ## Upgrade Path
 
-### 1.14.0 to 1.15.0
+### 1.15.0 to 2.0.0
 
-In upgrading to this version you need to pass through the ECS Cluster Name and not the ECS Cluster ARN.
-The difference would be changing `ecs_cluster_arn` to `ecs_cluster_name` and passing in the name info.
-The module will take care of pulling the ARN from the ECS Cluster data resource on your behalf.
+v2.0.0 of this module is built against Terraform v0.12. However, this
+introduces a bug that prevents the creation of an ECS service with this
+module prior to creation of the cluster which it is going to run on (see
+<https://github.com/hashicorp/terraform/issues/22730>). To work around
+this, create the cluster first, and then add the call to this module once
+the cluster exists.
 
-If you decide you do not want metric alarms you can also set two more settings:
-
-```hcl
-  cloudwatch_alarm_cpu_enable = false
-  cloudwatch_alarm_mem_enable = false
-```

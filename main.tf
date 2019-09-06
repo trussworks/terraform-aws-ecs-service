@@ -304,7 +304,7 @@ data "aws_iam_policy_document" "instance_role_policy_doc" {
       "ecs:Submit*",
     ]
 
-    resources = ["${data.aws_ecs_cluster.main.arn}"]
+    resources = [data.aws_ecs_cluster.main.arn]
   }
 
   statement {
@@ -317,7 +317,7 @@ data "aws_iam_policy_document" "instance_role_policy_doc" {
     condition {
       test     = "StringEquals"
       variable = "ecs:cluster"
-      values   = ["${data.aws_ecs_cluster.main.arn}"]
+      values   = [data.aws_ecs_cluster.main.arn]
     }
   }
 
@@ -516,19 +516,19 @@ resource "aws_ecs_service" "main" {
   deployment_maximum_percent         = var.tasks_maximum_percent
 
   dynamic ordered_placement_strategy {
-    for_each = var.ecs_use_fargate ? [] : ["attribute:ecs.availability-zone", "instanceId"]
+    for_each = local.ecs_service_ordered_placement_strategy[local.ecs_service_launch_type]
 
     content {
-      type = "spread"
-      field = ordered_placement_strategy.value
+      type  = ordered_placement_strategy.value.type
+      field = ordered_placement_strategy.value.field
     }
   }
 
   dynamic placement_constraints {
-    for_each = var.ecs_use_fargate ? [] : ["distinctInstance"]
+    for_each = local.ecs_service_placement_constraints[local.ecs_service_launch_type]
 
     content {
-      type = placement_constraints.value
+      type = placement_constraints.value.type
     }
   }
 
@@ -570,20 +570,22 @@ resource "aws_ecs_service" "main_no_lb" {
   deployment_minimum_healthy_percent = var.tasks_minimum_healthy_percent
   deployment_maximum_percent         = var.tasks_maximum_percent
 
-  dynamic "ordered_placement_strategy" {
-    for_each = var.ecs_use_fargate ? [] : ["attribute:ecs.availability-zone", "instanceId"]
+  dynamic ordered_placement_strategy {
+    for_each = local.ecs_service_ordered_placement_strategy[local.ecs_service_launch_type]
+    #    for_each = var.ecs_use_fargate ? [] : ["attribute:ecs.availability-zone", "instanceId"]
 
     content {
-      type  = spread
-      field = ordered_placement_strategy.value
+      type  = ordered_placement_strategy.value.type
+      field = ordered_placement_strategy.value.field
     }
   }
 
-  dynamic "placement_constraints" {
-    for_each = var.ecs_use_fargate ? [] : ["distinctInstance"]
+  dynamic placement_constraints {
+    for_each = local.ecs_service_placement_constraints[local.ecs_service_launch_type]
+    #    for_each = var.ecs_use_fargate ? [] : ["distinctInstance"]
 
     content {
-      type = placement_constraints.value
+      type = placement_constraints.value.type
     }
   }
 
