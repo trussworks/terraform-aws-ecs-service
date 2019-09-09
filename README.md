@@ -54,10 +54,8 @@
 
 ### 1.15.0 to 2.0.0
 
-v2.0.0 of this module is built against Terraform v0.12. However, this
-introduces a bug that prevents the creation of an ECS service with this
-module prior to creation of the cluster which it is going to run on (see
-<https://github.com/hashicorp/terraform/issues/22730>). To work around
-this, create the cluster first, and then add the call to this module once
-the cluster exists.
-
+v2.0.0 of this module is built against Terraform v0.12. In addition to
+requiring this upgrade, the v1.15.0 version of the module took the name
+of the ECS cluster as a parameter; v2.0.0 takes the actual object of the
+ECS cluster as a parameter instead. You will need to update previous
+instances of this module with the altered parameter.
