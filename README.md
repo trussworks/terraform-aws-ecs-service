@@ -1,3 +1,64 @@
+Creates an ECS service.
+
+Creates the following resources:
+
+* CloudWatch log group.
+* Security Groups for the ECS service.
+* ECS service.
+* Task definition using `golang:1.12.5-alpine` (see below).
+* Configurable associations with Network Load Balancers (NLB) and Application Load Balancers (ALB).
+
+We create an initial task definition using the `golang:1.12.5-alpine` image as a way
+to validate the initial infrastructure is working: visiting the site shows
+a simple Go hello world page. We expect deployments to manage the container
+definitions going forward, not Terraform.
+
+## Usage
+
+### ECS service associated with an Application Load Balancer (ALB)
+
+```hcl
+module "app_ecs_service" {
+  source = "trussworks/ecs-service/aws"
+
+  name        = "app"
+  environment = "prod"
+
+  ecs_cluster                   = aws_ecs_cluster.mycluster
+  ecs_vpc_id                    = module.vpc.vpc_id
+  ecs_subnet_ids                = module.vpc.private_subnets
+  tasks_desired_count           = 2
+  tasks_minimum_healthy_percent = 50
+  tasks_maximum_percent         = 200
+
+  associate_alb      = true
+  alb_security_group = module.security_group.id
+  lb_target_group    = module.target_group.id
+}
+```
+
+### ECS Service associated with a Network Load Balancer(NLB)
+
+```hcl
+module "app_ecs_service" {
+  source = "trussworks/ecs-service/aws"
+
+  name        = "app"
+  environment = "prod"
+
+  ecs_cluster                   = aws_ecs_cluster.mycluster
+  ecs_vpc_id                    = module.vpc.vpc_id
+  ecs_subnet_ids                = module.vpc.private_subnets
+  tasks_desired_count           = 2
+  tasks_minimum_healthy_percent = 50
+  tasks_maximum_percent         = 200
+
+  associate_nlb          = true
+  nlb_subnet_cidr_blocks = ["10.0.0.0/24", "10.0.1.0/24", "10.0.2.0/24"]
+  lb_target_group   = module.target_group.id
+}
+```
+
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Inputs
 
