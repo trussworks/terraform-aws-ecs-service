@@ -68,9 +68,12 @@ variable "ecs_use_fargate" {
   type        = string
 }
 
-variable "ecs_cluster_name" {
-  description = "The name  of the ECS cluster."
-  type        = "string"
+variable "ecs_cluster" {
+  description = "ECS cluster object for this task."
+  type = object({
+    arn  = string
+    name = string
+  })
 }
 
 variable "ecs_instance_role" {

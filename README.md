@@ -17,7 +17,7 @@
 | container\_image | The image of the container. | string | `"golang:1.12.5-alpine"` | no |
 | container\_port | The port on which the container will receive traffic. | string | `"80"` | no |
 | ecr\_repo\_arns | The ARNs of the ECR repos.  By default, allows all repositories. | list(string) | `[ "*" ]` | no |
-| ecs\_cluster\_name | The name  of the ECS cluster. | string | n/a | yes |
+| ecs\_cluster | ECS cluster object for this task. | object | n/a | yes |
 | ecs\_instance\_role | The name of the ECS instance role. | string | `""` | no |
 | ecs\_subnet\_ids | Subnet IDs for the ECS tasks. | list(string) | n/a | yes |
 | ecs\_use\_fargate | Whether to use Fargate for the task definition. | string | `"false"` | no |

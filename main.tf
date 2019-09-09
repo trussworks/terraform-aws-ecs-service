@@ -25,16 +25,16 @@
  *   name        = "app"
  *   environment = "prod"
  *
- *   ecs_cluster_name              = "cluster-name"
- *   ecs_vpc_id                    = "${module.vpc.vpc_id}"
- *   ecs_subnet_ids                = "${module.vpc.private_subnets}"
+ *   ecs_cluster                   = aws_ecs_cluster.mycluster
+ *   ecs_vpc_id                    = module.vpc.vpc_id
+ *   ecs_subnet_ids                = module.vpc.private_subnets
  *   tasks_desired_count           = 2
  *   tasks_minimum_healthy_percent = 50
  *   tasks_maximum_percent         = 200
  *
  *   associate_alb      = true
- *   alb_security_group = "${module.security_group.id}"
- *   lb_target_group   = "${module.target_group.id}"
+ *   alb_security_group = module.security_group.id
+ *   lb_target_group    = module.target_group.id
  * }
  * ```
  *
@@ -47,23 +47,19 @@
  *   name        = "app"
  *   environment = "prod"
  *
- *   ecs_cluster_name              = "cluster-name"
- *   ecs_vpc_id                    = "${module.vpc.vpc_id}"
- *   ecs_subnet_ids                = "${module.vpc.private_subnets}"
+ *   ecs_cluster                   = aws_ecs_cluster.mycluster
+ *   ecs_vpc_id                    = module.vpc.vpc_id
+ *   ecs_subnet_ids                = module.vpc.private_subnets
  *   tasks_desired_count           = 2
  *   tasks_minimum_healthy_percent = 50
  *   tasks_maximum_percent         = 200
  *
  *   associate_nlb          = true
  *   nlb_subnet_cidr_blocks = ["10.0.0.0/24", "10.0.1.0/24", "10.0.2.0/24"]
- *   lb_target_group   = "${module.target_group.id}"
+ *   lb_target_group   = module.target_group.id
  * }
  * ```
  */
-
-data "aws_ecs_cluster" "main" {
-  cluster_name = "${var.ecs_cluster_name}"
-}
 
 locals {
   awslogs_group         = "${var.logs_cloudwatch_group == "" ? "/ecs/${var.environment}/${var.name}" : var.logs_cloudwatch_group}"
@@ -143,7 +139,7 @@ resource "aws_cloudwatch_metric_alarm" "alarm_cpu" {
   threshold           = var.cloudwatch_alarm_cpu_threshold
 
   dimensions = {
-    "ClusterName" = var.ecs_cluster_name
+    "ClusterName" = var.ecs_cluster.name
     "ServiceName" = aws_ecs_service.main[count.index].name
   }
 }
@@ -164,7 +160,7 @@ resource "aws_cloudwatch_metric_alarm" "alarm_mem" {
   threshold           = var.cloudwatch_alarm_mem_threshold
 
   dimensions = {
-    "ClusterName" = var.ecs_cluster_name
+    "ClusterName" = var.ecs_cluster.name
     "ServiceName" = aws_ecs_service.main[count.index].name
   }
 }
@@ -185,7 +181,7 @@ resource "aws_cloudwatch_metric_alarm" "alarm_cpu_no_lb" {
   threshold           = var.cloudwatch_alarm_cpu_threshold
 
   dimensions = {
-    "ClusterName" = var.ecs_cluster_name
+    "ClusterName" = var.ecs_cluster.name
     "ServiceName" = aws_ecs_service.main_no_lb[count.index].name
   }
 }
@@ -206,7 +202,7 @@ resource "aws_cloudwatch_metric_alarm" "alarm_mem_no_lb" {
   threshold           = var.cloudwatch_alarm_mem_threshold
 
   dimensions = {
-    "ClusterName" = var.ecs_cluster_name
+    "ClusterName" = var.ecs_cluster.name
     "ServiceName" = aws_ecs_service.main_no_lb[count.index].name
   }
 }
@@ -304,7 +300,7 @@ data "aws_iam_policy_document" "instance_role_policy_doc" {
       "ecs:Submit*",
     ]
 
-    resources = [data.aws_ecs_cluster.main.arn]
+    resources = [var.ecs_cluster.arn]
   }
 
   statement {
@@ -317,7 +313,7 @@ data "aws_iam_policy_document" "instance_role_policy_doc" {
     condition {
       test     = "StringEquals"
       variable = "ecs:cluster"
-      values   = [data.aws_ecs_cluster.main.arn]
+      values   = [var.ecs_cluster.arn]
     }
   }
 
@@ -501,7 +497,7 @@ resource "aws_ecs_service" "main" {
   count = var.associate_alb || var.associate_nlb ? 1 : 0
 
   name    = var.name
-  cluster = data.aws_ecs_cluster.main.arn
+  cluster = var.ecs_cluster.arn
 
   launch_type = local.ecs_service_launch_type
 
@@ -556,7 +552,7 @@ resource "aws_ecs_service" "main_no_lb" {
   count = var.associate_alb || var.associate_nlb ? 0 : 1
 
   name    = var.name
-  cluster = data.aws_ecs_cluster.main.arn
+  cluster = var.ecs_cluster.arn
 
   launch_type = local.ecs_service_launch_type
 
