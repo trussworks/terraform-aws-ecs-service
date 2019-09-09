@@ -1,4 +1,3 @@
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 Creates an ECS service.
 
 Creates the following resources:
@@ -25,16 +24,16 @@ module "app_ecs_service" {
   name        = "app"
   environment = "prod"
 
-  ecs_cluster_name              = "cluster-name"
-  ecs_vpc_id                    = "${module.vpc.vpc_id}"
-  ecs_subnet_ids                = "${module.vpc.private_subnets}"
+  ecs_cluster                   = aws_ecs_cluster.mycluster
+  ecs_vpc_id                    = module.vpc.vpc_id
+  ecs_subnet_ids                = module.vpc.private_subnets
   tasks_desired_count           = 2
   tasks_minimum_healthy_percent = 50
   tasks_maximum_percent         = 200
 
   associate_alb      = true
-  alb_security_group = "${module.security_group.id}"
-  lb_target_group   = "${module.target_group.id}"
+  alb_security_group = module.security_group.id
+  lb_target_group    = module.target_group.id
 }
 ```
 
@@ -47,19 +46,20 @@ module "app_ecs_service" {
   name        = "app"
   environment = "prod"
 
-  ecs_cluster_name              = "cluster-name"
-  ecs_vpc_id                    = "${module.vpc.vpc_id}"
-  ecs_subnet_ids                = "${module.vpc.private_subnets}"
+  ecs_cluster                   = aws_ecs_cluster.mycluster
+  ecs_vpc_id                    = module.vpc.vpc_id
+  ecs_subnet_ids                = module.vpc.private_subnets
   tasks_desired_count           = 2
   tasks_minimum_healthy_percent = 50
   tasks_maximum_percent         = 200
 
   associate_nlb          = true
   nlb_subnet_cidr_blocks = ["10.0.0.0/24", "10.0.1.0/24", "10.0.2.0/24"]
-  lb_target_group   = "${module.target_group.id}"
+  lb_target_group   = module.target_group.id
 }
 ```
 
+<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Inputs
 
 | Name | Description | Type | Default | Required |
@@ -77,10 +77,10 @@ module "app_ecs_service" {
 | container\_health\_check\_port | An additional port on which the container can receive a health check.  Zero means the container port can only receive a health check on the port set by the container_port variable. | string | `"0"` | no |
 | container\_image | The image of the container. | string | `"golang:1.12.5-alpine"` | no |
 | container\_port | The port on which the container will receive traffic. | string | `"80"` | no |
-| ecr\_repo\_arns | The ARNs of the ECR repos.  By default, allows all repositories. | list | `[ "*" ]` | no |
-| ecs\_cluster\_name | The name  of the ECS cluster. | string | n/a | yes |
+| ecr\_repo\_arns | The ARNs of the ECR repos.  By default, allows all repositories. | list(string) | `[ "*" ]` | no |
+| ecs\_cluster | ECS cluster object for this task. | object | n/a | yes |
 | ecs\_instance\_role | The name of the ECS instance role. | string | `""` | no |
-| ecs\_subnet\_ids | Subnet IDs for the ECS tasks. | list | n/a | yes |
+| ecs\_subnet\_ids | Subnet IDs for the ECS tasks. | list(string) | n/a | yes |
 | ecs\_use\_fargate | Whether to use Fargate for the task definition. | string | `"false"` | no |
 | ecs\_vpc\_id | VPC ID to be used by ECS. | string | n/a | yes |
 | environment | Environment tag, e.g prod. | string | n/a | yes |
@@ -90,7 +90,7 @@ module "app_ecs_service" {
 | logs\_cloudwatch\_group | CloudWatch log group to create and use. Default: /ecs/{name}-{environment} | string | `""` | no |
 | logs\_cloudwatch\_retention | Number of days you want to retain log events in the log group. | string | `"90"` | no |
 | name | The service name. | string | n/a | yes |
-| nlb\_subnet\_cidr\_blocks | List of Network Load Balancer (NLB) CIDR blocks to allow traffic from. | list | `[]` | no |
+| nlb\_subnet\_cidr\_blocks | List of Network Load Balancer (NLB) CIDR blocks to allow traffic from. | list(string) | `[]` | no |
 | target\_container\_name | Name of the container the Load Balancer should target. Default: {name}-{environment} | string | `""` | no |
 | tasks\_desired\_count | The number of instances of a task definition. | string | `"1"` | no |
 | tasks\_maximum\_percent | Upper limit on the number of running tasks. | string | `"200"` | no |
@@ -113,15 +113,10 @@ module "app_ecs_service" {
 
 ## Upgrade Path
 
-### 1.14.0 to 1.15.0
+### 1.15.0 to 2.0.0
 
-In upgrading to this version you need to pass through the ECS Cluster Name and not the ECS Cluster ARN.
-The difference would be changing `ecs_cluster_arn` to `ecs_cluster_name` and passing in the name info.
-The module will take care of pulling the ARN from the ECS Cluster data resource on your behalf.
-
-If you decide you do not want metric alarms you can also set two more settings:
-
-```hcl
-  cloudwatch_alarm_cpu_enable = false
-  cloudwatch_alarm_mem_enable = false
-```
+v2.0.0 of this module is built against Terraform v0.12. In addition to
+requiring this upgrade, the v1.15.0 version of the module took the name
+of the ECS cluster as a parameter; v2.0.0 takes the actual object of the
+ECS cluster as a parameter instead. You will need to update previous
+instances of this module with the altered parameter.
