@@ -106,7 +106,7 @@ locals {
     "entryPoint": [
       "/bin/sh",
       "-c",
-      "echo 'cGFja2FnZSBtYWluCgppbXBvcnQgKAoJImZtdCIKCSJsb2ciCgkibmV0L2h0dHAiCgkib3MiCgkic3RyY29udiIKKQoKZnVuYyBtYWluKCkgewoKCXBvcnQsIGVyciA6PSBzdHJjb252LkF0b2kob3MuR2V0ZW52KCJQT1JUIikpCglpZiBlcnIgIT0gbmlsIHsKCQlwYW5pYyhlcnIpCgl9CglodHRwLkhhbmRsZUZ1bmMoIi8iLCBmdW5jKHcgaHR0cC5SZXNwb25zZVdyaXRlciwgciAqaHR0cC5SZXF1ZXN0KSB7CgkJZm10LkZwcmludGYodywgIkhlbGxvLCB3b3JsZCEiKQoJfSkKCWZtdC5QcmludGxuKCJMaXN0ZW5pbmcgb24gcG9ydCIsIHBvcnQpCglsb2cuRmF0YWwoaHR0cC5MaXN0ZW5BbmRTZXJ2ZShmbXQuU3ByaW50ZigiOiVkIiwgcG9ydCksIG5pbCkpCn0K' | base64 -d > helloworld.go && go run helloworld.go"
+      "echo 'cGFja2FnZSBtYWluCgppbXBvcnQgKAoJImZtdCIKCSJsb2ciCgkibmV0L2h0dHAiCgkib3MiCgkic3RyY29udiIKKQoKZnVuYyBtYWluKCkgewoJcG9ydCwgZXJyIDo9IHN0cmNvbnYuQXRvaShvcy5HZXRlbnYoIlBPUlQiKSkKCWlmIGVyciAhPSBuaWwgewoJCXBhbmljKGVycikKCX0KCWZtdC5QcmludGxuKCJMaXN0ZW5pbmcgb24gcG9ydCIsIHBvcnQpCglsb2cuRmF0YWwoaHR0cC5MaXN0ZW5BbmRTZXJ2ZShmbXQuU3ByaW50ZigiOiVkIiwgcG9ydCksIGh0dHAuSGFuZGxlckZ1bmMoZnVuYyh3IGh0dHAuUmVzcG9uc2VXcml0ZXIsIHIgKmh0dHAuUmVxdWVzdCkgewogICAgZm10LkZwcmludGYodywgIkhlbGxvLCB3b3JsZCEiKQogIH0pKSkKfQo=' | base64 -d > helloworld.go && go run helloworld.go"
     ]
   }
 ]
@@ -601,4 +601,3 @@ resource "aws_ecs_service" "main_no_lb" {
     ignore_changes = [task_definition]
   }
 }
-
