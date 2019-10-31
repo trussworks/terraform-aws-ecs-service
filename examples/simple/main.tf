@@ -5,7 +5,7 @@
 module "app_ecs_service" {
   source = "../../"
 
-  name        = "terratest-simple"
+  name        = var.ecs_service_name
   environment = "test"
 
   ecs_cluster    = aws_ecs_cluster.main
@@ -18,7 +18,7 @@ module "app_ecs_service" {
 #
 
 resource "aws_ecs_cluster" "main" {
-  name = "terratest-simple"
+  name = var.ecs_service_name
 }
 
 
