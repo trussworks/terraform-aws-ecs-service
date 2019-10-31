@@ -126,3 +126,27 @@ requiring this upgrade, the v1.15.0 version of the module took the name
 of the ECS cluster as a parameter; v2.0.0 takes the actual object of the
 ECS cluster as a parameter instead. You will need to update previous
 instances of this module with the altered parameter.
+
+## Developer Setup
+
+Install dependencies (macOS)
+
+```shell
+brew install pre-commit go terraform terraform-docs
+```
+
+### Testing
+
+[Terratest](https://github.com/gruntwork-io/terratest) is being used for
+automated testing with this module. Tests in the `test` folder can be run
+locally by running the following command:
+
+```text
+make test
+```
+
+Or with aws-vault:
+
+```text
+AWS_VAULT_KEYCHAIN_NAME=<NAME> aws-vault exec <PROFILE> -- make test
+```
