@@ -182,3 +182,8 @@ variable "nlb_subnet_cidr_blocks" {
   type        = list(string)
 }
 
+variable "kms_key_id" {
+  description = "KMS customer managed key (CMK) ID for encrypting application logs."
+  default     = ""
+  type        = string
+}
