@@ -122,7 +122,7 @@ resource "aws_cloudwatch_log_group" "main" {
   name              = local.awslogs_group
   retention_in_days = var.logs_cloudwatch_retention
 
-  kms_key_id = var.kms_key_id ? var.kms_key_id : null
+  kms_key_id = var.kms_key_id != "" ? var.kms_key_id : null
 
   tags = {
     Name        = "${var.name}-${var.environment}"
