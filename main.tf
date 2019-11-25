@@ -34,6 +34,7 @@
  *   ecs_cluster                   = aws_ecs_cluster.mycluster
  *   ecs_vpc_id                    = module.vpc.vpc_id
  *   ecs_subnet_ids                = module.vpc.private_subnets
+ *   kms_key_id                    = aws_kms_key.main.arn
  *   tasks_desired_count           = 2
  *   tasks_minimum_healthy_percent = 50
  *   tasks_maximum_percent         = 200
@@ -56,6 +57,7 @@
  *   ecs_cluster                   = aws_ecs_cluster.mycluster
  *   ecs_vpc_id                    = module.vpc.vpc_id
  *   ecs_subnet_ids                = module.vpc.private_subnets
+ *   kms_key_id                    = aws_kms_key.main.arn
  *   tasks_desired_count           = 2
  *   tasks_minimum_healthy_percent = 50
  *   tasks_maximum_percent         = 200
@@ -122,7 +124,7 @@ resource "aws_cloudwatch_log_group" "main" {
   name              = local.awslogs_group
   retention_in_days = var.logs_cloudwatch_retention
 
-  kms_key_id = var.kms_key_id != "" ? var.kms_key_id : null
+  kms_key_id = var.kms_key_id
 
   tags = {
     Name        = "${var.name}-${var.environment}"

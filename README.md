@@ -33,6 +33,7 @@ module "app_ecs_service" {
   ecs_cluster                   = aws_ecs_cluster.mycluster
   ecs_vpc_id                    = module.vpc.vpc_id
   ecs_subnet_ids                = module.vpc.private_subnets
+  kms_key_id                    = aws_kms_key.main.arn
   tasks_desired_count           = 2
   tasks_minimum_healthy_percent = 50
   tasks_maximum_percent         = 200
@@ -55,6 +56,7 @@ module "app_ecs_service" {
   ecs_cluster                   = aws_ecs_cluster.mycluster
   ecs_vpc_id                    = module.vpc.vpc_id
   ecs_subnet_ids                = module.vpc.private_subnets
+  kms_key_id                    = aws_kms_key.main.arn
   tasks_desired_count           = 2
   tasks_minimum_healthy_percent = 50
   tasks_maximum_percent         = 200
@@ -92,7 +94,7 @@ module "app_ecs_service" {
 | environment | Environment tag, e.g prod. | string | n/a | yes |
 | fargate\_task\_cpu | Number of cpu units used in initial task definition. Default is minimum. | string | `"256"` | no |
 | fargate\_task\_memory | Amount (in MiB) of memory used in initial task definition. Default is minimum. | string | `"512"` | no |
-| kms\_key\_id | KMS customer managed key (CMK) ID for encrypting application logs. | string | `""` | no |
+| kms\_key\_id | KMS customer managed key (CMK) ID for encrypting application logs. | string | n/a | yes |
 | lb\_target\_group | Either Application Load Balancer (ALB) or Network Load Balancer (NLB) target group ARN tasks will register with. | string | `""` | no |
 | logs\_cloudwatch\_group | CloudWatch log group to create and use. Default: /ecs/{name}-{environment} | string | `""` | no |
 | logs\_cloudwatch\_retention | Number of days you want to retain log events in the log group. | string | `"90"` | no |
@@ -119,6 +121,60 @@ module "app_ecs_service" {
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 
 ## Upgrade Path
+
+### 2.0.0 to 2.1.0
+
+In 2.1.0 KMS log encryption is required by default. This requires that you create and attach a new AWS KMS key ARN.
+As an example here is how to set that up (please review on your own):
+
+```hcl
+data "aws_iam_policy_document" "cloudwatch_logs_allow_kms" {
+  statement {
+    sid    = "Enable IAM User Permissions"
+    effect = "Allow"
+
+    principals {
+      type = "AWS"
+      identifiers = [
+        "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root",
+      ]
+    }
+
+    actions = [
+      "kms:*",
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    sid    = "Allow logs KMS access"
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["logs.us-west-2.amazonaws.com"]
+    }
+
+    actions = [
+      "kms:Encrypt*",
+      "kms:Decrypt*",
+      "kms:ReEncrypt*",
+      "kms:GenerateDataKey*",
+      "kms:Describe*"
+    ]
+    resources = ["*"]
+  }
+}
+
+resource "aws_kms_key" "main" {
+  description         = "Key for ECS log encryption"
+  enable_key_rotation = true
+
+  policy = data.aws_iam_policy_document.cloudwatch_logs_allow_kms.json
+}
+```
+
+**NOTE:** Best practice is to use a separate KMS key per ECS Service. Do not re-use KMS keys if it can be avoided.
 
 ### 1.15.0 to 2.0.0
 
