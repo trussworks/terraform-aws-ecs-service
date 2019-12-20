@@ -115,6 +115,7 @@ module "app_ecs_service" {
 | task\_definition\_arn | Full ARN of the Task Definition (including both family and revision). |
 | task\_definition\_family | The family of the Task Definition. |
 | task\_execution\_role\_arn | The ARN of the task execution role that the Amazon ECS container agent and the Docker daemon can assume. |
+| task\_execution\_role\_name | The name of the task execution role that the Amazon ECS container agent and the Docker daemon can assume. |
 | task\_role\_arn | The ARN of the IAM role assumed by Amazon ECS container tasks. |
 | task\_role\_name | The name of the IAM role assumed by Amazon ECS container tasks. |
 
