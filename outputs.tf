@@ -8,6 +8,11 @@ output "task_execution_role_arn" {
   value       = join("", aws_iam_role.task_execution_role.*.arn)
 }
 
+output "task_execution_role_name" {
+  description = "The name of the task execution role that the Amazon ECS container agent and the Docker daemon can assume."
+  value       = join("", aws_iam_role.task_execution_role.*.name)
+}
+
 output "task_role_arn" {
   description = "The ARN of the IAM role assumed by Amazon ECS container tasks."
   value       = aws_iam_role.task_role.arn
