@@ -186,3 +186,9 @@ variable "kms_key_id" {
   description = "KMS customer managed key (CMK) ARN for encrypting application logs."
   type        = string
 }
+
+
+variable "codedeploy" {
+  description = "If True service be deployed with CodeDeploy as controller"
+  type = bool
+}

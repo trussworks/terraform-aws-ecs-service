@@ -521,6 +521,10 @@ resource "aws_ecs_service" "main" {
   deployment_minimum_healthy_percent = var.tasks_minimum_healthy_percent
   deployment_maximum_percent         = var.tasks_maximum_percent
 
+  deployment_controller {
+    type = var.codedeploy == true ? "CODE_DEPLOY" : "ECS"
+  }
+
   dynamic ordered_placement_strategy {
     for_each = local.ecs_service_ordered_placement_strategy[local.ecs_service_launch_type]
 
