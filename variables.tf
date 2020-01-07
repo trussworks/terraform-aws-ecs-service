@@ -22,8 +22,8 @@ variable "cloudwatch_alarm_actions" {
 
 variable "cloudwatch_alarm_cpu_enable" {
   description = "Enable the CPU Utilization CloudWatch metric alarm"
-  type        = "string"
   default     = true
+  type        = bool
 }
 
 variable "cloudwatch_alarm_cpu_threshold" {
@@ -65,7 +65,7 @@ variable "ecr_repo_arns" {
 variable "ecs_use_fargate" {
   description = "Whether to use Fargate for the task definition."
   default     = false
-  type        = string
+  type        = bool
 }
 
 variable "ecs_cluster" {
@@ -90,6 +90,12 @@ variable "ecs_vpc_id" {
 variable "ecs_subnet_ids" {
   description = "Subnet IDs for the ECS tasks."
   type        = list(string)
+}
+
+variable "assign_public_ip" {
+  description = "Whether this instance should be accessible from the public internet. Default is false."
+  default     = false
+  type        = bool
 }
 
 variable "fargate_task_cpu" {
@@ -155,13 +161,13 @@ variable "target_container_name" {
 variable "associate_alb" {
   description = "Whether to associate an Application Load Balancer (ALB) with the ECS service."
   default     = false
-  type        = string
+  type        = bool
 }
 
 variable "associate_nlb" {
   description = "Whether to associate a Network Load Balancer (NLB) with the ECS service."
   default     = false
-  type        = string
+  type        = bool
 }
 
 variable "alb_security_group" {
