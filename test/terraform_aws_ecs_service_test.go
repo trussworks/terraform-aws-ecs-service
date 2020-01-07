@@ -30,3 +30,24 @@ func TestTerraformAwsEcsServiceSimple(t *testing.T) {
 	terraform.InitAndApply(t, terraformOptions)
 
 }
+
+unc TestTerraformAwsEcsServiceContainer(t *testing.T) {
+	t.Parallel()
+
+	ecsServiceName := fmt.Sprintf("terratest-simple-%s", strings.ToLower(random.UniqueId()))
+	awsRegion := aws.GetRandomStableRegion(t, nil, nil)
+
+	terraformOptions := &terraform.Options{
+		TerraformDir: "../examples/simple/",
+		Vars: map[string]interface{}{
+			"ecs_service_name": ecsServiceName,
+		},
+		EnvVars: map[string]string{
+			"AWS_DEFAULT_REGION": awsRegion,
+		},
+	}
+
+	defer terraform.Destroy(t, terraformOptions)
+	terraform.InitAndApply(t, terraformOptions)
+
+}

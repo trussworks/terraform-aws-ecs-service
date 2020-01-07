@@ -124,7 +124,7 @@ variable "tasks_maximum_percent" {
 
 variable "container_image" {
   description = "The image of the container."
-  default     = "golang:1.12.5-alpine"
+  default     = "golang:alpine"
   type        = string
 }
 
