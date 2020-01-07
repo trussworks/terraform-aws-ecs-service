@@ -1,53 +1,15 @@
 locals {
-  environment        = "test"
-  zone_name          = "infra-test.truss.coffee"
-  container_protocol = "HTTP"
-  container_port     = "80"
-  health_check_path  = "/"
+  environment       = "test"
+  container_port    = "80"
+  health_check_path = "/"
 }
 
-module "alb" {
-  source = "../../"
-
-  name           = var.test_name
-  environment    = local.environment
-  logs_s3_bucket = module.logs.aws_logs_bucket
-
-  alb_vpc_id                  = module.vpc.vpc_id
-  alb_subnet_ids              = module.vpc.public_subnets
-  alb_default_certificate_arn = module.acm-cert.acm_arn
-
-  container_port     = local.container_port
-  container_protocol = local.container_protocol
-  health_check_path  = local.health_check_path
-}
 
 module "logs" {
   source         = "trussworks/logs/aws"
   version        = "~> 4"
   s3_bucket_name = var.logs_bucket
   region         = var.region
-}
-
-module "acm-cert" {
-  source  = "trussworks/acm-cert/aws"
-  version = "~> 2"
-
-  domain_name = "${var.test_name}.${local.zone_name}"
-  environment = local.environment
-  zone_name   = local.zone_name
-}
-
-data "aws_route53_zone" "infra_truss_coffee" {
-  name = local.zone_name
-}
-
-resource "aws_route53_record" "main" {
-  zone_id = data.aws_route53_zone.infra_truss_coffee.zone_id
-  name    = var.test_name
-  type    = "CNAME"
-  ttl     = "300"
-  records = [module.alb.alb_dns_name]
 }
 
 module "vpc" {
@@ -129,11 +91,12 @@ module "ecs-service" {
   name        = var.test_name
   environment = local.environment
 
-  ecs_cluster     = aws_ecs_cluster.main
-  ecs_subnet_ids  = module.vpc.private_subnets
-  ecs_vpc_id      = module.vpc.vpc_id
-  ecs_use_fargate = true
-  container_port  = local.container_port
+  ecs_cluster      = aws_ecs_cluster.main
+  ecs_subnet_ids   = module.vpc.private_subnets
+  ecs_vpc_id       = module.vpc.vpc_id
+  ecs_use_fargate  = true
+  container_port   = local.container_port
+  assign_public_ip = true
 
   kms_key_id = aws_kms_key.main.arn
 }

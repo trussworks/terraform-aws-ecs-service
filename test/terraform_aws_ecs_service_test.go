@@ -31,7 +31,7 @@ func TestTerraformAwsEcsServiceSimple(t *testing.T) {
 
 }
 
-unc TestTerraformAwsEcsServiceContainer(t *testing.T) {
+func TestTerraformAwsEcsServiceContainer(t *testing.T) {
 	t.Parallel()
 
 	ecsServiceName := fmt.Sprintf("terratest-simple-%s", strings.ToLower(random.UniqueId()))
