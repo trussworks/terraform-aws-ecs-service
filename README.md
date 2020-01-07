@@ -73,6 +73,7 @@ module "app_ecs_service" {
 | Name | Description | Type | Default | Required |
 |------|-------------|:----:|:-----:|:-----:|
 | alb\_security\_group | Application Load Balancer \(ALB\) security group ID to allow traffic from. | string | `""` | no |
+| assign\_public\_ip | Whether this instance should be accessible from the public internet. Default is false. | string | `"false"` | no |
 | associate\_alb | Whether to associate an Application Load Balancer \(ALB\) with the ECS service. | string | `"false"` | no |
 | associate\_nlb | Whether to associate a Network Load Balancer \(NLB\) with the ECS service. | string | `"false"` | no |
 | cloudwatch\_alarm\_actions | The list of actions to take for cloudwatch alarms | list | `[]` | no |
