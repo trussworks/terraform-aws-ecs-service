@@ -73,11 +73,11 @@ module "app_ecs_service" {
 | Name | Description | Type | Default | Required |
 |------|-------------|:----:|:-----:|:-----:|
 | alb\_security\_group | Application Load Balancer \(ALB\) security group ID to allow traffic from. | string | `""` | no |
-| assign\_public\_ip | Whether this instance should be accessible from the public internet. Default is false. | string | `"false"` | no |
-| associate\_alb | Whether to associate an Application Load Balancer \(ALB\) with the ECS service. | string | `"false"` | no |
-| associate\_nlb | Whether to associate a Network Load Balancer \(NLB\) with the ECS service. | string | `"false"` | no |
+| assign\_public\_ip | Whether this instance should be accessible from the public internet. Default is false. | bool | `"false"` | no |
+| associate\_alb | Whether to associate an Application Load Balancer \(ALB\) with the ECS service. | bool | `"false"` | no |
+| associate\_nlb | Whether to associate a Network Load Balancer \(NLB\) with the ECS service. | bool | `"false"` | no |
 | cloudwatch\_alarm\_actions | The list of actions to take for cloudwatch alarms | list | `[]` | no |
-| cloudwatch\_alarm\_cpu\_enable | Enable the CPU Utilization CloudWatch metric alarm | string | `"true"` | no |
+| cloudwatch\_alarm\_cpu\_enable | Enable the CPU Utilization CloudWatch metric alarm | bool | `"true"` | no |
 | cloudwatch\_alarm\_cpu\_threshold | The CPU Utilization threshold for the CloudWatch metric alarm | string | `"80"` | no |
 | cloudwatch\_alarm\_mem\_enable | Enable the Memory Utilization CloudWatch metric alarm | string | `"true"` | no |
 | cloudwatch\_alarm\_mem\_threshold | The Memory Utilization threshold for the CloudWatch metric alarm | string | `"80"` | no |
@@ -90,7 +90,7 @@ module "app_ecs_service" {
 | ecs\_cluster | ECS cluster object for this task. | object | n/a | yes |
 | ecs\_instance\_role | The name of the ECS instance role. | string | `""` | no |
 | ecs\_subnet\_ids | Subnet IDs for the ECS tasks. | list(string) | n/a | yes |
-| ecs\_use\_fargate | Whether to use Fargate for the task definition. | string | `"false"` | no |
+| ecs\_use\_fargate | Whether to use Fargate for the task definition. | bool | `"false"` | no |
 | ecs\_vpc\_id | VPC ID to be used by ECS. | string | n/a | yes |
 | environment | Environment tag, e.g prod. | string | n/a | yes |
 | fargate\_task\_cpu | Number of cpu units used in initial task definition. Default is minimum. | string | `"256"` | no |
