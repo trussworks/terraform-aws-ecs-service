@@ -1,6 +1,5 @@
 locals {
   environment       = "test"
-  container_port    = "80"
   health_check_path = "/"
 }
 
@@ -95,7 +94,6 @@ module "ecs-service" {
   ecs_subnet_ids   = module.vpc.private_subnets
   ecs_vpc_id       = module.vpc.vpc_id
   ecs_use_fargate  = true
-  container_port   = local.container_port
   assign_public_ip = true
 
   kms_key_id = aws_kms_key.main.arn
