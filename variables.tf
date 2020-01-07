@@ -92,6 +92,12 @@ variable "ecs_subnet_ids" {
   type        = list(string)
 }
 
+variable "assign_public_ip" {
+  description = "Whether this instance should be accessible from the public internet. Default is false."
+  default     = false
+  type        = string
+}
+
 variable "fargate_task_cpu" {
   description = "Number of cpu units used in initial task definition. Default is minimum."
   default     = 256

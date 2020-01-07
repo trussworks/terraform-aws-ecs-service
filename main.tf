@@ -598,7 +598,7 @@ resource "aws_ecs_service" "main_no_lb" {
   network_configuration {
     subnets          = var.ecs_subnet_ids
     security_groups  = [aws_security_group.ecs_sg.id]
-    assign_public_ip = false
+    assign_public_ip = var.assign_public_ip
   }
 
   lifecycle {
