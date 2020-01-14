@@ -1,14 +1,17 @@
 package test
 
 import (
+	"crypto/tls"
 	"fmt"
 	"strings"
 	"testing"
 	"time"
 
 	awssdk "github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ecs"
 	"github.com/gruntwork-io/terratest/modules/aws"
+	http_helper "github.com/gruntwork-io/terratest/modules/http-helper"
 	"github.com/gruntwork-io/terratest/modules/random"
 	"github.com/gruntwork-io/terratest/modules/retry"
 	"github.com/gruntwork-io/terratest/modules/terraform"
@@ -16,34 +19,35 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// func TestTerraformAwsEcsServiceSimple(t *testing.T) {
-// 	t.Parallel()
+func TestTerraformAwsEcsServiceSimple(t *testing.T) {
+	t.Parallel()
 
-// tempTestFolder := test_structure.CopyTerraformFolderToTemp(t, "../", "examples/simple")
-// 	ecsServiceName := fmt.Sprintf("terratest-simple-%s", strings.ToLower(random.UniqueId()))
-// 	awsRegion := "us-west-2"
+	tempTestFolder := test_structure.CopyTerraformFolderToTemp(t, "../", "examples/simple")
+	ecsServiceName := fmt.Sprintf("terratest-simple-%s", strings.ToLower(random.UniqueId()))
+	awsRegion := "us-west-2"
 
-// 	terraformOptions := &terraform.Options{
-// 		// The path to where our Terraform code is located
-// 		TerraformDir: tempTestFolder,
-// 		// Variables to pass to our Terraform code using -var options
-// 		Vars: map[string]interface{}{
-// 			"ecs_service_name": ecsServiceName,
-// 		},
-// 		EnvVars: map[string]string{
-// 			"AWS_DEFAULT_REGION": awsRegion,
-// 		},
-// 	}
+	terraformOptions := &terraform.Options{
+		// The path to where our Terraform code is located
+		TerraformDir: tempTestFolder,
+		// Variables to pass to our Terraform code using -var options
+		Vars: map[string]interface{}{
+			"ecs_service_name": ecsServiceName,
+		},
+		EnvVars: map[string]string{
+			"AWS_DEFAULT_REGION": awsRegion,
+		},
+	}
 
-// 	defer terraform.Destroy(t, terraformOptions)
-// 	terraform.InitAndApply(t, terraformOptions)
+	defer terraform.Destroy(t, terraformOptions)
+	terraform.InitAndApply(t, terraformOptions)
 
-// }
+}
 
+// Retrieve tasks associated with a cluster
 func GetTasks(t *testing.T, region string, clusterName string) *ecs.ListTasksOutput {
-	taskName, err := GetTasksE(t, region, clusterName)
+	taskList, err := GetTasksE(t, region, clusterName)
 	require.NoError(t, err)
-	return taskName
+	return taskList
 }
 
 func GetTasksE(t *testing.T, region string, clusterName string) (*ecs.ListTasksOutput, error) {
@@ -56,31 +60,74 @@ func GetTasksE(t *testing.T, region string, clusterName string) (*ecs.ListTasksO
 	params := &ecs.ListTasksInput{
 		Cluster: awssdk.String(clusterName),
 	}
+
+	// Need to spin and wait to allow time for resources to get up
 	maxRetries := 3
 	retryDuration, _ := time.ParseDuration("30s")
 	_, err = retry.DoWithRetryE(t, "Get tasks", maxRetries, retryDuration,
 		func() (string, error) {
-			tasks, err := ecsClient.ListTasks(params)
-			if err != nil {
-				return "Did not retrieve tasks", err
+			tasks, _ := ecsClient.ListTasks(params)
+
+			if len(tasks.TaskArns) == 0 {
+				return "Did not retrieve tasks", fmt.Errorf("We returned empty tasks %v", tasks.TaskArns)
 			}
 			returnTaskList = tasks
 			return "Retrieved tasks", nil
 		},
 	)
-
 	if err != nil {
 		return returnTaskList, err
 	}
 
-	returnedTasks := fmt.Sprintf("HERE IT IS ecsClusterTask, %v", returnTaskList)
+	return returnTaskList, nil
+}
 
-	if returnedTasks == "" {
-		return returnTaskList, nil
+// Retrieve ENI from task ARNs and cluster
+func GetEni(t *testing.T, region string, cluster string, taskArns []*string) *string {
+	task, err := GetEniE(t, region, cluster, taskArns)
+	require.NoError(t, err)
+	return task
+}
+
+func GetEniE(t *testing.T, region string, cluster string, taskArns []*string) (*string, error) {
+	ecsClient, err := aws.NewEcsClientE(t, region)
+	if err != nil {
+		return nil, err
 	}
 
-	return returnTaskList, fmt.Errorf(returnedTasks)
-	// return returnTaskList, nil
+	params := &ecs.DescribeTasksInput{
+		Cluster: awssdk.String(cluster),
+		Tasks:   taskArns,
+	}
+	returnedTasks, err := ecsClient.DescribeTasks(params)
+	if err != nil {
+		return nil, err
+	}
+
+	eniDetail := returnedTasks.Tasks[0].Attachments[0].Details[1].Value
+	return eniDetail, nil
+}
+
+// Retrieve Public IP from ENI
+func GetPublicIP(t *testing.T, region string, enis []string) *string {
+	task, err := GetPublicIPE(t, region, enis)
+	require.NoError(t, err)
+	return task
+}
+
+func GetPublicIPE(t *testing.T, region string, enis []string) (*string, error) {
+	ec2Client := aws.NewEc2Client(t, region)
+
+	params := &ec2.DescribeNetworkInterfacesInput{
+		NetworkInterfaceIds: awssdk.StringSlice(enis),
+	}
+	eniDetail, err := ec2Client.DescribeNetworkInterfaces(params)
+	if err != nil {
+		return nil, err
+	}
+
+	publicIP := eniDetail.NetworkInterfaces[0].Association.PublicIp
+	return publicIP, nil
 }
 
 func TestTerraformAwsEcsServiceContainer(t *testing.T) {
@@ -106,13 +153,18 @@ func TestTerraformAwsEcsServiceContainer(t *testing.T) {
 
 	defer terraform.Destroy(t, terraformOptions)
 	terraform.InitAndApply(t, terraformOptions)
-	GetTasks(t, awsRegion, ecsServiceName)
-	// testURL := "https://10.0.0.20"
-	// expectedText := "Hello, world!"
-	// tlsConfig := tls.Config{}
-	// maxRetries := 2
-	// timeBetweenRetries := 30 * time.Second
 
-	// http_helper.HttpGetWithRetry(t, testURL, &tlsConfig, 200, expectedText, maxRetries, timeBetweenRetries)
+	// Step through cluster and task to retrieve public IP of instance
+	tasksOutput := GetTasks(t, awsRegion, ecsServiceName)
+	singleTaskEni := GetEni(t, awsRegion, ecsServiceName, tasksOutput.TaskArns)
+	publicIP := GetPublicIP(t, awsRegion, []string{*singleTaskEni})
+
+	testURL := fmt.Sprintf("http://%v", *publicIP)
+	expectedText := "Hello, world!"
+	tlsConfig := tls.Config{}
+	maxRetries := 2
+	timeBetweenRetries := 30 * time.Second
+
+	http_helper.HttpGetWithRetry(t, testURL, &tlsConfig, 200, expectedText, maxRetries, timeBetweenRetries)
 
 }
