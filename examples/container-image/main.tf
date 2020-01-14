@@ -1,28 +1,18 @@
 locals {
-  environment       = "test"
-  health_check_path = "/"
-}
-
-
-module "logs" {
-  source         = "trussworks/logs/aws"
-  version        = "~> 4"
-  s3_bucket_name = var.logs_bucket
-  region         = var.region
+  environment        = "test"
+  container_protocol = "HTTP"
+  container_port     = "80"
 }
 
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "~> 2"
 
-  name            = var.test_name
-  cidr            = "10.0.0.0/16"
-  azs             = var.vpc_azs
-  private_subnets = ["10.0.101.0/24", "10.0.102.0/24", "10.0.103.0/24"]
-  public_subnets  = ["10.0.104.0/24", "10.0.105.0/24", "10.0.106.0/24"]
+  name = var.test_name
+  cidr = "10.0.0.0/16"
+  azs  = var.vpc_azs
 
-  enable_nat_gateway = true
-  single_nat_gateway = true
+  public_subnets = ["10.0.104.0/24", "10.0.105.0/24", "10.0.106.0/24"]
 }
 
 #
@@ -91,10 +81,25 @@ module "ecs-service" {
   environment = local.environment
 
   ecs_cluster      = aws_ecs_cluster.main
-  ecs_subnet_ids   = module.vpc.private_subnets
+  ecs_subnet_ids   = module.vpc.public_subnets
   ecs_vpc_id       = module.vpc.vpc_id
   ecs_use_fargate  = true
   assign_public_ip = true
 
   kms_key_id = aws_kms_key.main.arn
+}
+
+#
+# SG adjustment
+#
+
+resource "aws_security_group_rule" "ecs_allow_http" {
+  description       = "Allow HTTP"
+  security_group_id = module.ecs-service.ecs_security_group_id
+
+  type        = "ingress"
+  from_port   = local.container_port
+  to_port     = local.container_port
+  protocol    = "tcp"
+  cidr_blocks = ["0.0.0.0/0"]
 }

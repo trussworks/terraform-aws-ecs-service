@@ -134,7 +134,7 @@ resource "aws_cloudwatch_log_group" "main" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "alarm_cpu" {
-  count = "${var.cloudwatch_alarm_cpu_enable && (var.associate_alb || var.associate_nlb) ? 1 : 0}"
+  count = var.cloudwatch_alarm_cpu_enable && (var.associate_alb || var.associate_nlb) ? 1 : 0
 
   alarm_name        = "${local.cloudwatch_alarm_name}-cpu"
   alarm_description = "Monitors ECS CPU Utilization"
@@ -155,7 +155,7 @@ resource "aws_cloudwatch_metric_alarm" "alarm_cpu" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "alarm_mem" {
-  count = "${var.cloudwatch_alarm_cpu_enable && (var.associate_alb || var.associate_nlb) ? 1 : 0}"
+  count = var.cloudwatch_alarm_cpu_enable && (var.associate_alb || var.associate_nlb) ? 1 : 0
 
   alarm_name        = "${local.cloudwatch_alarm_name}-mem"
   alarm_description = "Monitors ECS CPU Utilization"
@@ -176,7 +176,7 @@ resource "aws_cloudwatch_metric_alarm" "alarm_mem" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "alarm_cpu_no_lb" {
-  count = "${var.cloudwatch_alarm_cpu_enable && ! (var.associate_alb || var.associate_nlb) ? 1 : 0}"
+  count = var.cloudwatch_alarm_cpu_enable && ! (var.associate_alb || var.associate_nlb) ? 1 : 0
 
   alarm_name        = "${local.cloudwatch_alarm_name}-cpu"
   alarm_description = "Monitors ECS CPU Utilization"
@@ -197,7 +197,7 @@ resource "aws_cloudwatch_metric_alarm" "alarm_cpu_no_lb" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "alarm_mem_no_lb" {
-  count = "${var.cloudwatch_alarm_cpu_enable && ! (var.associate_alb || var.associate_nlb) ? 1 : 0}"
+  count = var.cloudwatch_alarm_cpu_enable && ! (var.associate_alb || var.associate_nlb) ? 1 : 0
 
   alarm_name        = "${local.cloudwatch_alarm_name}-mem"
   alarm_description = "Monitors ECS CPU Utilization"

@@ -76,13 +76,13 @@ module "app_ecs_service" {
 | assign\_public\_ip | Whether this instance should be accessible from the public internet. Default is false. | bool | `"false"` | no |
 | associate\_alb | Whether to associate an Application Load Balancer \(ALB\) with the ECS service. | bool | `"false"` | no |
 | associate\_nlb | Whether to associate a Network Load Balancer \(NLB\) with the ECS service. | bool | `"false"` | no |
-| cloudwatch\_alarm\_actions | The list of actions to take for cloudwatch alarms | list | `[]` | no |
+| cloudwatch\_alarm\_actions | The list of actions to take for cloudwatch alarms | list(string) | `[]` | no |
 | cloudwatch\_alarm\_cpu\_enable | Enable the CPU Utilization CloudWatch metric alarm | bool | `"true"` | no |
 | cloudwatch\_alarm\_cpu\_threshold | The CPU Utilization threshold for the CloudWatch metric alarm | string | `"80"` | no |
-| cloudwatch\_alarm\_mem\_enable | Enable the Memory Utilization CloudWatch metric alarm | string | `"true"` | no |
+| cloudwatch\_alarm\_mem\_enable | Enable the Memory Utilization CloudWatch metric alarm | bool | `"true"` | no |
 | cloudwatch\_alarm\_mem\_threshold | The Memory Utilization threshold for the CloudWatch metric alarm | string | `"80"` | no |
 | cloudwatch\_alarm\_name | Generic name used for CPU and Memory Cloudwatch Alarms | string | `""` | no |
-| container\_definitions | Container definitions provided as valid JSON document. Default uses golang:1.12.5-alpine running a simple hello world. | string | `""` | no |
+| container\_definitions | Container definitions provided as valid JSON document. Default uses golang:alpine running a simple hello world. | string | `""` | no |
 | container\_health\_check\_port | An additional port on which the container can receive a health check.  Zero means the container port can only receive a health check on the port set by the container\_port variable. | string | `"0"` | no |
 | container\_image | The image of the container. | string | `"golang:alpine"` | no |
 | container\_port | The port on which the container will receive traffic. | string | `"80"` | no |

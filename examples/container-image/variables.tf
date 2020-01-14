@@ -1,15 +1,14 @@
-variable "logs_bucket" {
-  type = string
-}
-
 variable "region" {
-  type = string
+  type    = string
+  default = "us-west-2"
 }
 
 variable "test_name" {
-  type = string
+  type    = string
+  default = "blahblah"
 }
 
 variable "vpc_azs" {
-  type = list(string)
+  type    = list(string)
+  default = ["us-west-2a", "us-west-2b", "us-west-2c"]
 }
