@@ -84,9 +84,9 @@ func GetTasksE(t *testing.T, region string, clusterName string) (*ecs.ListTasksO
 
 // Retrieve ENI from task ARNs and cluster
 func GetEni(t *testing.T, region string, cluster string, taskArns []*string) *string {
-	task, err := GetEniE(t, region, cluster, taskArns)
+	eni, err := GetEniE(t, region, cluster, taskArns)
 	require.NoError(t, err)
-	return task
+	return eni
 }
 
 func GetEniE(t *testing.T, region string, cluster string, taskArns []*string) (*string, error) {
@@ -110,9 +110,9 @@ func GetEniE(t *testing.T, region string, cluster string, taskArns []*string) (*
 
 // Retrieve Public IP from ENI
 func GetPublicIP(t *testing.T, region string, enis []string) *string {
-	task, err := GetPublicIPE(t, region, enis)
+	publicIP, err := GetPublicIPE(t, region, enis)
 	require.NoError(t, err)
-	return task
+	return publicIP
 }
 
 func GetPublicIPE(t *testing.T, region string, enis []string) (*string, error) {
@@ -147,7 +147,9 @@ func TestTerraformAwsEcsServiceContainer(t *testing.T) {
 		Vars: map[string]interface{}{
 			"test_name": ecsServiceName,
 			"vpc_azs":   vpcAzs,
-			"region":    awsRegion,
+		},
+		EnvVars: map[string]string{
+			"AWS_DEFAULT_REGION": awsRegion,
 		},
 	}
 
