@@ -1,14 +1,11 @@
 variable "region" {
-  type    = string
-  default = "us-west-2"
+  type = string
 }
 
 variable "test_name" {
-  type    = string
-  default = "blahblah"
+  type = string
 }
 
 variable "vpc_azs" {
-  type    = list(string)
-  default = ["us-west-2a", "us-west-2b", "us-west-2c"]
+  type = list(string)
 }
