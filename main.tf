@@ -6,10 +6,10 @@
  * * CloudWatch log group.
  * * Security Groups for the ECS service.
  * * ECS service.
- * * Task definition using `golang:1.12.5-alpine` (see below).
+ * * Task definition using `golang:alpine` (see below).
  * * Configurable associations with Network Load Balancers (NLB) and Application Load Balancers (ALB).
  *
- * We create an initial task definition using the `golang:1.12.5-alpine` image as a way
+ * We create an initial task definition using the `golang:alpine` image as a way
  * to validate the initial infrastructure is working: visiting the site shows
  * a simple Go hello world page. We expect deployments to manage the container
  * definitions going forward, not Terraform.
