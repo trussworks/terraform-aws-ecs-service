@@ -19,30 +19,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestTerraformAwsEcsServiceSimple(t *testing.T) {
-	t.Parallel()
-
-	tempTestFolder := test_structure.CopyTerraformFolderToTemp(t, "../", "examples/simple")
-	ecsServiceName := fmt.Sprintf("terratest-simple-%s", strings.ToLower(random.UniqueId()))
-	awsRegion := "us-west-2"
-
-	terraformOptions := &terraform.Options{
-		// The path to where our Terraform code is located
-		TerraformDir: tempTestFolder,
-		// Variables to pass to our Terraform code using -var options
-		Vars: map[string]interface{}{
-			"ecs_service_name": ecsServiceName,
-		},
-		EnvVars: map[string]string{
-			"AWS_DEFAULT_REGION": awsRegion,
-		},
-	}
-
-	defer terraform.Destroy(t, terraformOptions)
-	terraform.InitAndApply(t, terraformOptions)
-
-}
-
 // Retrieve tasks associated with a cluster
 func GetTasks(t *testing.T, region string, clusterName string) *ecs.ListTasksOutput {
 	taskList, err := GetTasksE(t, region, clusterName)
@@ -130,12 +106,12 @@ func GetPublicIPE(t *testing.T, region string, enis []string) (*string, error) {
 	return publicIP, nil
 }
 
-func TestTerraformAwsEcsServiceContainer(t *testing.T) {
+func TestTerraformAwsEcsServiceSimple(t *testing.T) {
 	t.Parallel()
 
-	tempTestFolder := test_structure.CopyTerraformFolderToTemp(t, "../", "examples/container-image")
+	tempTestFolder := test_structure.CopyTerraformFolderToTemp(t, "../", "examples/simple")
 
-	ecsServiceName := fmt.Sprintf("terratest-container-%s", strings.ToLower(random.UniqueId()))
+	ecsServiceName := fmt.Sprintf("terratest-simple-%s", strings.ToLower(random.UniqueId()))
 	awsRegion := "us-west-2"
 	vpcAzs := aws.GetAvailabilityZones(t, awsRegion)[:3]
 
@@ -147,6 +123,7 @@ func TestTerraformAwsEcsServiceContainer(t *testing.T) {
 		Vars: map[string]interface{}{
 			"test_name": ecsServiceName,
 			"vpc_azs":   vpcAzs,
+			"region":    awsRegion,
 		},
 		EnvVars: map[string]string{
 			"AWS_DEFAULT_REGION": awsRegion,
