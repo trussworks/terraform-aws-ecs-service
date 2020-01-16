@@ -6,10 +6,10 @@
  * * CloudWatch log group.
  * * Security Groups for the ECS service.
  * * ECS service.
- * * Task definition using `golang:1.12.5-alpine` (see below).
+ * * Task definition using `golang:alpine` (see below).
  * * Configurable associations with Network Load Balancers (NLB) and Application Load Balancers (ALB).
  *
- * We create an initial task definition using the `golang:1.12.5-alpine` image as a way
+ * We create an initial task definition using the `golang:alpine` image as a way
  * to validate the initial infrastructure is working: visiting the site shows
  * a simple Go hello world page. We expect deployments to manage the container
  * definitions going forward, not Terraform.
@@ -134,7 +134,7 @@ resource "aws_cloudwatch_log_group" "main" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "alarm_cpu" {
-  count = "${var.cloudwatch_alarm_cpu_enable && (var.associate_alb || var.associate_nlb) ? 1 : 0}"
+  count = var.cloudwatch_alarm_cpu_enable && (var.associate_alb || var.associate_nlb) ? 1 : 0
 
   alarm_name        = "${local.cloudwatch_alarm_name}-cpu"
   alarm_description = "Monitors ECS CPU Utilization"
@@ -155,7 +155,7 @@ resource "aws_cloudwatch_metric_alarm" "alarm_cpu" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "alarm_mem" {
-  count = "${var.cloudwatch_alarm_cpu_enable && (var.associate_alb || var.associate_nlb) ? 1 : 0}"
+  count = var.cloudwatch_alarm_cpu_enable && (var.associate_alb || var.associate_nlb) ? 1 : 0
 
   alarm_name        = "${local.cloudwatch_alarm_name}-mem"
   alarm_description = "Monitors ECS CPU Utilization"
@@ -176,7 +176,7 @@ resource "aws_cloudwatch_metric_alarm" "alarm_mem" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "alarm_cpu_no_lb" {
-  count = "${var.cloudwatch_alarm_cpu_enable && ! (var.associate_alb || var.associate_nlb) ? 1 : 0}"
+  count = var.cloudwatch_alarm_cpu_enable && ! (var.associate_alb || var.associate_nlb) ? 1 : 0
 
   alarm_name        = "${local.cloudwatch_alarm_name}-cpu"
   alarm_description = "Monitors ECS CPU Utilization"
@@ -197,7 +197,7 @@ resource "aws_cloudwatch_metric_alarm" "alarm_cpu_no_lb" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "alarm_mem_no_lb" {
-  count = "${var.cloudwatch_alarm_cpu_enable && ! (var.associate_alb || var.associate_nlb) ? 1 : 0}"
+  count = var.cloudwatch_alarm_cpu_enable && ! (var.associate_alb || var.associate_nlb) ? 1 : 0
 
   alarm_name        = "${local.cloudwatch_alarm_name}-mem"
   alarm_description = "Monitors ECS CPU Utilization"

@@ -5,10 +5,10 @@ Creates the following resources:
 * CloudWatch log group.
 * Security Groups for the ECS service.
 * ECS service.
-* Task definition using `golang:1.12.5-alpine` (see below).
+* Task definition using `golang:alpine` (see below).
 * Configurable associations with Network Load Balancers (NLB) and Application Load Balancers (ALB).
 
-We create an initial task definition using the `golang:1.12.5-alpine` image as a way
+We create an initial task definition using the `golang:alpine` image as a way
 to validate the initial infrastructure is working: visiting the site shows
 a simple Go hello world page. We expect deployments to manage the container
 definitions going forward, not Terraform.
@@ -76,15 +76,15 @@ module "app_ecs_service" {
 | assign\_public\_ip | Whether this instance should be accessible from the public internet. Default is false. | bool | `"false"` | no |
 | associate\_alb | Whether to associate an Application Load Balancer \(ALB\) with the ECS service. | bool | `"false"` | no |
 | associate\_nlb | Whether to associate a Network Load Balancer \(NLB\) with the ECS service. | bool | `"false"` | no |
-| cloudwatch\_alarm\_actions | The list of actions to take for cloudwatch alarms | list | `[]` | no |
+| cloudwatch\_alarm\_actions | The list of actions to take for cloudwatch alarms | list(string) | `[]` | no |
 | cloudwatch\_alarm\_cpu\_enable | Enable the CPU Utilization CloudWatch metric alarm | bool | `"true"` | no |
 | cloudwatch\_alarm\_cpu\_threshold | The CPU Utilization threshold for the CloudWatch metric alarm | string | `"80"` | no |
-| cloudwatch\_alarm\_mem\_enable | Enable the Memory Utilization CloudWatch metric alarm | string | `"true"` | no |
+| cloudwatch\_alarm\_mem\_enable | Enable the Memory Utilization CloudWatch metric alarm | bool | `"true"` | no |
 | cloudwatch\_alarm\_mem\_threshold | The Memory Utilization threshold for the CloudWatch metric alarm | string | `"80"` | no |
 | cloudwatch\_alarm\_name | Generic name used for CPU and Memory Cloudwatch Alarms | string | `""` | no |
-| container\_definitions | Container definitions provided as valid JSON document. Default uses golang:1.12.5-alpine running a simple hello world. | string | `""` | no |
+| container\_definitions | Container definitions provided as valid JSON document. Default uses golang:alpine running a simple hello world. | string | `""` | no |
 | container\_health\_check\_port | An additional port on which the container can receive a health check.  Zero means the container port can only receive a health check on the port set by the container\_port variable. | string | `"0"` | no |
-| container\_image | The image of the container. | string | `"golang:1.12.5-alpine"` | no |
+| container\_image | The image of the container. | string | `"golang:alpine"` | no |
 | container\_port | The port on which the container will receive traffic. | string | `"80"` | no |
 | ecr\_repo\_arns | The ARNs of the ECR repos.  By default, allows all repositories. | list(string) | `[ "*" ]` | no |
 | ecs\_cluster | ECS cluster object for this task. | object | n/a | yes |

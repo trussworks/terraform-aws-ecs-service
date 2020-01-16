@@ -11,12 +11,12 @@ variable "environment" {
 variable "cloudwatch_alarm_name" {
   description = "Generic name used for CPU and Memory Cloudwatch Alarms"
   default     = ""
-  type        = "string"
+  type        = string
 }
 
 variable "cloudwatch_alarm_actions" {
   description = "The list of actions to take for cloudwatch alarms"
-  type        = "list"
+  type        = list(string)
   default     = []
 }
 
@@ -29,19 +29,19 @@ variable "cloudwatch_alarm_cpu_enable" {
 variable "cloudwatch_alarm_cpu_threshold" {
   description = "The CPU Utilization threshold for the CloudWatch metric alarm"
   default     = 80
-  type        = "string"
+  type        = string
 }
 
 variable "cloudwatch_alarm_mem_enable" {
   description = "Enable the Memory Utilization CloudWatch metric alarm"
-  type        = "string"
   default     = true
+  type        = bool
 }
 
 variable "cloudwatch_alarm_mem_threshold" {
   description = "The Memory Utilization threshold for the CloudWatch metric alarm"
   default     = 80
-  type        = "string"
+  type        = string
 }
 
 variable "logs_cloudwatch_retention" {
@@ -130,7 +130,7 @@ variable "tasks_maximum_percent" {
 
 variable "container_image" {
   description = "The image of the container."
-  default     = "golang:1.12.5-alpine"
+  default     = "golang:alpine"
   type        = string
 }
 
@@ -147,7 +147,7 @@ variable "container_health_check_port" {
 }
 
 variable "container_definitions" {
-  description = "Container definitions provided as valid JSON document. Default uses golang:1.12.5-alpine running a simple hello world."
+  description = "Container definitions provided as valid JSON document. Default uses golang:alpine running a simple hello world."
   default     = ""
   type        = string
 }
