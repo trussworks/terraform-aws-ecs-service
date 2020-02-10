@@ -3,7 +3,7 @@ module github.com/trussworks/terraform-aws-ecs-service
 go 1.13
 
 require (
-	github.com/aws/aws-sdk-go v1.28.9
+	github.com/aws/aws-sdk-go v1.28.13
 	github.com/gruntwork-io/terratest v0.23.4
 	github.com/stretchr/testify v1.4.0
 )
