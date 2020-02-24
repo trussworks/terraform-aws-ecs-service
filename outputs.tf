@@ -23,6 +23,16 @@ output "task_role_name" {
   value       = aws_iam_role.task_role.name
 }
 
+output "task_role" {
+  description = "The IAM role object assumed by Amazon ECS container tasks."
+  value       = aws_iam_role.task_role
+}
+
+output "task_execution_role" {
+  description = "The role object of the task execution role that the Amazon ECS container agent and the Docker daemon can assume."
+  value       = aws_iam_role.task_execution_role
+}
+
 output "task_definition_arn" {
   description = "Full ARN of the Task Definition (including both family and revision)."
   value       = aws_ecs_task_definition.main.arn
