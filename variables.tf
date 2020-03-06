@@ -192,3 +192,9 @@ variable "kms_key_id" {
   description = "KMS customer managed key (CMK) ARN for encrypting application logs."
   type        = string
 }
+
+variable "additional_security_group_ids" {
+  description = "In addition to the security group created for the service, a list of security groups the ECS service should also be added to."
+  default     = []
+  type        = list(string)
+}
