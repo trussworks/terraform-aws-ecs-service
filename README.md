@@ -64,6 +64,7 @@ module "app_ecs_service" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|:----:|:-----:|:-----:|
+| additional\_security\_group\_ids | In addition to the security group created for the service, a list of security groups the ECS service should also be added to. | list | `[]` | no |
 | alb\_security\_group | Application Load Balancer (ALB) security group ID to allow traffic from. | string | `""` | no |
 | associate\_alb | Whether to associate an Application Load Balancer (ALB) with the ECS service. | string | `"false"` | no |
 | associate\_nlb | Whether to associate a Network Load Balancer (NLB) with the ECS service. | string | `"false"` | no |
