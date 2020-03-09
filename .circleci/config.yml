@@ -11,6 +11,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
+            - pre-commit-dot-cache-{{ checksum ".pre-commit-config.yaml" }}
             - go-mod-sources-v1-{{ checksum "go.sum" }}
       - run:
           name: Assume role, run pre-commit and run terratest
@@ -22,6 +23,10 @@ jobs:
             export AWS_SECRET_ACCESS_KEY=$(echo $temp_role | jq .Credentials.SecretAccessKey | xargs)
             export AWS_SESSION_TOKEN=$(echo $temp_role | jq .Credentials.SessionToken | xargs)
             make test
+      - save_cache:
+          key: pre-commit-dot-cache-{{ checksum ".pre-commit-config.yaml" }}
+          paths:
+            - "~/.cache/pre-commit"
       - save_cache:
           key: go-mod-sources-v1-{{ checksum "go.sum" }}
           paths:
