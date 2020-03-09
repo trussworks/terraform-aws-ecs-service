@@ -431,7 +431,7 @@ locals {
     FARGATE = []
   }
 
-  ecs_service_agg_security_groups = [compact(concat(list(aws_security_group.ecs_sg.id), var.additional_security_group_ids))]
+  ecs_service_agg_security_groups = compact(concat(list(aws_security_group.ecs_sg.id), var.additional_security_group_ids))
 }
 
 resource "aws_ecs_service" "main" {
