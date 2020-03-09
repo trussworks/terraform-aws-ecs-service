@@ -493,6 +493,8 @@ locals {
 
     FARGATE = []
   }
+
+  ecs_service_agg_security_groups = ["${compact(concat(list(aws_security_group.ecs_sg.id), var.additional_security_group_ids))}"]
 }
 
 resource "aws_ecs_service" "main" {
@@ -517,7 +519,7 @@ resource "aws_ecs_service" "main" {
 
   network_configuration {
     subnets          = ["${var.ecs_subnet_ids}"]
-    security_groups  = ["${aws_security_group.ecs_sg.id}"]
+    security_groups  = ["${local.ecs_service_agg_security_groups}"]
     assign_public_ip = false
   }
 
@@ -557,7 +559,7 @@ resource "aws_ecs_service" "main_no_lb" {
 
   network_configuration {
     subnets          = ["${var.ecs_subnet_ids}"]
-    security_groups  = ["${aws_security_group.ecs_sg.id}"]
+    security_groups  = ["${local.ecs_service_agg_security_groups}"]
     assign_public_ip = false
   }
 

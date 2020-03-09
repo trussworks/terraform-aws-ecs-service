@@ -178,3 +178,9 @@ variable "nlb_subnet_cidr_blocks" {
   default     = []
   type        = "list"
 }
+
+variable "additional_security_group_ids" {
+  description = "In addition to the security group created for the service, a list of security groups the ECS service should also be added to."
+  default     = []
+  type        = "list"
+}
