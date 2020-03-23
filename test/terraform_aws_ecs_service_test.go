@@ -66,6 +66,7 @@ func GetEni(t *testing.T, region string, cluster string, taskArns []*string) *st
 }
 
 func GetEniE(t *testing.T, region string, cluster string, taskArns []*string) (*string, error) {
+	var eniDetail *string
 	ecsClient, err := aws.NewEcsClientE(t, region)
 	if err != nil {
 		return nil, err
@@ -75,12 +76,28 @@ func GetEniE(t *testing.T, region string, cluster string, taskArns []*string) (*
 		Cluster: awssdk.String(cluster),
 		Tasks:   taskArns,
 	}
-	returnedTasks, err := ecsClient.DescribeTasks(params)
-	if err != nil {
-		return nil, err
-	}
 
-	eniDetail := returnedTasks.Tasks[0].Attachments[0].Details[1].Value
+	maxRetries := 3
+	retryDuration, _ := time.ParseDuration("30s")
+	_, err = retry.DoWithRetryE(t, "Get tasks", maxRetries, retryDuration,
+		func() (string, error) {
+			returnedTasks, _ := ecsClient.DescribeTasks(params)
+			errMessage := "failed to look up public elastic network interface"
+			if len(returnedTasks.Tasks) == 0 {
+				return errMessage, fmt.Errorf("returned empty tasks %v", returnedTasks.Tasks)
+			} else if len(returnedTasks.Tasks[0].Attachments) == 0 {
+				return errMessage, fmt.Errorf("returned empty task attachements %v", returnedTasks.Tasks[0].Attachments)
+			} else if len(returnedTasks.Tasks[0].Attachments[0].Details) == 1 {
+				return errMessage, fmt.Errorf("returned task without public elastic network interface %v", returnedTasks.Tasks[0].Attachments)
+			} else {
+				eniDetail = returnedTasks.Tasks[0].Attachments[0].Details[1].Value
+				return "restrieved public elastice network interface", nil
+			}
+		},
+	)
+	if err != nil {
+		return eniDetail, err
+	}
 	return eniDetail, nil
 }
 
