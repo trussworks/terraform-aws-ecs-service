@@ -79,7 +79,7 @@ func GetEniE(t *testing.T, region string, cluster string, taskArns []*string) (*
 
 	maxRetries := 3
 	retryDuration, _ := time.ParseDuration("30s")
-	_, err = retry.DoWithRetryE(t, "Get tasks", maxRetries, retryDuration,
+	_, err = retry.DoWithRetryE(t, "Get public elastic network interface", maxRetries, retryDuration,
 		func() (string, error) {
 			returnedTasks, _ := ecsClient.DescribeTasks(params)
 			errMessage := "failed to look up public elastic network interface"
