@@ -3,47 +3,63 @@ locals {
   target_container_name = "${var.target_container_name == "" ? "${var.name}-${var.environment}" : var.target_container_name}"
   cloudwatch_alarm_name = "${var.cloudwatch_alarm_name == "" ? "${var.name}-${var.environment}" : var.cloudwatch_alarm_name}"
 
-  default_container_definitions = <<EOF
-[
-  {
-    "name": "${local.target_container_name}",
-    "image": "${var.container_image}",
-    "cpu": 128,
-    "memory": 128,
-    "essential": true,
-    "portMappings": [
-      {
-        "containerPort": ${var.container_port},
-        "hostPort": ${var.container_port},
-        "protocol": "tcp"
-      }
-    ],
-    "logConfiguration": {
-      "logDriver": "awslogs",
-      "options": {
-        "awslogs-group": "${local.awslogs_group}",
-        "awslogs-region": "${data.aws_region.current.name}",
-        "awslogs-stream-prefix": "helloworld"
-      }
-    },
-    "environment": [
-      {
-        "name": "PORT",
-        "value": "${var.container_port}"
-      }
-    ],
-    "mountPoints": [],
-    "volumesFrom": [],
-    "entryPoint": [
-      "/bin/sh",
-      "-c",
-      "echo 'cGFja2FnZSBtYWluCgppbXBvcnQgKAoJImZtdCIKCSJsb2ciCgkibmV0L2h0dHAiCgkib3MiCgkic3RyY29udiIKKQoKZnVuYyBtYWluKCkgewoJcG9ydCwgZXJyIDo9IHN0cmNvbnYuQXRvaShvcy5HZXRlbnYoIlBPUlQiKSkKCWlmIGVyciAhPSBuaWwgewoJCXBhbmljKGVycikKCX0KCWZtdC5QcmludGxuKCJMaXN0ZW5pbmcgb24gcG9ydCIsIHBvcnQpCglsb2cuRmF0YWwoaHR0cC5MaXN0ZW5BbmRTZXJ2ZShmbXQuU3ByaW50ZigiOiVkIiwgcG9ydCksIGh0dHAuSGFuZGxlckZ1bmMoZnVuYyh3IGh0dHAuUmVzcG9uc2VXcml0ZXIsIHIgKmh0dHAuUmVxdWVzdCkgewogICAgZm10LkZwcmludGYodywgIkhlbGxvLCB3b3JsZCEiKQogIH0pKSkKfQo=' | base64 -d > helloworld.go && go run helloworld.go"
-    ]
-  }
-]
-EOF
+  base64_encode_helloworld = base64encode(file("${path.module}/helloworld.go"))
 
+  default_container_definitions = jsonencode(
+    [
+
+      {
+        name  = local.target_container_name
+        image = var.container_image
+
+        cpu       = var.fargate_task_cpu
+        memory    = var.fargate_task_memory
+        essential = true
+
+        portMappings = [
+          {
+            containerPort = element(var.target_groups, 0).container_port
+            hostPort      = element(var.target_groups, 0).container_port
+            protocol      = "tcp"
+          },
+          {
+            containerPort = element(var.target_groups, 1).container_port
+            hostPort      = element(var.target_groups, 1).container_port
+            protocol      = "tcp"
+          }
+        ]
+
+        logConfiguration = {
+          logDriver = "awslogs"
+          options = {
+            "awslogs-group"         = local.awslogs_group
+            "awslogs-region"        = data.aws_region.current.name
+            "awslogs-stream-prefix" = "helloworld"
+          }
+        }
+        environment = [
+          {
+            "name" : "PORT1",
+            "value" : tostring(element(var.target_groups, 0).container_port)
+          },
+          {
+            "name" : "PORT2",
+            "value" : tostring(element(var.target_groups, 1).container_port)
+          }
+        ]
+        mountPoints = []
+        volumesFrom = []
+        entryPoint = [
+          "/bin/sh", "-c",
+          "echo '${local.base64_encode_helloworld}' | base64 -d > helloworld.go && go run helloworld.go"
+        ]
+
+      }
+    ]
+  )
 }
+
+
 
 #
 # CloudWatch
@@ -180,21 +196,21 @@ resource "aws_security_group_rule" "app_ecs_allow_https_from_alb" {
   security_group_id = aws_security_group.ecs_sg.id
 
   type                     = "ingress"
-  from_port                = var.container_port
-  to_port                  = var.container_port
+  from_port                = var.target_groups[0].container_port
+  to_port                  = var.target_groups[0].container_port
   protocol                 = "tcp"
   source_security_group_id = var.alb_security_group
 }
 
 resource "aws_security_group_rule" "app_ecs_allow_health_check_from_alb" {
-  count = var.associate_alb && var.container_health_check_port > 0 ? 1 : 0
+  count = var.associate_alb && var.target_groups[0].container_health_check_port > 0 ? 1 : 0
 
   description       = "Allow in health check from ALB"
   security_group_id = aws_security_group.ecs_sg.id
 
   type                     = "ingress"
-  from_port                = var.container_health_check_port
-  to_port                  = var.container_health_check_port
+  from_port                = var.target_groups[0].container_health_check_port
+  to_port                  = var.target_groups[0].container_health_check_port
   protocol                 = "tcp"
   source_security_group_id = var.alb_security_group
 }
@@ -206,21 +222,21 @@ resource "aws_security_group_rule" "app_ecs_allow_tcp_from_nlb" {
   security_group_id = aws_security_group.ecs_sg.id
 
   type        = "ingress"
-  from_port   = var.container_port
-  to_port     = var.container_port
+  from_port   = var.target_groups[0].container_port
+  to_port     = var.target_groups[0].container_port
   protocol    = "tcp"
   cidr_blocks = var.nlb_subnet_cidr_blocks
 }
 
 resource "aws_security_group_rule" "app_ecs_allow_health_check_from_nlb" {
-  count = var.associate_nlb && var.container_health_check_port > 0 ? 1 : 0
+  count = var.associate_nlb && var.target_groups[0].container_health_check_port > 0 ? 1 : 0
 
   description       = "Allow in health check from NLB"
   security_group_id = aws_security_group.ecs_sg.id
 
   type        = "ingress"
-  from_port   = var.container_health_check_port
-  to_port     = var.container_health_check_port
+  from_port   = var.target_groups[0].container_health_check_port
+  to_port     = var.target_groups[0].container_health_check_port
   protocol    = "tcp"
   cidr_blocks = var.nlb_subnet_cidr_blocks
 }
@@ -476,9 +492,9 @@ resource "aws_ecs_service" "main" {
   }
 
   load_balancer {
-    target_group_arn = var.lb_target_group
+    target_group_arn = var.target_groups[0].lb_target_group_arn
     container_name   = local.target_container_name
-    container_port   = var.container_port
+    container_port   = var.target_groups[0].container_port
   }
 
   lifecycle {

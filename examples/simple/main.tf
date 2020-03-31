@@ -1,7 +1,6 @@
 locals {
-  environment        = "test"
-  container_protocol = "HTTP"
-  container_port     = "80"
+  environment    = "test"
+  container_port = "80"
 }
 
 module "vpc" {

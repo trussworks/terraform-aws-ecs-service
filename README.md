@@ -85,14 +85,12 @@ module "app_ecs_service" {
 | associate\_nlb | Whether to associate a Network Load Balancer (NLB) with the ECS service. | `bool` | `false` | no |
 | cloudwatch\_alarm\_actions | The list of actions to take for cloudwatch alarms | `list(string)` | `[]` | no |
 | cloudwatch\_alarm\_cpu\_enable | Enable the CPU Utilization CloudWatch metric alarm | `bool` | `true` | no |
-| cloudwatch\_alarm\_cpu\_threshold | The CPU Utilization threshold for the CloudWatch metric alarm | `string` | `80` | no |
+| cloudwatch\_alarm\_cpu\_threshold | The CPU Utilization threshold for the CloudWatch metric alarm | `number` | `80` | no |
 | cloudwatch\_alarm\_mem\_enable | Enable the Memory Utilization CloudWatch metric alarm | `bool` | `true` | no |
-| cloudwatch\_alarm\_mem\_threshold | The Memory Utilization threshold for the CloudWatch metric alarm | `string` | `80` | no |
+| cloudwatch\_alarm\_mem\_threshold | The Memory Utilization threshold for the CloudWatch metric alarm | `number` | `80` | no |
 | cloudwatch\_alarm\_name | Generic name used for CPU and Memory Cloudwatch Alarms | `string` | `""` | no |
 | container\_definitions | Container definitions provided as valid JSON document. Default uses golang:alpine running a simple hello world. | `string` | `""` | no |
-| container\_health\_check\_port | An additional port on which the container can receive a health check.  Zero means the container port can only receive a health check on the port set by the container\_port variable. | `string` | `0` | no |
 | container\_image | The image of the container. | `string` | `"golang:alpine"` | no |
-| container\_port | The port on which the container will receive traffic. | `string` | `80` | no |
 | ecr\_repo\_arns | The ARNs of the ECR repos.  By default, allows all repositories. | `list(string)` | <pre>[<br>  "*"<br>]</pre> | no |
 | ecs\_cluster | ECS cluster object for this task. | <pre>object({<br>    arn  = string<br>    name = string<br>  })</pre> | n/a | yes |
 | ecs\_instance\_role | The name of the ECS instance role. | `string` | `""` | no |
@@ -100,18 +98,18 @@ module "app_ecs_service" {
 | ecs\_use\_fargate | Whether to use Fargate for the task definition. | `bool` | `false` | no |
 | ecs\_vpc\_id | VPC ID to be used by ECS. | `string` | n/a | yes |
 | environment | Environment tag, e.g prod. | `string` | n/a | yes |
-| fargate\_task\_cpu | Number of cpu units used in initial task definition. Default is minimum. | `string` | `256` | no |
-| fargate\_task\_memory | Amount (in MiB) of memory used in initial task definition. Default is minimum. | `string` | `512` | no |
+| fargate\_task\_cpu | Number of cpu units used in initial task definition. Default is minimum. | `number` | `256` | no |
+| fargate\_task\_memory | Amount (in MiB) of memory used in initial task definition. Default is minimum. | `number` | `512` | no |
 | kms\_key\_id | KMS customer managed key (CMK) ARN for encrypting application logs. | `string` | n/a | yes |
-| lb\_target\_group | Either Application Load Balancer (ALB) or Network Load Balancer (NLB) target group ARN tasks will register with. | `string` | `""` | no |
 | logs\_cloudwatch\_group | CloudWatch log group to create and use. Default: /ecs/{name}-{environment} | `string` | `""` | no |
-| logs\_cloudwatch\_retention | Number of days you want to retain log events in the log group. | `string` | `90` | no |
+| logs\_cloudwatch\_retention | Number of days you want to retain log events in the log group. | `number` | `90` | no |
 | name | The service name. | `string` | n/a | yes |
 | nlb\_subnet\_cidr\_blocks | List of Network Load Balancer (NLB) CIDR blocks to allow traffic from. | `list(string)` | `[]` | no |
 | target\_container\_name | Name of the container the Load Balancer should target. Default: {name}-{environment} | `string` | `""` | no |
-| tasks\_desired\_count | The number of instances of a task definition. | `string` | `1` | no |
-| tasks\_maximum\_percent | Upper limit on the number of running tasks. | `string` | `"200"` | no |
-| tasks\_minimum\_healthy\_percent | Lower limit on the number of running tasks. | `string` | `"100"` | no |
+| target\_groups | The port on which the container will receive traffic. An additional port on which the container can receive a health check.  Zero means the container port can only receive a health check on the port set by the container\_port variable.Either Application Load Balancer (ALB) or Network Load Balancer (NLB) target group ARN tasks will register with. | <pre>list(<br>    object({<br>      lb_target_group_arn         = string<br>      container_port              = number<br>      container_health_check_port = number<br>      }<br>    )<br>  )</pre> | <pre>[<br>  {<br>    "container_health_check_port": 0,<br>    "container_port": 80,<br>    "lb_target_group_arn": ""<br>  },<br>  {<br>    "container_health_check_port": 0,<br>    "container_port": 81,<br>    "lb_target_group_arn": ""<br>  }<br>]</pre> | no |
+| tasks\_desired\_count | The number of instances of a task definition. | `number` | `1` | no |
+| tasks\_maximum\_percent | Upper limit on the number of running tasks. | `number` | `"200"` | no |
+| tasks\_minimum\_healthy\_percent | Lower limit on the number of running tasks. | `number` | `"100"` | no |
 
 ## Outputs
 
