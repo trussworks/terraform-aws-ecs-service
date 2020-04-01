@@ -123,10 +123,10 @@ func GetPublicIPE(t *testing.T, region string, enis []string) (*string, error) {
 	return publicIP, nil
 }
 
-func TestTerraformAwsEcsServiceSimple(t *testing.T) {
+func TestTerraformAwsEcsServiceNoLoadBalancer(t *testing.T) {
 	t.Parallel()
 
-	tempTestFolder := test_structure.CopyTerraformFolderToTemp(t, "../", "examples/simple")
+	tempTestFolder := test_structure.CopyTerraformFolderToTemp(t, "../", "examples/no-load-balancer")
 
 	ecsServiceName := fmt.Sprintf("terratest-simple-%s", strings.ToLower(random.UniqueId()))
 	awsRegion := "us-west-2"
@@ -155,12 +155,144 @@ func TestTerraformAwsEcsServiceSimple(t *testing.T) {
 	singleTaskEni := GetEni(t, awsRegion, ecsServiceName, tasksOutput.TaskArns)
 	publicIP := GetPublicIP(t, awsRegion, []string{*singleTaskEni})
 
-	testURL := fmt.Sprintf("http://%v", *publicIP)
+	// Access over port 80 and 81
+	testURL80 := fmt.Sprintf("http://%v", *publicIP)
+	testURL81 := fmt.Sprintf("http://%v:81", *publicIP)
 	expectedText := "Hello, world!"
 	tlsConfig := tls.Config{}
 	maxRetries := 2
 	timeBetweenRetries := 30 * time.Second
 
-	http_helper.HttpGetWithRetry(t, testURL, &tlsConfig, 200, expectedText, maxRetries, timeBetweenRetries)
+	http_helper.HttpGetWithRetry(
+		t,
+		testURL80,
+		&tlsConfig,
+		200,
+		expectedText,
+		maxRetries,
+		timeBetweenRetries,
+	)
+	http_helper.HttpGetWithRetry(
+		t,
+		testURL81,
+		&tlsConfig,
+		200,
+		expectedText,
+		maxRetries,
+		timeBetweenRetries,
+	)
+}
 
+func TestTerraformAwsEcsServiceAlb(t *testing.T) {
+	t.Parallel()
+
+	tempTestFolder := test_structure.CopyTerraformFolderToTemp(t, "../", "examples/load-balancer")
+
+	ecsServiceName := fmt.Sprintf("terratest-simple-%s", strings.ToLower(random.UniqueId()))
+	awsRegion := "us-west-2"
+	vpcAzs := aws.GetAvailabilityZones(t, awsRegion)[:3]
+
+	terraformOptions := &terraform.Options{
+		// The path to where our Terraform code is located
+		TerraformDir: tempTestFolder,
+
+		// Variables to pass to our Terraform code using -var options
+		Vars: map[string]interface{}{
+			"test_name":     ecsServiceName,
+			"vpc_azs":       vpcAzs,
+			"region":        awsRegion,
+			"associate_alb": true,
+			"associate_nlb": false,
+		},
+		EnvVars: map[string]string{
+			"AWS_DEFAULT_REGION": awsRegion,
+		},
+	}
+
+	defer terraform.Destroy(t, terraformOptions)
+	terraform.InitAndApply(t, terraformOptions)
+
+	lbDNSName := terraform.Output(t, terraformOptions, "lb_dns_name")
+	testURL80 := fmt.Sprintf("http://%s/", lbDNSName)
+	testURL81 := fmt.Sprintf("http://%s:81/", lbDNSName)
+	expectedText := "Hello, world!"
+	tlsConfig := tls.Config{}
+	maxRetries := 10
+	timeBetweenRetries := 30 * time.Second
+
+	http_helper.HttpGetWithRetry(
+		t,
+		testURL80,
+		&tlsConfig,
+		200,
+		expectedText,
+		maxRetries,
+		timeBetweenRetries,
+	)
+	http_helper.HttpGetWithRetry(
+		t,
+		testURL81,
+		&tlsConfig,
+		200,
+		expectedText,
+		maxRetries,
+		timeBetweenRetries,
+	)
+}
+
+func TestTerraformAwsEcsServiceNlb(t *testing.T) {
+	t.Parallel()
+
+	tempTestFolder := test_structure.CopyTerraformFolderToTemp(t, "../", "examples/load-balancer")
+
+	ecsServiceName := fmt.Sprintf("terratest-simple-%s", strings.ToLower(random.UniqueId()))
+	awsRegion := "us-west-2"
+	vpcAzs := aws.GetAvailabilityZones(t, awsRegion)[:3]
+
+	terraformOptions := &terraform.Options{
+		// The path to where our Terraform code is located
+		TerraformDir: tempTestFolder,
+
+		// Variables to pass to our Terraform code using -var options
+		Vars: map[string]interface{}{
+			"test_name":     ecsServiceName,
+			"vpc_azs":       vpcAzs,
+			"region":        awsRegion,
+			"associate_alb": false,
+			"associate_nlb": true,
+		},
+		EnvVars: map[string]string{
+			"AWS_DEFAULT_REGION": awsRegion,
+		},
+	}
+
+	defer terraform.Destroy(t, terraformOptions)
+	terraform.InitAndApply(t, terraformOptions)
+
+	lbDNSName := terraform.Output(t, terraformOptions, "lb_dns_name")
+	testURL80 := fmt.Sprintf("http://%s/", lbDNSName)
+	testURL81 := fmt.Sprintf("http://%s:81/", lbDNSName)
+	expectedText := "Hello, world!"
+	tlsConfig := tls.Config{}
+	maxRetries := 20
+	timeBetweenRetries := 30 * time.Second
+
+	http_helper.HttpGetWithRetry(
+		t,
+		testURL80,
+		&tlsConfig,
+		200,
+		expectedText,
+		maxRetries,
+		timeBetweenRetries,
+	)
+	http_helper.HttpGetWithRetry(
+		t,
+		testURL81,
+		&tlsConfig,
+		200,
+		expectedText,
+		maxRetries,
+		timeBetweenRetries,
+	)
 }

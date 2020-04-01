@@ -1,6 +1,5 @@
 locals {
-  environment    = "test"
-  container_port = "80"
+  environment = "test"
 }
 
 module "vpc" {
@@ -102,13 +101,24 @@ resource "aws_security_group" "ecs_allow_http" {
 
 }
 
-resource "aws_security_group_rule" "ecs_allow_http" {
-  description       = "Allow HTTP"
+resource "aws_security_group_rule" "ecs_allow_http_80" {
+  description       = "Allow HTTP on port 80"
   security_group_id = aws_security_group.ecs_allow_http.id
 
   type        = "ingress"
-  from_port   = local.container_port
-  to_port     = local.container_port
+  from_port   = 80
+  to_port     = 80
+  protocol    = "tcp"
+  cidr_blocks = ["0.0.0.0/0"]
+}
+
+resource "aws_security_group_rule" "ecs_allow_http_81" {
+  description       = "Allow HTTP on port 81"
+  security_group_id = aws_security_group.ecs_allow_http.id
+
+  type        = "ingress"
+  from_port   = 81
+  to_port     = 81
   protocol    = "tcp"
   cidr_blocks = ["0.0.0.0/0"]
 }

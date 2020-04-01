@@ -195,12 +195,12 @@ variable "target_groups" {
     {
       lb_target_group_arn         = ""
       container_port              = 80
-      container_health_check_port = 0
+      container_health_check_port = 80
     },
     {
       lb_target_group_arn         = ""
       container_port              = 81
-      container_health_check_port = 0
+      container_health_check_port = 81
     }
   ]
 }
