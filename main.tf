@@ -6,7 +6,7 @@ locals {
   # for each target group, allow ingress from the alb to ecs container port
   lb_ingress_container_ports = distinct(
     [
-      for target_group in var.target_groups : target_group.container_port
+      for lb_target_group in var.lb_target_groups : lb_target_group.container_port
     ]
   )
 
@@ -14,12 +14,12 @@ locals {
   # if it doesn't collide with the container port
   lb_ingress_container_health_check_ports = distinct(
     [
-      for target_group in var.target_groups :
-      target_group.container_health_check_port if target_group.container_health_check_port != target_group.container_port
+      for lb_target_group in var.lb_target_groups :
+      lb_target_group.container_health_check_port if lb_target_group.container_health_check_port != lb_target_group.container_port
     ]
   )
 
-  # if we use any aws load balancer use target_groups to look up the
+  # if we use any aws load balancer use lb_target_groups to look up the
   # container_ports, otherwise use no_lb_container_ports
   default_container_ports = [8080, 8081]
 
@@ -520,7 +520,7 @@ resource "aws_ecs_service" "main" {
   }
 
   dynamic load_balancer {
-    for_each = var.target_groups
+    for_each = var.lb_target_groups
     content {
       container_name   = local.target_container_name
       target_group_arn = load_balancer.value.lb_target_group_arn

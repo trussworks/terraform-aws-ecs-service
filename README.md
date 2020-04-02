@@ -70,11 +70,12 @@ module "app_ecs_service" {
 
   associate_nlb          = true
   nlb_subnet_cidr_blocks = ["10.0.0.0/24", "10.0.1.0/24", "10.0.2.0/24"]
-  target_groups =
+
+  lb_target_groups =
   [
     {
       container_port             = 8443
-      container_healthcheck_port = 8443
+      container_healthcheck_port = 8080
       lb_target_arn              = module.nlb.arn
     }
   ]
@@ -94,8 +95,6 @@ module "app_ecs_service" {
   ecs_vpc_id                    = module.vpc.vpc_id
   ecs_subnet_ids                = module.vpc.private_subnets
   kms_key_id                    = aws_kms_key.main.arn
-
-  no_lb_container_ports         = [8080, 8443]
 }
 ```
 
@@ -133,12 +132,12 @@ module "app_ecs_service" {
 | fargate\_task\_cpu | Number of cpu units used in initial task definition. Default is minimum. | `number` | `256` | no |
 | fargate\_task\_memory | Amount (in MiB) of memory used in initial task definition. Default is minimum. | `number` | `512` | no |
 | kms\_key\_id | KMS customer managed key (CMK) ARN for encrypting application logs. | `string` | n/a | yes |
+| lb\_target\_groups | List of load balancer target group objects containing the lb\_target\_group\_arn, container\_port and container\_health\_check\_port. The container\_port is the port on which the container will receive traffic. The container\_health\_check\_port is an additional port on which the container can receive a health check. The lb\_target\_group\_arn is either Application Load Balancer (ALB) or Network Load Balancer (NLB) target group ARN tasks will register with. | <pre>list(<br>    object({<br>      container_port              = number<br>      container_health_check_port = number<br>      lb_target_group_arn         = string<br>      }<br>    )<br>  )</pre> | `[]` | no |
 | logs\_cloudwatch\_group | CloudWatch log group to create and use. Default: /ecs/{name}-{environment} | `string` | `""` | no |
 | logs\_cloudwatch\_retention | Number of days you want to retain log events in the log group. | `number` | `90` | no |
 | name | The service name. | `string` | n/a | yes |
 | nlb\_subnet\_cidr\_blocks | List of Network Load Balancer (NLB) CIDR blocks to allow traffic from. | `list(string)` | `[]` | no |
 | target\_container\_name | Name of the container the Load Balancer should target. Default: {name}-{environment} | `string` | `""` | no |
-| target\_groups | List of target group objects containing the lb\_target\_group\_arn, container\_port and container\_health\_check\_port. The container\_port is the port on which the container will receive traffic. The container\_health\_check\_port is an additional port on which the container can receive a health check. The lb\_target\_group\_arn is either Application Load Balancer (ALB) or Network Load Balancer (NLB) target group ARN tasks will register with. | <pre>list(<br>    object({<br>      container_port              = number<br>      container_health_check_port = number<br>      lb_target_group_arn         = string<br>      }<br>    )<br>  )</pre> | `[]` | no |
 | tasks\_desired\_count | The number of instances of a task definition. | `number` | `1` | no |
 | tasks\_maximum\_percent | Upper limit on the number of running tasks. | `number` | `200` | no |
 | tasks\_minimum\_healthy\_percent | Lower limit on the number of running tasks. | `number` | `100` | no |
@@ -162,6 +161,50 @@ module "app_ecs_service" {
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 
 ## Upgrade Path
+
+### 2.x.x to 3.0.0
+
+In 3.0.0 the module added support for multiple load balancer target groups. To support this change, `container_port`, `container_health_check_port` and `lb_target_group` are being replaced with `lb_target_groups`
+
+### Without a load balancer
+
+If you are using this module without an ALB or NLB then you can remove any references to `container_port`, `container_health_check_port` and `lb_target_group` if you were doing so.
+
+### Using with ALB or NLB target groups
+
+If you are using an NLB or NLB target groups with this module then you will need replace the values of `container_port`, `container_health_check_port` and `lb_target_group` with
+
+Below is an example of how the module would be instantiated prior to version 3.0.0
+
+```hcl
+module "app_ecs_service" {
+  source = "trussworks/ecs-service/aws"
+  ...
+  container_port              = 8443
+  container_health_check_port = 8080
+  lb_target_group             = module.alb.arn
+  ...
+}
+```
+
+In 3.0.0 the same example will look like the following
+
+```hcl
+module "app_ecs_service" {
+  source = "trussworks/ecs-service/aws"
+  ...
+  lb_target_groups =
+  [
+    {
+      container_port              = 8443
+      container_health_check_port = 8080
+      lb_target_group             = module.alb.arn
+    }
+  ]
+  ...
+}
+```
+
 
 ### 2.0.0 to 2.1.0
 

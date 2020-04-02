@@ -204,7 +204,7 @@ module "ecs-service" {
   alb_security_group     = var.associate_alb == true && var.associate_nlb == false ? aws_security_group.lb_sg.id : null
   nlb_subnet_cidr_blocks = var.associate_alb == false && var.associate_nlb == true ? module.vpc.public_subnets_cidr_blocks : null
 
-  target_groups = [
+  lb_target_groups = [
     {
       lb_target_group_arn         = aws_lb_target_group.http_8080.arn
       container_port              = 8080

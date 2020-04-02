@@ -155,9 +155,8 @@ func TestTerraformAwsEcsServiceNoLoadBalancer(t *testing.T) {
 	singleTaskEni := GetEni(t, awsRegion, ecsServiceName, tasksOutput.TaskArns)
 	publicIP := GetPublicIP(t, awsRegion, []string{*singleTaskEni})
 
-	// Access over port 80 and 81
-	testURL80 := fmt.Sprintf("http://%v", *publicIP)
-	testURL81 := fmt.Sprintf("http://%v:81", *publicIP)
+	testURL8080 := fmt.Sprintf("http://%v:8080", *publicIP)
+	testURL8081 := fmt.Sprintf("http://%v:8081", *publicIP)
 	expectedText := "Hello, world!"
 	tlsConfig := tls.Config{}
 	maxRetries := 2
@@ -165,7 +164,7 @@ func TestTerraformAwsEcsServiceNoLoadBalancer(t *testing.T) {
 
 	http_helper.HttpGetWithRetry(
 		t,
-		testURL80,
+		testURL8080,
 		&tlsConfig,
 		200,
 		expectedText,
@@ -174,7 +173,7 @@ func TestTerraformAwsEcsServiceNoLoadBalancer(t *testing.T) {
 	)
 	http_helper.HttpGetWithRetry(
 		t,
-		testURL81,
+		testURL8081,
 		&tlsConfig,
 		200,
 		expectedText,
@@ -213,8 +212,8 @@ func TestTerraformAwsEcsServiceAlb(t *testing.T) {
 	terraform.InitAndApply(t, terraformOptions)
 
 	lbDNSName := terraform.Output(t, terraformOptions, "lb_dns_name")
-	testURL80 := fmt.Sprintf("http://%s/", lbDNSName)
-	testURL81 := fmt.Sprintf("http://%s:81/", lbDNSName)
+	testURL8080 := fmt.Sprintf("http://%s:8080/", lbDNSName)
+	testURL8081 := fmt.Sprintf("http://%s:8081/", lbDNSName)
 	expectedText := "Hello, world!"
 	tlsConfig := tls.Config{}
 	maxRetries := 10
@@ -222,7 +221,7 @@ func TestTerraformAwsEcsServiceAlb(t *testing.T) {
 
 	http_helper.HttpGetWithRetry(
 		t,
-		testURL80,
+		testURL8080,
 		&tlsConfig,
 		200,
 		expectedText,
@@ -231,7 +230,7 @@ func TestTerraformAwsEcsServiceAlb(t *testing.T) {
 	)
 	http_helper.HttpGetWithRetry(
 		t,
-		testURL81,
+		testURL8081,
 		&tlsConfig,
 		200,
 		expectedText,
@@ -270,8 +269,8 @@ func TestTerraformAwsEcsServiceNlb(t *testing.T) {
 	terraform.InitAndApply(t, terraformOptions)
 
 	lbDNSName := terraform.Output(t, terraformOptions, "lb_dns_name")
-	testURL80 := fmt.Sprintf("http://%s/", lbDNSName)
-	testURL81 := fmt.Sprintf("http://%s:81/", lbDNSName)
+	testURL8080 := fmt.Sprintf("http://%s:8080/", lbDNSName)
+	testURL8081 := fmt.Sprintf("http://%s:8081/", lbDNSName)
 	expectedText := "Hello, world!"
 	tlsConfig := tls.Config{}
 	maxRetries := 20
@@ -279,7 +278,7 @@ func TestTerraformAwsEcsServiceNlb(t *testing.T) {
 
 	http_helper.HttpGetWithRetry(
 		t,
-		testURL80,
+		testURL8080,
 		&tlsConfig,
 		200,
 		expectedText,
@@ -288,7 +287,7 @@ func TestTerraformAwsEcsServiceNlb(t *testing.T) {
 	)
 	http_helper.HttpGetWithRetry(
 		t,
-		testURL81,
+		testURL8081,
 		&tlsConfig,
 		200,
 		expectedText,
