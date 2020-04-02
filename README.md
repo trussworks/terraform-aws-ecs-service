@@ -1,6 +1,4 @@
-Creates an ECS service.
-
-Supports the following features
+Terraform module that creates an ECS service with the following features
 
 * Runs an ECS service with or without an AWS load balancer.
 * Stream logs to a CloudWatch log group encrypted with a KMS key.
@@ -166,11 +164,11 @@ module "app_ecs_service" {
 
 In 3.0.0 the module added support for multiple load balancer target groups. To support this change, `container_port`, `container_health_check_port` and `lb_target_group` are being replaced with `lb_target_groups`
 
-### Without a load balancer
+#### Without a load balancer
 
 If you are using this module without an ALB or NLB then you can remove any references to `container_port`, `container_health_check_port` and `lb_target_group` if you were doing so.
 
-### Using with ALB or NLB target groups
+#### Using with ALB or NLB target groups
 
 If you are using an NLB or NLB target groups with this module then you will need replace the values of `container_port`, `container_health_check_port` and `lb_target_group` with
 
