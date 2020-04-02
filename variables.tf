@@ -118,13 +118,13 @@ variable "tasks_desired_count" {
 
 variable "tasks_minimum_healthy_percent" {
   description = "Lower limit on the number of running tasks."
-  default     = "100"
+  default     = 100
   type        = number
 }
 
 variable "tasks_maximum_percent" {
   description = "Upper limit on the number of running tasks."
-  default     = "200"
+  default     = 200
   type        = number
 }
 
@@ -182,25 +182,14 @@ variable "additional_security_group_ids" {
 }
 
 variable "target_groups" {
-  description = "The port on which the container will receive traffic. An additional port on which the container can receive a health check.  Zero means the container port can only receive a health check on the port set by the container_port variable.Either Application Load Balancer (ALB) or Network Load Balancer (NLB) target group ARN tasks will register with."
+  description = "List of target group objects containing the lb_target_group_arn, container_port and container_health_check_port. The container_port is the port on which the container will receive traffic. The container_health_check_port is an additional port on which the container can receive a health check. The lb_target_group_arn is either Application Load Balancer (ALB) or Network Load Balancer (NLB) target group ARN tasks will register with."
+  default     = []
   type = list(
     object({
-      lb_target_group_arn         = string
       container_port              = number
       container_health_check_port = number
+      lb_target_group_arn         = string
       }
     )
   )
-  default = [
-    {
-      lb_target_group_arn         = ""
-      container_port              = 80
-      container_health_check_port = 80
-    },
-    {
-      lb_target_group_arn         = ""
-      container_port              = 81
-      container_health_check_port = 81
-    }
-  ]
 }

@@ -85,32 +85,32 @@ resource "aws_lb" "main" {
   subnets            = module.vpc.public_subnets
 }
 
-resource "aws_lb_listener" "http_80" {
+resource "aws_lb_listener" "http_8080" {
   load_balancer_arn = aws_lb.main.id
-  port              = "80"
+  port              = "8080"
   protocol          = local.protocol
 
   default_action {
-    target_group_arn = aws_lb_target_group.http_80.id
+    target_group_arn = aws_lb_target_group.http_8080.id
     type             = "forward"
   }
 }
 
-resource "aws_lb_listener" "http_81" {
+resource "aws_lb_listener" "http_8081" {
   load_balancer_arn = aws_lb.main.id
-  port              = "81"
+  port              = "8081"
   protocol          = local.protocol
 
 
   default_action {
-    target_group_arn = aws_lb_target_group.http_81.id
+    target_group_arn = aws_lb_target_group.http_8081.id
     type             = "forward"
   }
 }
 
-resource "aws_lb_target_group" "http_80" {
-  name     = "${var.test_name}-80"
-  port     = 80
+resource "aws_lb_target_group" "http_8080" {
+  name     = "${var.test_name}-8080"
+  port     = 8080
   protocol = local.protocol
 
   vpc_id      = module.vpc.vpc_id
@@ -131,9 +131,9 @@ resource "aws_lb_target_group" "http_80" {
   depends_on = [aws_lb.main]
 }
 
-resource "aws_lb_target_group" "http_81" {
-  name     = "${var.test_name}-81"
-  port     = 81
+resource "aws_lb_target_group" "http_8081" {
+  name     = "${var.test_name}-8081"
+  port     = 8081
   protocol = local.protocol
 
   vpc_id      = module.vpc.vpc_id
@@ -169,22 +169,22 @@ resource "aws_security_group_rule" "app_lb_allow_outbound" {
   cidr_blocks = ["0.0.0.0/0"]
 }
 
-resource "aws_security_group_rule" "app_lb_allow_all_http_80" {
+resource "aws_security_group_rule" "app_lb_allow_all_http_8080" {
   security_group_id = aws_security_group.lb_sg.id
 
   type        = "ingress"
-  from_port   = 80
-  to_port     = 80
+  from_port   = 8080
+  to_port     = 8080
   protocol    = "tcp"
   cidr_blocks = ["0.0.0.0/0"]
 }
 
-resource "aws_security_group_rule" "app_lb_allow_all_http_81" {
+resource "aws_security_group_rule" "app_lb_allow_all_http_8081" {
   security_group_id = aws_security_group.lb_sg.id
 
   type        = "ingress"
-  from_port   = 81
-  to_port     = 81
+  from_port   = 8081
+  to_port     = 8081
   protocol    = "tcp"
   cidr_blocks = ["0.0.0.0/0"]
 }
@@ -206,14 +206,14 @@ module "ecs-service" {
 
   target_groups = [
     {
-      lb_target_group_arn         = aws_lb_target_group.http_80.arn
-      container_port              = 80
-      container_health_check_port = 80
+      lb_target_group_arn         = aws_lb_target_group.http_8080.arn
+      container_port              = 8080
+      container_health_check_port = 8080
     },
     {
-      lb_target_group_arn         = aws_lb_target_group.http_81.arn
-      container_port              = 81
-      container_health_check_port = 80
+      lb_target_group_arn         = aws_lb_target_group.http_8081.arn
+      container_port              = 8081
+      container_health_check_port = 8081
     }
   ]
 

@@ -1,23 +1,27 @@
 Creates an ECS service.
 
-Creates the following resources:
+Supports the following features
 
-* CloudWatch log group.
-* Security Groups for the ECS service.
-* ECS service.
-* Task definition using `golang:alpine` (see below).
-* Configurable associations with Network Load Balancers (NLB) and Application Load Balancers (ALB).
+* Runs an ECS service with or without an AWS load balancer.
+* Stream logs to a CloudWatch log group encrypted with a KMS key.
+* Associate multiple target groups with Network Load Balancers (NLB) and Application Load Balancers (ALB).
+* Supports running ECS tasks on EC2 instances or Fargate.
+
+## Default container definition
 
 We create an initial task definition using the `golang:alpine` image as a way
 to validate the initial infrastructure is working: visiting the site shows
-a simple Go hello world page. We expect deployments to manage the container
+a simple Go hello world page listening on two ports (8080 and 8081). This is
+meant to get a proof up concept instance up and running and to help with testing
+
+In production usage, we expect deployment tooling to manage the container
 definitions going forward, not Terraform.
 
 ## Terraform Versions
 
-Terraform 0.12. Pin module version to ~> 2.0.1. Submit pull-requests to master branch.
+Terraform 0.12. Pin module version to ~> 3.0. Submit pull-requests to master branch.
 
-Terraform 0.11. Pin module version to ~> 1.14.0. Submit pull-requests to terraform011 branch.
+Terraform 0.11. Pin module version to ~> 1.14. Submit pull-requests to terraform011 branch.
 
 ## Usage
 
@@ -35,12 +39,17 @@ module "app_ecs_service" {
   ecs_subnet_ids                = module.vpc.private_subnets
   kms_key_id                    = aws_kms_key.main.arn
   tasks_desired_count           = 2
-  tasks_minimum_healthy_percent = 50
-  tasks_maximum_percent         = 200
 
   associate_alb      = true
   alb_security_group = module.security_group.id
-  lb_target_group    = module.target_group.id
+  target_groups =
+  [
+    {
+      container_port             = 8443
+      container_healthcheck_port = 8443
+      lb_target_arn              = module.alb.arn
+    }
+  ]
 }
 ```
 
@@ -58,12 +67,35 @@ module "app_ecs_service" {
   ecs_subnet_ids                = module.vpc.private_subnets
   kms_key_id                    = aws_kms_key.main.arn
   tasks_desired_count           = 2
-  tasks_minimum_healthy_percent = 50
-  tasks_maximum_percent         = 200
 
   associate_nlb          = true
   nlb_subnet_cidr_blocks = ["10.0.0.0/24", "10.0.1.0/24", "10.0.2.0/24"]
-  lb_target_group   = module.target_group.id
+  target_groups =
+  [
+    {
+      container_port             = 8443
+      container_healthcheck_port = 8443
+      lb_target_arn              = module.nlb.arn
+    }
+  ]
+}
+```
+
+### ECS Service without any AWS load balancer
+
+```hcl
+module "app_ecs_service" {
+  source = "trussworks/ecs-service/aws"
+
+  name        = "app"
+  environment = "prod"
+
+  ecs_cluster                   = aws_ecs_cluster.mycluster
+  ecs_vpc_id                    = module.vpc.vpc_id
+  ecs_subnet_ids                = module.vpc.private_subnets
+  kms_key_id                    = aws_kms_key.main.arn
+
+  no_lb_container_ports         = [8080, 8443]
 }
 ```
 
@@ -106,10 +138,10 @@ module "app_ecs_service" {
 | name | The service name. | `string` | n/a | yes |
 | nlb\_subnet\_cidr\_blocks | List of Network Load Balancer (NLB) CIDR blocks to allow traffic from. | `list(string)` | `[]` | no |
 | target\_container\_name | Name of the container the Load Balancer should target. Default: {name}-{environment} | `string` | `""` | no |
-| target\_groups | The port on which the container will receive traffic. An additional port on which the container can receive a health check.  Zero means the container port can only receive a health check on the port set by the container\_port variable.Either Application Load Balancer (ALB) or Network Load Balancer (NLB) target group ARN tasks will register with. | <pre>list(<br>    object({<br>      lb_target_group_arn         = string<br>      container_port              = number<br>      container_health_check_port = number<br>      }<br>    )<br>  )</pre> | <pre>[<br>  {<br>    "container_health_check_port": 80,<br>    "container_port": 80,<br>    "lb_target_group_arn": ""<br>  },<br>  {<br>    "container_health_check_port": 81,<br>    "container_port": 81,<br>    "lb_target_group_arn": ""<br>  }<br>]</pre> | no |
+| target\_groups | List of target group objects containing the lb\_target\_group\_arn, container\_port and container\_health\_check\_port. The container\_port is the port on which the container will receive traffic. The container\_health\_check\_port is an additional port on which the container can receive a health check. The lb\_target\_group\_arn is either Application Load Balancer (ALB) or Network Load Balancer (NLB) target group ARN tasks will register with. | <pre>list(<br>    object({<br>      container_port              = number<br>      container_health_check_port = number<br>      lb_target_group_arn         = string<br>      }<br>    )<br>  )</pre> | `[]` | no |
 | tasks\_desired\_count | The number of instances of a task definition. | `number` | `1` | no |
-| tasks\_maximum\_percent | Upper limit on the number of running tasks. | `number` | `"200"` | no |
-| tasks\_minimum\_healthy\_percent | Lower limit on the number of running tasks. | `number` | `"100"` | no |
+| tasks\_maximum\_percent | Upper limit on the number of running tasks. | `number` | `200` | no |
+| tasks\_minimum\_healthy\_percent | Lower limit on the number of running tasks. | `number` | `100` | no |
 
 ## Outputs
 

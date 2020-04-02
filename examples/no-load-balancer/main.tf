@@ -101,24 +101,24 @@ resource "aws_security_group" "ecs_allow_http" {
 
 }
 
-resource "aws_security_group_rule" "ecs_allow_http_80" {
-  description       = "Allow HTTP on port 80"
+resource "aws_security_group_rule" "ecs_allow_http_8080" {
+  description       = "Allow HTTP on port 8080"
   security_group_id = aws_security_group.ecs_allow_http.id
 
   type        = "ingress"
-  from_port   = 80
-  to_port     = 80
+  from_port   = 8080
+  to_port     = 8080
   protocol    = "tcp"
   cidr_blocks = ["0.0.0.0/0"]
 }
 
-resource "aws_security_group_rule" "ecs_allow_http_81" {
-  description       = "Allow HTTP on port 81"
+resource "aws_security_group_rule" "ecs_allow_http_8081" {
+  description       = "Allow HTTP on port 8081"
   security_group_id = aws_security_group.ecs_allow_http.id
 
   type        = "ingress"
-  from_port   = 81
-  to_port     = 81
+  from_port   = 8081
+  to_port     = 8081
   protocol    = "tcp"
   cidr_blocks = ["0.0.0.0/0"]
 }

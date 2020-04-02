@@ -3,28 +3,32 @@ locals {
   target_container_name = "${var.target_container_name == "" ? "${var.name}-${var.environment}" : var.target_container_name}"
   cloudwatch_alarm_name = "${var.cloudwatch_alarm_name == "" ? "${var.name}-${var.environment}" : var.cloudwatch_alarm_name}"
 
-  # for each target group, allow ingress from the alb to ecs container port if it doesn't
-  # collide with the healthcheck_port
-  ingress_container_ports = distinct(
+  # for each target group, allow ingress from the alb to ecs container port
+  lb_ingress_container_ports = distinct(
     [
-      for target_group in var.target_groups :
-      target_group.container_port if target_group.container_health_check_port != target_group.container_port
+      for target_group in var.target_groups : target_group.container_port
     ]
   )
 
-  # for each target group, allow ingress from the alb to ecs healthcheck port if it doesn't
-  # collide with the container port
-  ingress_container_health_check_ports = distinct(
+  # for each target group, allow ingress from the alb to ecs healthcheck port
+  # if it doesn't collide with the container port
+  lb_ingress_container_health_check_ports = distinct(
     [
       for target_group in var.target_groups :
       target_group.container_health_check_port if target_group.container_health_check_port != target_group.container_port
     ]
   )
 
-  # hello world app that will spin up two HTTP listeners with
-  # environment variables PORT1 and PORT2 and JSON request logs
+  # if we use any aws load balancer use target_groups to look up the
+  # container_ports, otherwise use no_lb_container_ports
+  default_container_ports = [8080, 8081]
+
+  # base64 encoded version of the helloworld go app
   base64_encode_helloworld = base64encode(file("${path.module}/helloworld.go"))
 
+  # default container definition to be used with the helloworld go app included
+  # in this repo. It currently supports 2 HTTP listeners configured on
+  # environment variables PORT1 and PORT2 and simple JSON requests logs
   default_container_definitions = jsonencode(
     [
 
@@ -38,13 +42,13 @@ locals {
 
         portMappings = [
           {
-            containerPort = element(var.target_groups, 0).container_port
-            hostPort      = element(var.target_groups, 0).container_port
+            containerPort = element(local.default_container_ports, 0)
+            hostPort      = element(local.default_container_ports, 0)
             protocol      = "tcp"
           },
           {
-            containerPort = element(var.target_groups, 1).container_port
-            hostPort      = element(var.target_groups, 1).container_port
+            containerPort = element(local.default_container_ports, 1)
+            hostPort      = element(local.default_container_ports, 1)
             protocol      = "tcp"
           }
         ]
@@ -60,11 +64,11 @@ locals {
         environment = [
           {
             "name" : "PORT1",
-            "value" : tostring(element(var.target_groups, 0).container_port)
+            "value" : tostring(element(local.default_container_ports, 0))
           },
           {
             "name" : "PORT2",
-            "value" : tostring(element(var.target_groups, 1).container_port)
+            "value" : tostring(element(local.default_container_ports, 1))
           }
         ]
         mountPoints = []
@@ -212,14 +216,14 @@ resource "aws_security_group_rule" "app_ecs_allow_outbound" {
 resource "aws_security_group_rule" "app_ecs_allow_https_from_alb" {
   # if we have an alb, then create security group rules for the container
   # ports
-  count = var.associate_alb ? length(local.ingress_container_ports) : 0
+  count = var.associate_alb ? length(local.lb_ingress_container_ports) : 0
 
   description       = "Allow in ALB"
   security_group_id = aws_security_group.ecs_sg.id
 
   type                     = "ingress"
-  from_port                = element(local.ingress_container_ports, count.index)
-  to_port                  = element(local.ingress_container_ports, count.index)
+  from_port                = element(local.lb_ingress_container_ports, count.index)
+  to_port                  = element(local.lb_ingress_container_ports, count.index)
   protocol                 = "tcp"
   source_security_group_id = var.alb_security_group
 }
@@ -227,40 +231,40 @@ resource "aws_security_group_rule" "app_ecs_allow_https_from_alb" {
 resource "aws_security_group_rule" "app_ecs_allow_health_check_from_alb" {
   # if we have an alb, then create security group rules for the container
   # health check ports
-  count = var.associate_alb ? length(local.ingress_container_health_check_ports) : 0
+  count = var.associate_alb ? length(local.lb_ingress_container_health_check_ports) : 0
 
   description       = "Allow in health check from ALB"
   security_group_id = aws_security_group.ecs_sg.id
 
   type                     = "ingress"
-  from_port                = element(local.ingress_container_health_check_ports, count.index)
-  to_port                  = element(local.ingress_container_health_check_ports, count.index)
+  from_port                = element(local.lb_ingress_container_health_check_ports, count.index)
+  to_port                  = element(local.lb_ingress_container_health_check_ports, count.index)
   protocol                 = "tcp"
   source_security_group_id = var.alb_security_group
 }
 
 resource "aws_security_group_rule" "app_ecs_allow_tcp_from_nlb" {
-  count = var.associate_nlb ? length(local.ingress_container_ports) : 0
+  count = var.associate_nlb ? length(local.lb_ingress_container_ports) : 0
 
   description       = "Allow in NLB"
   security_group_id = aws_security_group.ecs_sg.id
 
   type        = "ingress"
-  from_port   = element(local.ingress_container_ports, count.index)
-  to_port     = element(local.ingress_container_ports, count.index)
+  from_port   = element(local.lb_ingress_container_ports, count.index)
+  to_port     = element(local.lb_ingress_container_ports, count.index)
   protocol    = "tcp"
   cidr_blocks = var.nlb_subnet_cidr_blocks
 }
 
 resource "aws_security_group_rule" "app_ecs_allow_health_check_from_nlb" {
-  count = var.associate_nlb ? length(local.ingress_container_health_check_ports) : 0
+  count = var.associate_nlb ? length(local.lb_ingress_container_health_check_ports) : 0
 
   description       = "Allow in health check from NLB"
   security_group_id = aws_security_group.ecs_sg.id
 
   type        = "ingress"
-  from_port   = element(local.ingress_container_health_check_ports, count.index)
-  to_port     = element(local.ingress_container_health_check_ports, count.index)
+  from_port   = element(local.lb_ingress_container_health_check_ports, count.index)
+  to_port     = element(local.lb_ingress_container_health_check_ports, count.index)
   protocol    = "tcp"
   cidr_blocks = var.nlb_subnet_cidr_blocks
 }
