@@ -182,8 +182,8 @@ Below is an example of how the module would be instantiated prior to version 3.0
 module "app_ecs_service" {
   source = "trussworks/ecs-service/aws"
   ...
-  container_port              = 8443
-  container_health_check_port = 8080
+  container_port                  = 8443
+  container_health_check_port     = 8080
   lb_target_group_arn             = module.alb.arn
   ...
 }
@@ -198,8 +198,8 @@ module "app_ecs_service" {
   lb_target_groups =
   [
     {
-      container_port              = 8443
-      container_health_check_port = 8080
+      container_port                  = 8443
+      container_health_check_port     = 8080
       lb_target_group_arn             = module.alb.arn
     }
   ]
