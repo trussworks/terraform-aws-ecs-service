@@ -24,7 +24,7 @@ locals {
   default_container_ports = [8080, 8081]
 
   # base64 encoded version of the helloworld go app
-  base64_encode_helloworld = base64encode(file("${path.module}/helloworld.go"))
+  base64_encode_helloworld = base64encode(file("${path.module}/examples/helloworld.go"))
 
   # default container definition to be used with the helloworld go app included
   # in this repo. It currently supports 2 HTTP listeners configured on

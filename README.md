@@ -10,7 +10,7 @@ Terraform module that creates an ECS service with the following features
 We create an initial task definition using the `golang:alpine` image as a way
 to validate the initial infrastructure is working: visiting the site shows
 a simple Go hello world page listening on two ports (8080 and 8081). This is
-meant to get a proof up concept instance up and running and to help with testing
+meant to get a proof of concept instance up and running and to help with testing
 
 In production usage, we expect deployment tooling to manage the container
 definitions going forward, not Terraform.
@@ -97,6 +97,10 @@ module "app_ecs_service" {
 ```
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+## Requirements
+
+No requirements.
+
 ## Providers
 
 | Name | Version |
@@ -106,7 +110,7 @@ module "app_ecs_service" {
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:-----:|
+|------|-------------|------|---------|:--------:|
 | additional\_security\_group\_ids | In addition to the security group created for the service, a list of security groups the ECS service should also be added to. | `list(string)` | `[]` | no |
 | alb\_security\_group | Application Load Balancer (ALB) security group ID to allow traffic from. | `string` | `""` | no |
 | assign\_public\_ip | Whether this instance should be accessible from the public internet. Default is false. | `bool` | `false` | no |
