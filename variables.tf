@@ -193,3 +193,9 @@ variable "lb_target_groups" {
     )
   )
 }
+
+variable "hello_world_container_ports" {
+  description = "List of ports for the hello world container app to listen on. The app currently supports listening on two ports."
+  type        = list(number)
+  default     = [8080, 8081]
+}

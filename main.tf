@@ -11,17 +11,15 @@ locals {
   )
 
   # for each target group, allow ingress from the alb to ecs healthcheck port
-  # if it doesn't collide with the container port
-  lb_ingress_container_health_check_ports = distinct(
-    [
-      for lb_target_group in var.lb_target_groups :
-      lb_target_group.container_health_check_port if lb_target_group.container_health_check_port != lb_target_group.container_port
-    ]
+  # if it doesn't collide with the container ports
+  lb_ingress_container_health_check_ports = tolist(
+    setsubtract(
+      [
+        for lb_target_group in var.lb_target_groups : lb_target_group.container_health_check_port
+      ],
+      local.lb_ingress_container_ports,
+    )
   )
-
-  # if we use any aws load balancer use lb_target_groups to look up the
-  # container_ports, otherwise use no_lb_container_ports
-  default_container_ports = [8080, 8081]
 
   # base64 encoded version of the helloworld go app
   base64_encode_helloworld = base64encode(file("${path.module}/examples/helloworld.go"))
@@ -42,13 +40,13 @@ locals {
 
         portMappings = [
           {
-            containerPort = element(local.default_container_ports, 0)
-            hostPort      = element(local.default_container_ports, 0)
+            containerPort = element(var.hello_world_container_ports, 0)
+            hostPort      = element(var.hello_world_container_ports, 0)
             protocol      = "tcp"
           },
           {
-            containerPort = element(local.default_container_ports, 1)
-            hostPort      = element(local.default_container_ports, 1)
+            containerPort = element(var.hello_world_container_ports, 1)
+            hostPort      = element(var.hello_world_container_ports, 1)
             protocol      = "tcp"
           }
         ]
@@ -64,11 +62,11 @@ locals {
         environment = [
           {
             "name" : "PORT1",
-            "value" : tostring(element(local.default_container_ports, 0))
+            "value" : tostring(element(var.hello_world_container_ports, 0))
           },
           {
             "name" : "PORT2",
-            "value" : tostring(element(local.default_container_ports, 1))
+            "value" : tostring(element(var.hello_world_container_ports, 1))
           }
         ]
         mountPoints = []

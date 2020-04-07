@@ -5,12 +5,16 @@ Terraform module that creates an ECS service with the following features
 * Associate multiple target groups with Network Load Balancers (NLB) and Application Load Balancers (ALB).
 * Supports running ECS tasks on EC2 instances or Fargate.
 
-## Default container definition
+## Default container definition (hello world app)
 
 We create an initial task definition using the `golang:alpine` image as a way
 to validate the initial infrastructure is working: visiting the site shows
-a simple Go hello world page listening on two ports (8080 and 8081). This is
-meant to get a proof of concept instance up and running and to help with testing
+a simple Go hello world page listening on two configurable ports. This is
+meant to get a proof of concept instance up and running and to help with
+testing.
+
+If you want to customize the listener ports for the hello world app, you can
+modify the `hello_world_container_ports` variable.
 
 In production usage, we expect deployment tooling to manage the container
 definitions going forward, not Terraform.
@@ -133,6 +137,7 @@ No requirements.
 | environment | Environment tag, e.g prod. | `string` | n/a | yes |
 | fargate\_task\_cpu | Number of cpu units used in initial task definition. Default is minimum. | `number` | `256` | no |
 | fargate\_task\_memory | Amount (in MiB) of memory used in initial task definition. Default is minimum. | `number` | `512` | no |
+| hello\_world\_container\_ports | List of ports for the hello world container app to listen on. The app currently supports listening on two ports. | `list(number)` | <pre>[<br>  8080,<br>  8081<br>]</pre> | no |
 | kms\_key\_id | KMS customer managed key (CMK) ARN for encrypting application logs. | `string` | n/a | yes |
 | lb\_target\_groups | List of load balancer target group objects containing the lb\_target\_group\_arn, container\_port and container\_health\_check\_port. The container\_port is the port on which the container will receive traffic. The container\_health\_check\_port is an additional port on which the container can receive a health check. The lb\_target\_group\_arn is either Application Load Balancer (ALB) or Network Load Balancer (NLB) target group ARN tasks will register with. | <pre>list(<br>    object({<br>      container_port              = number<br>      container_health_check_port = number<br>      lb_target_group_arn         = string<br>      }<br>    )<br>  )</pre> | `[]` | no |
 | logs\_cloudwatch\_group | CloudWatch log group to create and use. Default: /ecs/{name}-{environment} | `string` | `""` | no |

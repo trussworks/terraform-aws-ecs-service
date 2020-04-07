@@ -1,6 +1,7 @@
 locals {
-  environment = "test"
-  protocol    = var.associate_alb == true && var.associate_nlb == false ? "HTTP" : "TCP"
+  environment                 = "test"
+  protocol                    = var.associate_alb == true && var.associate_nlb == false ? "HTTP" : "TCP"
+  hello_world_container_ports = [8080, 8081]
 }
 
 module "vpc" {
@@ -85,55 +86,24 @@ resource "aws_lb" "main" {
   subnets            = module.vpc.public_subnets
 }
 
-resource "aws_lb_listener" "http_8080" {
+resource "aws_lb_listener" "http" {
+  count = length(local.hello_world_container_ports)
+
   load_balancer_arn = aws_lb.main.id
-  port              = "8080"
+  port              = element(local.hello_world_container_ports, count.index)
   protocol          = local.protocol
 
   default_action {
-    target_group_arn = aws_lb_target_group.http_8080.id
+    target_group_arn = aws_lb_target_group.http[count.index].id
     type             = "forward"
   }
 }
 
-resource "aws_lb_listener" "http_8081" {
-  load_balancer_arn = aws_lb.main.id
-  port              = "8081"
-  protocol          = local.protocol
+resource "aws_lb_target_group" "http" {
+  count = length(local.hello_world_container_ports)
 
-
-  default_action {
-    target_group_arn = aws_lb_target_group.http_8081.id
-    type             = "forward"
-  }
-}
-
-resource "aws_lb_target_group" "http_8080" {
-  name     = "${var.test_name}-8080"
-  port     = 8080
-  protocol = local.protocol
-
-  vpc_id      = module.vpc.vpc_id
-  target_type = "ip"
-
-  deregistration_delay = 90
-
-  health_check {
-    timeout             = var.associate_alb == true && var.associate_nlb == false ? 5 : null
-    interval            = 30
-    path                = var.associate_alb == true && var.associate_nlb == false ? "/" : null
-    protocol            = local.protocol
-    healthy_threshold   = 3
-    unhealthy_threshold = 3
-    matcher             = var.associate_alb == true && var.associate_nlb == false ? "200" : null
-  }
-
-  depends_on = [aws_lb.main]
-}
-
-resource "aws_lb_target_group" "http_8081" {
-  name     = "${var.test_name}-8081"
-  port     = 8081
+  name     = "${var.test_name}-${local.hello_world_container_ports[count.index]}"
+  port     = element(local.hello_world_container_ports, count.index)
   protocol = local.protocol
 
   vpc_id      = module.vpc.vpc_id
@@ -169,22 +139,13 @@ resource "aws_security_group_rule" "app_lb_allow_outbound" {
   cidr_blocks = ["0.0.0.0/0"]
 }
 
-resource "aws_security_group_rule" "app_lb_allow_all_http_8080" {
+resource "aws_security_group_rule" "app_lb_allow_all_http" {
+  count             = length(local.hello_world_container_ports)
   security_group_id = aws_security_group.lb_sg.id
 
   type        = "ingress"
-  from_port   = 8080
-  to_port     = 8080
-  protocol    = "tcp"
-  cidr_blocks = ["0.0.0.0/0"]
-}
-
-resource "aws_security_group_rule" "app_lb_allow_all_http_8081" {
-  security_group_id = aws_security_group.lb_sg.id
-
-  type        = "ingress"
-  from_port   = 8081
-  to_port     = 8081
+  from_port   = element(local.hello_world_container_ports, count.index)
+  to_port     = element(local.hello_world_container_ports, count.index)
   protocol    = "tcp"
   cidr_blocks = ["0.0.0.0/0"]
 }
@@ -204,16 +165,18 @@ module "ecs-service" {
   alb_security_group     = var.associate_alb == true && var.associate_nlb == false ? aws_security_group.lb_sg.id : null
   nlb_subnet_cidr_blocks = var.associate_alb == false && var.associate_nlb == true ? module.vpc.public_subnets_cidr_blocks : null
 
+  hello_world_container_ports = local.hello_world_container_ports
+
   lb_target_groups = [
     {
-      lb_target_group_arn         = aws_lb_target_group.http_8080.arn
-      container_port              = 8080
-      container_health_check_port = 8080
+      lb_target_group_arn         = aws_lb_target_group.http[0].arn
+      container_port              = element(local.hello_world_container_ports, 0)
+      container_health_check_port = element(local.hello_world_container_ports, 0)
     },
     {
-      lb_target_group_arn         = aws_lb_target_group.http_8081.arn
-      container_port              = 8081
-      container_health_check_port = 8081
+      lb_target_group_arn         = aws_lb_target_group.http[1].arn
+      container_port              = element(local.hello_world_container_ports, 0)
+      container_health_check_port = element(local.hello_world_container_ports, 1)
     }
   ]
 

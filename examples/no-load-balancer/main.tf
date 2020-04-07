@@ -1,5 +1,6 @@
 locals {
-  environment = "test"
+  environment                 = "test"
+  hello_world_container_ports = [8080, 8081]
 }
 
 module "vpc" {
@@ -87,6 +88,8 @@ module "ecs-service" {
     aws_security_group.ecs_allow_http.id
   ]
 
+  hello_world_container_ports = local.hello_world_container_ports
+
   kms_key_id = aws_kms_key.main.arn
 }
 
@@ -101,24 +104,15 @@ resource "aws_security_group" "ecs_allow_http" {
 
 }
 
-resource "aws_security_group_rule" "ecs_allow_http_8080" {
-  description       = "Allow HTTP on port 8080"
+resource "aws_security_group_rule" "ecs_allow_http" {
+  count = length(local.hello_world_container_ports)
+
   security_group_id = aws_security_group.ecs_allow_http.id
 
   type        = "ingress"
-  from_port   = 8080
-  to_port     = 8080
+  from_port   = element(local.hello_world_container_ports, count.index)
+  to_port     = element(local.hello_world_container_ports, count.index)
   protocol    = "tcp"
   cidr_blocks = ["0.0.0.0/0"]
 }
 
-resource "aws_security_group_rule" "ecs_allow_http_8081" {
-  description       = "Allow HTTP on port 8081"
-  security_group_id = aws_security_group.ecs_allow_http.id
-
-  type        = "ingress"
-  from_port   = 8081
-  to_port     = 8081
-  protocol    = "tcp"
-  cidr_blocks = ["0.0.0.0/0"]
-}
