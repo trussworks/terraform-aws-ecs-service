@@ -1,7 +1,6 @@
 locals {
-  environment        = "test"
-  container_protocol = "HTTP"
-  container_port     = "80"
+  environment                 = "test"
+  hello_world_container_ports = [8080, 8081]
 }
 
 module "vpc" {
@@ -85,21 +84,35 @@ module "ecs-service" {
   ecs_vpc_id       = module.vpc.vpc_id
   ecs_use_fargate  = true
   assign_public_ip = true
+  additional_security_group_ids = [
+    aws_security_group.ecs_allow_http.id
+  ]
+
+  hello_world_container_ports = local.hello_world_container_ports
 
   kms_key_id = aws_kms_key.main.arn
 }
 
 #
-# SG adjustment
+# Allow HTTP access to the ECS instance from the internet
 #
 
+resource "aws_security_group" "ecs_allow_http" {
+  name        = "ecs-allow-http"
+  description = "Allow inbound HTTP to the ECS instance"
+  vpc_id      = module.vpc.vpc_id
+
+}
+
 resource "aws_security_group_rule" "ecs_allow_http" {
-  description       = "Allow HTTP"
-  security_group_id = module.ecs-service.ecs_security_group_id
+  count = length(local.hello_world_container_ports)
+
+  security_group_id = aws_security_group.ecs_allow_http.id
 
   type        = "ingress"
-  from_port   = local.container_port
-  to_port     = local.container_port
+  from_port   = element(local.hello_world_container_ports, count.index)
+  to_port     = element(local.hello_world_container_ports, count.index)
   protocol    = "tcp"
   cidr_blocks = ["0.0.0.0/0"]
 }
+
