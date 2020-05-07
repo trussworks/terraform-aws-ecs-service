@@ -68,6 +68,10 @@ module "app_ecs_service" {
 ```
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+## Requirements
+
+No requirements.
+
 ## Providers
 
 | Name | Version |
@@ -77,7 +81,7 @@ module "app_ecs_service" {
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:-----:|
+|------|-------------|------|---------|:--------:|
 | alb\_security\_group | Application Load Balancer (ALB) security group ID to allow traffic from. | `string` | `""` | no |
 | assign\_public\_ip | Whether this instance should be accessible from the public internet. Default is false. | `bool` | `false` | no |
 | associate\_alb | Whether to associate an Application Load Balancer (ALB) with the ECS service. | `bool` | `false` | no |
