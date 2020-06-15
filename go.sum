@@ -268,6 +268,8 @@ github.com/gruntwork-io/terratest v0.27.4 h1:+Pgf3pHRPgVjNv0/MyLWwySmKUcmL+wT6fe
 github.com/gruntwork-io/terratest v0.27.4/go.mod h1:ONEOU6Fv3a1rN16Z5t5yWbV57DkVC7665yRyvu3aWnk=
 github.com/gruntwork-io/terratest v0.28.3 h1:7nrfpOp35m7l+6y9l8UrR+qHCnrxizjoX/d6HWFyRsY=
 github.com/gruntwork-io/terratest v0.28.3/go.mod h1:lTntpr4gGDzb2YEQ1GTjC5G/xw9ixMwxGmZkPCk1O0A=
+github.com/gruntwork-io/terratest v0.28.5 h1:B3Cd45sc18V0Ieaw9JrIl/U27c2mPdwc0pOAF3hGMn4=
+github.com/gruntwork-io/terratest v0.28.5/go.mod h1:lTntpr4gGDzb2YEQ1GTjC5G/xw9ixMwxGmZkPCk1O0A=
 github.com/hashicorp/golang-lru v0.5.0/go.mod h1:/m3WP610KZHVQ1SGc6re/UDhFvYD7pJ4Ao+sR/qLZy8=
 github.com/hashicorp/golang-lru v0.5.1/go.mod h1:/m3WP610KZHVQ1SGc6re/UDhFvYD7pJ4Ao+sR/qLZy8=
 github.com/hashicorp/golang-lru v0.5.3/go.mod h1:iADmTwqILo4mZ8BN3D2Q6+9jd8WM5uGBxy+E8yxSoD4=
