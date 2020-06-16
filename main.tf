@@ -526,6 +526,16 @@ resource "aws_ecs_service" "main" {
     }
   }
 
+  dynamic service_registries {
+    for_each = var.service_registries
+    content {
+      registry_arn   = service_registries.value.registry_arn
+      container_name = service_registries.value.container_name
+      container_port = service_registries.value.container_port
+      port = service_registries.value.port
+    }
+  }
+
   lifecycle {
     ignore_changes = [task_definition]
   }
@@ -575,6 +585,16 @@ resource "aws_ecs_service" "main_no_lb" {
     subnets          = var.ecs_subnet_ids
     security_groups  = local.ecs_service_agg_security_groups
     assign_public_ip = var.assign_public_ip
+  }
+
+    dynamic service_registries {
+    for_each = var.service_registries
+    content {
+      registry_arn   = service_registries.value.registry_arn
+      container_name = service_registries.value.container_name
+      container_port = service_registries.value.container_port
+      port = service_registries.value.port
+    }
   }
 
   lifecycle {
