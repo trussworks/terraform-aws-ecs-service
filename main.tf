@@ -532,7 +532,7 @@ resource "aws_ecs_service" "main" {
       registry_arn   = service_registries.value.registry_arn
       container_name = service_registries.value.container_name
       container_port = service_registries.value.container_port
-      port = service_registries.value.port
+      port           = service_registries.value.port
     }
   }
 
@@ -587,13 +587,13 @@ resource "aws_ecs_service" "main_no_lb" {
     assign_public_ip = var.assign_public_ip
   }
 
-    dynamic service_registries {
+  dynamic service_registries {
     for_each = var.service_registries
     content {
       registry_arn   = service_registries.value.registry_arn
       container_name = service_registries.value.container_name
       container_port = service_registries.value.container_port
-      port = service_registries.value.port
+      port           = service_registries.value.port
     }
   }
 
