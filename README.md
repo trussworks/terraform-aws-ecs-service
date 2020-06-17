@@ -144,6 +144,7 @@ No requirements.
 | logs\_cloudwatch\_retention | Number of days you want to retain log events in the log group. | `number` | `90` | no |
 | name | The service name. | `string` | n/a | yes |
 | nlb\_subnet\_cidr\_blocks | List of Network Load Balancer (NLB) CIDR blocks to allow traffic from. | `list(string)` | `[]` | no |
+| service\_registries | List of service registry objects as per <https://www.terraform.io/docs/providers/aws/r/ecs_service.html#service_registries-1>. List can only have a single object until <https://github.com/terraform-providers/terraform-provider-aws/issues/9573> is resolved. | <pre>list(object({<br>    registry_arn   = string<br>    container_name = string<br>    container_port = number<br>    port           = number<br>  }))</pre> | `[]` | no |
 | target\_container\_name | Name of the container the Load Balancer should target. Default: {name}-{environment} | `string` | `""` | no |
 | tasks\_desired\_count | The number of instances of a task definition. | `number` | `1` | no |
 | tasks\_maximum\_percent | Upper limit on the number of running tasks. | `number` | `200` | no |
