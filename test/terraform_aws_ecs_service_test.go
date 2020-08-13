@@ -158,7 +158,9 @@ func TestTerraformAwsEcsServiceNoLoadBalancer(t *testing.T) {
 	testURL8080 := fmt.Sprintf("http://%v:8080", *publicIP)
 	testURL8081 := fmt.Sprintf("http://%v:8081", *publicIP)
 	expectedText := "Hello, world!"
-	tlsConfig := tls.Config{}
+	tlsConfig := tls.Config{
+		MinVersion: tls.VersionTLS13,
+	}
 	maxRetries := 2
 	timeBetweenRetries := 30 * time.Second
 
@@ -215,7 +217,9 @@ func TestTerraformAwsEcsServiceAlb(t *testing.T) {
 	testURL8080 := fmt.Sprintf("http://%s:8080/", lbDNSName)
 	testURL8081 := fmt.Sprintf("http://%s:8081/", lbDNSName)
 	expectedText := "Hello, world!"
-	tlsConfig := tls.Config{}
+	tlsConfig := tls.Config{
+		MinVersion: tls.VersionTLS13,
+	}
 	maxRetries := 10
 	timeBetweenRetries := 30 * time.Second
 
@@ -272,7 +276,9 @@ func TestTerraformAwsEcsServiceNlb(t *testing.T) {
 	testURL8080 := fmt.Sprintf("http://%s:8080/", lbDNSName)
 	testURL8081 := fmt.Sprintf("http://%s:8081/", lbDNSName)
 	expectedText := "Hello, world!"
-	tlsConfig := tls.Config{}
+	tlsConfig := tls.Config{
+		MinVersion: tls.VersionTLS13,
+	}
 	maxRetries := 20
 	timeBetweenRetries := 30 * time.Second
 
