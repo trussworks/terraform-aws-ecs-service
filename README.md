@@ -1,9 +1,9 @@
 Terraform module that creates an ECS service with the following features
 
-* Runs an ECS service with or without an AWS load balancer.
-* Stream logs to a CloudWatch log group encrypted with a KMS key.
-* Associate multiple target groups with Network Load Balancers (NLB) and Application Load Balancers (ALB).
-* Supports running ECS tasks on EC2 instances or Fargate.
+- Runs an ECS service with or without an AWS load balancer.
+- Stream logs to a CloudWatch log group encrypted with a KMS key.
+- Associate multiple target groups with Network Load Balancers (NLB) and Application Load Balancers (ALB).
+- Supports running ECS tasks on EC2 instances or Fargate.
 
 ## Default container definition (hello world app)
 
@@ -21,7 +21,9 @@ definitions going forward, not Terraform.
 
 ## Terraform Versions
 
-Terraform 0.12. Pin module version to ~> 3.0. Submit pull-requests to master branch.
+Terraform 0.13. Pin module version to ~> 4.X. Submit pull-requests to master branch.
+
+Terraform 0.12. Pin module version to ~> 3.X. Submit pull-requests to terraform012 branch.
 
 Terraform 0.11. Pin module version to ~> 1.14. Submit pull-requests to terraform011 branch.
 
@@ -105,14 +107,14 @@ module "app_ecs_service" {
 
 | Name | Version |
 |------|---------|
-| terraform | ~> 0.12.0 |
-| aws | ~> 2.70 |
+| terraform | ~> 0.13.0 |
+| aws | ~> 3.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| aws | ~> 2.70 |
+| aws | ~> 3.0 |
 
 ## Inputs
 
@@ -215,7 +217,6 @@ module "app_ecs_service" {
   ...
 }
 ```
-
 
 ### 2.0.0 to 2.1.0
 
