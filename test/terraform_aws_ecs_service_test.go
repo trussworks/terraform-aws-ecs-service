@@ -38,8 +38,8 @@ func GetTasksE(t *testing.T, region string, clusterName string) (*ecs.ListTasksO
 	}
 
 	// Need to spin and wait to allow time for resources to get up
-	maxRetries := 3
-	retryDuration, _ := time.ParseDuration("30s")
+	maxRetries := 10
+	retryDuration := time.Duration(30)
 	_, err = retry.DoWithRetryE(t, "Get tasks", maxRetries, retryDuration,
 		func() (string, error) {
 			tasks, _ := ecsClient.ListTasks(params)
@@ -77,8 +77,8 @@ func GetEniE(t *testing.T, region string, cluster string, taskArns []*string) (*
 		Tasks:   taskArns,
 	}
 
-	maxRetries := 3
-	retryDuration, _ := time.ParseDuration("30s")
+	maxRetries := 10
+	retryDuration := time.Duration(30)
 	_, err = retry.DoWithRetryE(t, "Get public elastic network interface", maxRetries, retryDuration,
 		func() (string, error) {
 			returnedTasks, _ := ecsClient.DescribeTasks(params)
@@ -161,8 +161,8 @@ func TestTerraformAwsEcsServiceNoLoadBalancer(t *testing.T) {
 	tlsConfig := tls.Config{
 		MinVersion: tls.VersionTLS13,
 	}
-	maxRetries := 2
-	timeBetweenRetries := 30 * time.Second
+	maxRetries := 10
+	timeBetweenRetries := 300 * time.Second
 
 	http_helper.HttpGetWithRetry(
 		t,
@@ -221,7 +221,7 @@ func TestTerraformAwsEcsServiceAlb(t *testing.T) {
 		MinVersion: tls.VersionTLS13,
 	}
 	maxRetries := 10
-	timeBetweenRetries := 30 * time.Second
+	timeBetweenRetries := 300 * time.Second
 
 	http_helper.HttpGetWithRetry(
 		t,
@@ -280,7 +280,7 @@ func TestTerraformAwsEcsServiceNlb(t *testing.T) {
 		MinVersion: tls.VersionTLS13,
 	}
 	maxRetries := 20
-	timeBetweenRetries := 30 * time.Second
+	timeBetweenRetries := 300 * time.Second
 
 	http_helper.HttpGetWithRetry(
 		t,
