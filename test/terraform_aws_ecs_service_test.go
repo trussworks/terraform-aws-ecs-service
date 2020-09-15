@@ -161,7 +161,7 @@ func TestTerraformAwsEcsServiceNoLoadBalancer(t *testing.T) {
 	tlsConfig := tls.Config{
 		MinVersion: tls.VersionTLS13,
 	}
-	maxRetries := 10
+	maxRetries := 2
 	timeBetweenRetries := 30 * time.Second
 
 	http_helper.HttpGetWithRetry(
