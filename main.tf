@@ -314,7 +314,7 @@ data "aws_iam_policy_document" "instance_role_policy_doc" {
       "logs:PutLogEvents",
     ]
 
-    resources = [aws_cloudwatch_log_group.main.arn]
+    resources = ["${aws_cloudwatch_log_group.main.arn}:*"]
   }
 
   statement {
@@ -366,7 +366,7 @@ data "aws_iam_policy_document" "task_execution_role_policy_doc" {
       "logs:PutLogEvents",
     ]
 
-    resources = [aws_cloudwatch_log_group.main.arn]
+    resources = ["${aws_cloudwatch_log_group.main.arn}:*"]
   }
 
   statement {
