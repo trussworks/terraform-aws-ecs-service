@@ -281,7 +281,7 @@ data "aws_iam_policy_document" "instance_role_policy_doc" {
       "ecs:Submit*",
     ]
 
-    resources = [var.ecs_cluster.arn]
+    resources = ["${var.ecs_cluster.arn}:*"]
   }
 
   statement {
@@ -294,7 +294,7 @@ data "aws_iam_policy_document" "instance_role_policy_doc" {
     condition {
       test     = "StringEquals"
       variable = "ecs:cluster"
-      values   = [var.ecs_cluster.arn]
+      values   = ["${var.ecs_cluster.arn}:*"]
     }
   }
 
