@@ -49,9 +49,9 @@ module "app_ecs_service" {
   target_groups =
   [
     {
-      container_port             = 8443
-      container_healthcheck_port = 8443
-      lb_target_group_arn        = module.alb.arn
+      container_port              = 8443
+      container_health_check_port = 8443
+      lb_target_group_arn         = module.alb.arn
     }
   ]
 }
@@ -78,9 +78,9 @@ module "app_ecs_service" {
   lb_target_groups =
   [
     {
-      container_port             = 8443
-      container_healthcheck_port = 8080
-      lb_target_group_arn        = module.nlb.arn
+      container_port              = 8443
+      container_health_check_port = 8080
+      lb_target_group_arn         = module.nlb.arn
     }
   ]
 }
