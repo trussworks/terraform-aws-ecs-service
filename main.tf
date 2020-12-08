@@ -148,10 +148,10 @@ resource "aws_cloudwatch_metric_alarm" "alarm_cpu" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "alarm_mem" {
-  count = "${var.cloudwatch_alarm_cpu_enable && (var.associate_alb || var.associate_nlb) ? 1 : 0}"
+  count = "${var.cloudwatch_alarm_mem_enable && (var.associate_alb || var.associate_nlb) ? 1 : 0}"
 
   alarm_name        = "${local.cloudwatch_alarm_name}-mem"
-  alarm_description = "Monitors ECS CPU Utilization"
+  alarm_description = "Monitors ECS memory Utilization"
   alarm_actions     = ["${var.cloudwatch_alarm_actions}"]
 
   comparison_operator = "GreaterThanOrEqualToThreshold"
@@ -172,7 +172,7 @@ resource "aws_cloudwatch_metric_alarm" "alarm_cpu_no_lb" {
   count = "${var.cloudwatch_alarm_cpu_enable && ! (var.associate_alb || var.associate_nlb) ? 1 : 0}"
 
   alarm_name        = "${local.cloudwatch_alarm_name}-cpu"
-  alarm_description = "Monitors ECS CPU Utilization"
+  alarm_description = "Monitors ECS CPU Utilization when no load balancer is attached"
   alarm_actions     = ["${var.cloudwatch_alarm_actions}"]
 
   comparison_operator = "GreaterThanOrEqualToThreshold"
@@ -193,7 +193,7 @@ resource "aws_cloudwatch_metric_alarm" "alarm_mem_no_lb" {
   count = "${var.cloudwatch_alarm_cpu_enable && ! (var.associate_alb || var.associate_nlb) ? 1 : 0}"
 
   alarm_name        = "${local.cloudwatch_alarm_name}-mem"
-  alarm_description = "Monitors ECS CPU Utilization"
+  alarm_description = "Monitors ECS memory Utilization when no load balancer is attached"
   alarm_actions     = ["${var.cloudwatch_alarm_actions}"]
 
   comparison_operator = "GreaterThanOrEqualToThreshold"
@@ -436,7 +436,7 @@ resource "aws_iam_role_policy" "task_execution_role_policy" {
 
 data "aws_region" "current" {}
 
-# Create a task definition with a golang image so the ecs service can be easily
+# Create a task definition with a golang image so the ecs service can be
 # tested. We expect deployments will manage the future container definitions.
 resource "aws_ecs_task_definition" "main" {
   family        = "${var.name}-${var.environment}"
