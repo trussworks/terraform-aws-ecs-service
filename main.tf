@@ -190,7 +190,7 @@ resource "aws_cloudwatch_metric_alarm" "alarm_cpu_no_lb" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "alarm_mem_no_lb" {
-  count = "${var.cloudwatch_alarm_cpu_enable && ! (var.associate_alb || var.associate_nlb) ? 1 : 0}"
+  count = "${var.cloudwatch_alarm_mem_enable && ! (var.associate_alb || var.associate_nlb) ? 1 : 0}"
 
   alarm_name        = "${local.cloudwatch_alarm_name}-mem"
   alarm_description = "Monitors ECS memory Utilization when no load balancer is attached"
