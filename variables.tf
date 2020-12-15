@@ -98,6 +98,12 @@ variable "assign_public_ip" {
   type        = bool
 }
 
+variable "fargate_platform_version" {
+  description = "The platform version on which to run your service. Only applicable when using Fargate launch type."
+  default     = "LATEST"
+  type        = string
+}
+
 variable "fargate_task_cpu" {
   description = "Number of cpu units used in initial task definition. Default is minimum."
   default     = 256

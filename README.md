@@ -108,13 +108,13 @@ module "app_ecs_service" {
 | Name | Version |
 |------|---------|
 | terraform | ~> 0.13 |
-| aws | ~> 2.70 |
+| aws | >= 2.70, < 4.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| aws | ~> 2.70 |
+| aws | >= 2.70, < 4.0 |
 
 ## Inputs
 
@@ -140,6 +140,7 @@ module "app_ecs_service" {
 | ecs\_use\_fargate | Whether to use Fargate for the task definition. | `bool` | `false` | no |
 | ecs\_vpc\_id | VPC ID to be used by ECS. | `string` | n/a | yes |
 | environment | Environment tag, e.g prod. | `string` | n/a | yes |
+| fargate\_platform\_version | The platform version on which to run your service. Only applicable when using Fargate launch type. | `string` | `"LATEST"` | no |
 | fargate\_task\_cpu | Number of cpu units used in initial task definition. Default is minimum. | `number` | `256` | no |
 | fargate\_task\_memory | Amount (in MiB) of memory used in initial task definition. Default is minimum. | `number` | `512` | no |
 | hello\_world\_container\_ports | List of ports for the hello world container app to listen on. The app currently supports listening on two ports. | `list(number)` | <pre>[<br>  8080,<br>  8081<br>]</pre> | no |

@@ -448,7 +448,8 @@ data "aws_ecs_task_definition" "main" {
 }
 
 locals {
-  ecs_service_launch_type = var.ecs_use_fargate ? "FARGATE" : "EC2"
+  ecs_service_launch_type  = var.ecs_use_fargate ? "FARGATE" : "EC2"
+  fargate_platform_version = var.ecs_use_fargate ? var.fargate_platform_version : null
 
   ecs_service_ordered_placement_strategy = {
     EC2 = [
@@ -482,7 +483,8 @@ resource "aws_ecs_service" "main" {
   name    = var.name
   cluster = var.ecs_cluster.arn
 
-  launch_type = local.ecs_service_launch_type
+  launch_type      = local.ecs_service_launch_type
+  platform_version = local.fargate_platform_version
 
   # Use latest active revision
   task_definition = "${aws_ecs_task_definition.main.family}:${max(
@@ -550,7 +552,8 @@ resource "aws_ecs_service" "main_no_lb" {
   name    = var.name
   cluster = var.ecs_cluster.arn
 
-  launch_type = local.ecs_service_launch_type
+  launch_type      = local.ecs_service_launch_type
+  platform_version = local.fargate_platform_version
 
   # Use latest active revision
   task_definition = "${aws_ecs_task_definition.main.family}:${max(
