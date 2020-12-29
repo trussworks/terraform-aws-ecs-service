@@ -107,14 +107,14 @@ module "app_ecs_service" {
 
 | Name | Version |
 |------|---------|
-| terraform | ~> 0.13 |
-| aws | >= 2.70, < 4.0 |
+| terraform | >= 0.13 |
+| aws | >= 3.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| aws | >= 2.70, < 4.0 |
+| aws | >= 3.0 |
 
 ## Inputs
 
