@@ -1,7 +1,7 @@
 locals {
-  awslogs_group         = "${var.logs_cloudwatch_group == "" ? "/ecs/${var.environment}/${var.name}" : var.logs_cloudwatch_group}"
-  target_container_name = "${var.target_container_name == "" ? "${var.name}-${var.environment}" : var.target_container_name}"
-  cloudwatch_alarm_name = "${var.cloudwatch_alarm_name == "" ? "${var.name}-${var.environment}" : var.cloudwatch_alarm_name}"
+  awslogs_group         = var.logs_cloudwatch_group == "" ? "/ecs/${var.environment}/${var.name}" : var.logs_cloudwatch_group
+  target_container_name = var.target_container_name == "" ? "${var.name}-${var.environment}" : var.target_container_name
+  cloudwatch_alarm_name = var.cloudwatch_alarm_name == "" ? "${var.name}-${var.environment}" : var.cloudwatch_alarm_name
 
   # for each target group, allow ingress from the alb to ecs container port
   lb_ingress_container_ports = distinct(
@@ -143,7 +143,7 @@ resource "aws_cloudwatch_metric_alarm" "alarm_mem" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "alarm_cpu_no_lb" {
-  count = var.cloudwatch_alarm_cpu_enable && ! (var.associate_alb || var.associate_nlb) ? 1 : 0
+  count = var.cloudwatch_alarm_cpu_enable && !(var.associate_alb || var.associate_nlb) ? 1 : 0
 
   alarm_name        = "${local.cloudwatch_alarm_name}-cpu"
   alarm_description = "Monitors ECS CPU Utilization when no load balancer is attached"
@@ -164,7 +164,7 @@ resource "aws_cloudwatch_metric_alarm" "alarm_cpu_no_lb" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "alarm_mem_no_lb" {
-  count = var.cloudwatch_alarm_mem_enable && ! (var.associate_alb || var.associate_nlb) ? 1 : 0
+  count = var.cloudwatch_alarm_mem_enable && !(var.associate_alb || var.associate_nlb) ? 1 : 0
 
   alarm_name        = "${local.cloudwatch_alarm_name}-mem"
   alarm_description = "Monitors ECS memory Utilization when no load balancer is attached"
@@ -496,7 +496,7 @@ resource "aws_ecs_service" "main" {
   deployment_minimum_healthy_percent = var.tasks_minimum_healthy_percent
   deployment_maximum_percent         = var.tasks_maximum_percent
 
-  dynamic ordered_placement_strategy {
+  dynamic "ordered_placement_strategy" {
     for_each = local.ecs_service_ordered_placement_strategy[local.ecs_service_launch_type]
 
     content {
@@ -505,7 +505,7 @@ resource "aws_ecs_service" "main" {
     }
   }
 
-  dynamic placement_constraints {
+  dynamic "placement_constraints" {
     for_each = local.ecs_service_placement_constraints[local.ecs_service_launch_type]
 
     content {
@@ -519,7 +519,7 @@ resource "aws_ecs_service" "main" {
     assign_public_ip = var.assign_public_ip
   }
 
-  dynamic load_balancer {
+  dynamic "load_balancer" {
     for_each = var.lb_target_groups
     content {
       container_name   = local.target_container_name
@@ -528,7 +528,7 @@ resource "aws_ecs_service" "main" {
     }
   }
 
-  dynamic service_registries {
+  dynamic "service_registries" {
     for_each = var.service_registries
     content {
       registry_arn   = service_registries.value.registry_arn
@@ -565,7 +565,7 @@ resource "aws_ecs_service" "main_no_lb" {
   deployment_minimum_healthy_percent = var.tasks_minimum_healthy_percent
   deployment_maximum_percent         = var.tasks_maximum_percent
 
-  dynamic ordered_placement_strategy {
+  dynamic "ordered_placement_strategy" {
     for_each = local.ecs_service_ordered_placement_strategy[local.ecs_service_launch_type]
     #    for_each = var.ecs_use_fargate ? [] : ["attribute:ecs.availability-zone", "instanceId"]
 
@@ -575,7 +575,7 @@ resource "aws_ecs_service" "main_no_lb" {
     }
   }
 
-  dynamic placement_constraints {
+  dynamic "placement_constraints" {
     for_each = local.ecs_service_placement_constraints[local.ecs_service_launch_type]
     #    for_each = var.ecs_use_fargate ? [] : ["distinctInstance"]
 
@@ -590,7 +590,7 @@ resource "aws_ecs_service" "main_no_lb" {
     assign_public_ip = var.assign_public_ip
   }
 
-  dynamic service_registries {
+  dynamic "service_registries" {
     for_each = var.service_registries
     content {
       registry_arn   = service_registries.value.registry_arn

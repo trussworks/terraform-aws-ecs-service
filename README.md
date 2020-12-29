@@ -25,8 +25,6 @@ Terraform 0.13. Pin module version to ~> 4.0. Submit pull-requests to master bra
 
 Terraform 0.12. Pin module version to ~> 3.0. Submit pull-requests to terraform012 branch.
 
-Terraform 0.11. Pin module version to ~> 1.14. Submit pull-requests to terraform011 branch.
-
 ## Usage
 
 ### ECS service associated with an Application Load Balancer (ALB)
@@ -107,14 +105,14 @@ module "app_ecs_service" {
 
 | Name | Version |
 |------|---------|
-| terraform | ~> 0.13 |
-| aws | >= 2.70, < 4.0 |
+| terraform | >= 0.13 |
+| aws | >= 3.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| aws | >= 2.70, < 4.0 |
+| aws | >= 3.0 |
 
 ## Inputs
 
