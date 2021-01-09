@@ -314,7 +314,9 @@ data "aws_iam_policy_document" "instance_role_policy_doc" {
       "logs:PutLogEvents",
     ]
 
-    resources = [aws_cloudwatch_log_group.main.arn]
+    # Ensure that the arn always includes a ':*' suffix to be compatible with both AWS 2.x and 3.x providers
+    # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/guides/version-3-upgrade#removal-of-arn-wildcard-suffix
+    resources = ["${replace(aws_cloudwatch_log_group.main.arn, "/:\\*$/", "")}:*"]
   }
 
   statement {
@@ -366,7 +368,7 @@ data "aws_iam_policy_document" "task_execution_role_policy_doc" {
       "logs:PutLogEvents",
     ]
 
-    resources = [aws_cloudwatch_log_group.main.arn]
+    resources = ["${replace(aws_cloudwatch_log_group.main.arn, "/:\\*$/", "")}:*"]
   }
 
   statement {
