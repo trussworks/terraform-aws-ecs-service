@@ -29,6 +29,9 @@ func main() {
 		panic(err)
 	}
 
+	log.Print("Starting default hello world go container...")
+	log.Print("Hello World")
+
 	finish := make(chan bool)
 
 	server1 := http.NewServeMux()
