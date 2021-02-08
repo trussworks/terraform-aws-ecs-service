@@ -28,7 +28,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
 	log.Print("Starting default hello world go container...")
 	log.Print("Hello World")
 
