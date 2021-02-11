@@ -101,7 +101,7 @@ resource "aws_cloudwatch_log_group" "main" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "alarm_cpu" {
-  count = var.cloudwatch_alarm_cpu_enable && (var.associate_alb || var.associate_nlb) ? 1 : 0
+  count = var.cloudwatch_alarm_cpu_enable ? 1 : 0
 
   alarm_name        = "${local.cloudwatch_alarm_name}-cpu"
   alarm_description = "Monitors ECS CPU Utilization"
@@ -117,12 +117,12 @@ resource "aws_cloudwatch_metric_alarm" "alarm_cpu" {
 
   dimensions = {
     "ClusterName" = var.ecs_cluster.name
-    "ServiceName" = aws_ecs_service.main[count.index].name
+    "ServiceName" = aws_ecs_service.main.name
   }
 }
 
 resource "aws_cloudwatch_metric_alarm" "alarm_mem" {
-  count = var.cloudwatch_alarm_mem_enable && (var.associate_alb || var.associate_nlb) ? 1 : 0
+  count = var.cloudwatch_alarm_mem_enable ? 1 : 0
 
   alarm_name        = "${local.cloudwatch_alarm_name}-mem"
   alarm_description = "Monitors ECS memory Utilization"
@@ -138,49 +138,7 @@ resource "aws_cloudwatch_metric_alarm" "alarm_mem" {
 
   dimensions = {
     "ClusterName" = var.ecs_cluster.name
-    "ServiceName" = aws_ecs_service.main[count.index].name
-  }
-}
-
-resource "aws_cloudwatch_metric_alarm" "alarm_cpu_no_lb" {
-  count = var.cloudwatch_alarm_cpu_enable && !(var.associate_alb || var.associate_nlb) ? 1 : 0
-
-  alarm_name        = "${local.cloudwatch_alarm_name}-cpu"
-  alarm_description = "Monitors ECS CPU Utilization when no load balancer is attached"
-  alarm_actions     = var.cloudwatch_alarm_actions
-
-  comparison_operator = "GreaterThanOrEqualToThreshold"
-  evaluation_periods  = "2"
-  metric_name         = "CPUUtilization"
-  namespace           = "AWS/ECS"
-  period              = "120"
-  statistic           = "Average"
-  threshold           = var.cloudwatch_alarm_cpu_threshold
-
-  dimensions = {
-    "ClusterName" = var.ecs_cluster.name
-    "ServiceName" = aws_ecs_service.main_no_lb[count.index].name
-  }
-}
-
-resource "aws_cloudwatch_metric_alarm" "alarm_mem_no_lb" {
-  count = var.cloudwatch_alarm_mem_enable && !(var.associate_alb || var.associate_nlb) ? 1 : 0
-
-  alarm_name        = "${local.cloudwatch_alarm_name}-mem"
-  alarm_description = "Monitors ECS memory Utilization when no load balancer is attached"
-  alarm_actions     = var.cloudwatch_alarm_actions
-
-  comparison_operator = "GreaterThanOrEqualToThreshold"
-  evaluation_periods  = "2"
-  metric_name         = "MemoryUtilization"
-  namespace           = "AWS/ECS"
-  period              = "120"
-  statistic           = "Average"
-  threshold           = var.cloudwatch_alarm_mem_threshold
-
-  dimensions = {
-    "ClusterName" = var.ecs_cluster.name
-    "ServiceName" = aws_ecs_service.main_no_lb[count.index].name
+    "ServiceName" = aws_ecs_service.main.name
   }
 }
 
@@ -478,8 +436,6 @@ locals {
 }
 
 resource "aws_ecs_service" "main" {
-  count = var.associate_alb || var.associate_nlb ? 1 : 0
-
   name    = var.name
   cluster = var.ecs_cluster.arn
 
@@ -520,74 +476,12 @@ resource "aws_ecs_service" "main" {
   }
 
   dynamic "load_balancer" {
-    for_each = var.lb_target_groups
+    for_each = var.associate_alb || var.associate_nlb ? var.lb_target_groups : []
     content {
       container_name   = local.target_container_name
       target_group_arn = load_balancer.value.lb_target_group_arn
       container_port   = load_balancer.value.container_port
     }
-  }
-
-  dynamic "service_registries" {
-    for_each = var.service_registries
-    content {
-      registry_arn   = service_registries.value.registry_arn
-      container_name = service_registries.value.container_name
-      container_port = service_registries.value.container_port
-      port           = service_registries.value.port
-    }
-  }
-
-  lifecycle {
-    ignore_changes = [task_definition]
-  }
-}
-
-# NOTE: We have to duplicate this resource with a count instead of parameterizing
-# the load_balancer argument due to this Terraform bug:
-# https://github.com/hashicorp/terraform/issues/16856
-resource "aws_ecs_service" "main_no_lb" {
-  count = var.associate_alb || var.associate_nlb ? 0 : 1
-
-  name    = var.name
-  cluster = var.ecs_cluster.arn
-
-  launch_type      = local.ecs_service_launch_type
-  platform_version = local.fargate_platform_version
-
-  # Use latest active revision
-  task_definition = "${aws_ecs_task_definition.main.family}:${max(
-    aws_ecs_task_definition.main.revision,
-    data.aws_ecs_task_definition.main.revision,
-  )}"
-
-  desired_count                      = var.tasks_desired_count
-  deployment_minimum_healthy_percent = var.tasks_minimum_healthy_percent
-  deployment_maximum_percent         = var.tasks_maximum_percent
-
-  dynamic "ordered_placement_strategy" {
-    for_each = local.ecs_service_ordered_placement_strategy[local.ecs_service_launch_type]
-    #    for_each = var.ecs_use_fargate ? [] : ["attribute:ecs.availability-zone", "instanceId"]
-
-    content {
-      type  = ordered_placement_strategy.value.type
-      field = ordered_placement_strategy.value.field
-    }
-  }
-
-  dynamic "placement_constraints" {
-    for_each = local.ecs_service_placement_constraints[local.ecs_service_launch_type]
-    #    for_each = var.ecs_use_fargate ? [] : ["distinctInstance"]
-
-    content {
-      type = placement_constraints.value.type
-    }
-  }
-
-  network_configuration {
-    subnets          = var.ecs_subnet_ids
-    security_groups  = local.ecs_service_agg_security_groups
-    assign_public_ip = var.assign_public_ip
   }
 
   dynamic "service_registries" {
