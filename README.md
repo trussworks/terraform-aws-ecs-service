@@ -179,10 +179,26 @@ module "app_ecs_service" {
 In versions 4.x and prior, the following resources existed as arrays (toggled by a `count` meta-argument). With 5.0.0, each pair has been merged into a single resource.
 
 * `aws_cloudwatch_metric_alarm.alarm_cpu[0]` xor `aws_cloudwatch_metric_alarm.alarm_cpu_no_lb[0]` -> `aws_cloudwatch_metric_alarm.alarm_cpu`
-* `aws_cloudwatch_metric_alarm.alarm_mem[0]` xor `aws_cloudwatch_metric_alarm.alarm_mem_no_lb[0]` -> `aws_cloudwatch_metric_alarm.alarm_cpu`
+* `aws_cloudwatch_metric_alarm.alarm_mem[0]` xor `aws_cloudwatch_metric_alarm.alarm_mem_no_lb[0]` -> `aws_cloudwatch_metric_alarm.alarm_mem`
 * `aws_ecs_service.main[0]` xor `aws_ecs_service.main_no_lb[0]` -> `aws_ecs_service.main`
 
-To upgrade to 5.0.0, you will need to perform a `terraform mv` for any affected resources to avoid destruction and recreation. Alternatively, you can let Terraform delete/recreate the deployed resources.
+To upgrade to 5.0.0, you will need to perform a `terraform state mv` for any affected resources to avoid destruction and recreation. Alternatively, you can let Terraform delete/recreate the deployed resources.
+
+For example, if you are using this module and naming it `example`, you could run one or more of the commands as appropriate given your environment:
+
+```bash
+# Example alarm_cpu state mv commands (pick the relevant one for your environment):
+terraform state mv 'module.example.aws_cloudwatch_metric_alarm.alarm_cpu[0]' 'module.example.aws_cloudwatch_metric_alarm.alarm_cpu'
+terraform state mv 'module.example.aws_cloudwatch_metric_alarm.alarm_cpu_no_lb[0]' 'module.example.aws_cloudwatch_metric_alarm.alarm_cpu'
+
+# Example alarm_mem state mv commands (pick the relevant one for your environment):
+terraform state mv 'module.example.aws_cloudwatch_metric_alarm.alarm_mem[0]' 'module.example.aws_cloudwatch_metric_alarm.alarm_mem'
+terraform state mv 'module.example.aws_cloudwatch_metric_alarm.alarm_mem_no_lb[0]' 'module.example.aws_cloudwatch_metric_alarm.alarm_mem'
+
+# Example main state mv commands (pick the relevant one for your environment):
+terraform state mv 'module.example.aws_ecs_service.main[0]' 'module.example.aws_ecs_service.main'
+terraform state mv 'module.example.aws_ecs_service.main_no_lb[0]' 'module.example.aws_ecs_service.main'
+```
 
 ### 3.x to 4.x
 
