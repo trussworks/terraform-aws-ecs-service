@@ -21,7 +21,7 @@ definitions going forward, not Terraform.
 
 ## Terraform Versions
 
-Terraform 0.13 and 0.14. Pin module version to ~> 5.0. Submit pull-requests to master branch.
+Terraform 0.13 and 0.14. Pin module version to ~> 6.0. Submit pull-requests to master branch.
 
 Terraform 0.12 is deprecated.
 
@@ -174,15 +174,15 @@ module "app_ecs_service" {
 
 ## Upgrade Path
 
-### 4.x to 5.0.0
+### 5.x.x to 6.0.0
 
-In versions 4.x and prior, the following resources existed as arrays (toggled by a `count` meta-argument). With 5.0.0, each pair has been merged into a single resource.
+In versions 5.x.x and prior, the following resources existed as arrays (toggled by a `count` meta-argument). With 6.0.0, each pair has been merged into a single resource.
 
 * `aws_cloudwatch_metric_alarm.alarm_cpu[0]` xor `aws_cloudwatch_metric_alarm.alarm_cpu_no_lb[0]` -> `aws_cloudwatch_metric_alarm.alarm_cpu`
 * `aws_cloudwatch_metric_alarm.alarm_mem[0]` xor `aws_cloudwatch_metric_alarm.alarm_mem_no_lb[0]` -> `aws_cloudwatch_metric_alarm.alarm_mem`
 * `aws_ecs_service.main[0]` xor `aws_ecs_service.main_no_lb[0]` -> `aws_ecs_service.main`
 
-To upgrade to 5.0.0, you will need to perform a `terraform state mv` for any affected resources to avoid destruction and recreation. Alternatively, you can let Terraform delete/recreate the deployed resources.
+To upgrade to 6.0.0, you will need to perform a `terraform state mv` for any affected resources to avoid destruction and recreation. Alternatively, you can let Terraform delete/recreate the deployed resources.
 
 For example, if you are using this module and naming it `example`, you could run one or more of the commands as appropriate given your environment:
 
@@ -200,13 +200,21 @@ terraform state mv 'module.example.aws_ecs_service.main[0]' 'module.example.aws_
 terraform state mv 'module.example.aws_ecs_service.main_no_lb[0]' 'module.example.aws_ecs_service.main'
 ```
 
-### 3.x to 4.x
+### 5.x.x to 5.1.1
 
-3.x uses Terraform 0.12.x and 4.x uses Terraform 0.13.x, so this requires upgrading any code that uses this module to Terraform 0.13.x
+With 5.1.1, the `hashicorp/aws` provider must be a minimum version of 3.0. It no longer has a maximum version. Therefore any code calling this will need to accomodate for that minimum version change.
+
+### 4.0.0 to 5.0.0
+
+Prior to 5.x, the `hashicorp/aws` provider required the use of version 2.70. 5.x changes the `hashicorp/aws` provider so that it can be greater than or equal to 2.70, but must be less than 4.0. Therefore any code calling this will need to accomodate for that version change.
+
+### 3.x.x to 4.0.0
+
+3.x.x uses Terraform 0.12.x and 4.0.0 uses Terraform 0.13.x, so this requires upgrading any code that uses this module to Terraform 0.13.x.
 
 ### 2.x.x to 3.0.0
 
-In 3.0.0 the module added support for multiple load balancer target groups. To support this change, `container_port`, `container_health_check_port` and `lb_target_group` are being replaced with `lb_target_groups`
+In 3.0.0 the module added support for multiple load balancer target groups. To support this change, `container_port`, `container_health_check_port` and `lb_target_group` are being replaced with `lb_target_groups`.
 
 #### Without a load balancer
 
@@ -216,7 +224,7 @@ If you are using this module without an ALB or NLB then you can remove any refer
 
 If you are using an NLB or NLB target groups with this module then you will need replace the values of `container_port`, `container_health_check_port` and `lb_target_group` with
 
-Below is an example of how the module would be instantiated prior to version 3.0.0
+Below is an example of how the module would be instantiated prior to version 3.0.0:
 
 ```hcl
 module "app_ecs_service" {
