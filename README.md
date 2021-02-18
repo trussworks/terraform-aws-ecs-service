@@ -44,7 +44,7 @@ module "app_ecs_service" {
 
   associate_alb      = true
   alb_security_group = module.security_group.id
-  target_groups =
+  lb_target_groups =
   [
     {
       container_port              = 8443
