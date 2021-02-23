@@ -216,3 +216,9 @@ variable "service_registries" {
   }))
   default = []
 }
+
+variable "manage_ecs_security_group" {
+  description = "Enable creation and management of the ECS security group and rules"
+  default     = true
+  type        = bool
+}

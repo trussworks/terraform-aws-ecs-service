@@ -147,6 +147,7 @@ resource "aws_cloudwatch_metric_alarm" "alarm_mem" {
 #
 
 resource "aws_security_group" "ecs_sg" {
+  count       = var.manage_ecs_security_group ? 1 : 0
   name        = "ecs-${var.name}-${var.environment}"
   description = "${var.name}-${var.environment} container security group"
   vpc_id      = var.ecs_vpc_id
@@ -159,8 +160,9 @@ resource "aws_security_group" "ecs_sg" {
 }
 
 resource "aws_security_group_rule" "app_ecs_allow_outbound" {
+  count             = var.manage_ecs_security_group ? 1 : 0
   description       = "All outbound"
-  security_group_id = aws_security_group.ecs_sg.id
+  security_group_id = aws_security_group.ecs_sg[0].id
 
   type        = "egress"
   from_port   = 0
@@ -172,10 +174,10 @@ resource "aws_security_group_rule" "app_ecs_allow_outbound" {
 resource "aws_security_group_rule" "app_ecs_allow_https_from_alb" {
   # if we have an alb, then create security group rules for the container
   # ports
-  count = var.associate_alb ? length(local.lb_ingress_container_ports) : 0
+  count = var.manage_ecs_security_group && var.associate_alb ? length(local.lb_ingress_container_ports) : 0
 
   description       = "Allow in ALB"
-  security_group_id = aws_security_group.ecs_sg.id
+  security_group_id = aws_security_group.ecs_sg[0].id
 
   type                     = "ingress"
   from_port                = element(local.lb_ingress_container_ports, count.index)
@@ -187,10 +189,10 @@ resource "aws_security_group_rule" "app_ecs_allow_https_from_alb" {
 resource "aws_security_group_rule" "app_ecs_allow_health_check_from_alb" {
   # if we have an alb, then create security group rules for the container
   # health check ports
-  count = var.associate_alb ? length(local.lb_ingress_container_health_check_ports) : 0
+  count = var.manage_ecs_security_group && var.associate_alb ? length(local.lb_ingress_container_health_check_ports) : 0
 
   description       = "Allow in health check from ALB"
-  security_group_id = aws_security_group.ecs_sg.id
+  security_group_id = aws_security_group.ecs_sg[0].id
 
   type                     = "ingress"
   from_port                = element(local.lb_ingress_container_health_check_ports, count.index)
@@ -200,10 +202,10 @@ resource "aws_security_group_rule" "app_ecs_allow_health_check_from_alb" {
 }
 
 resource "aws_security_group_rule" "app_ecs_allow_tcp_from_nlb" {
-  count = var.associate_nlb ? length(local.lb_ingress_container_ports) : 0
+  count = var.manage_ecs_security_group && var.associate_nlb ? length(local.lb_ingress_container_ports) : 0
 
   description       = "Allow in NLB"
-  security_group_id = aws_security_group.ecs_sg.id
+  security_group_id = aws_security_group.ecs_sg[0].id
 
   type        = "ingress"
   from_port   = element(local.lb_ingress_container_ports, count.index)
@@ -213,10 +215,10 @@ resource "aws_security_group_rule" "app_ecs_allow_tcp_from_nlb" {
 }
 
 resource "aws_security_group_rule" "app_ecs_allow_health_check_from_nlb" {
-  count = var.associate_nlb ? length(local.lb_ingress_container_health_check_ports) : 0
+  count = var.manage_ecs_security_group && var.associate_nlb ? length(local.lb_ingress_container_health_check_ports) : 0
 
   description       = "Allow in health check from NLB"
-  security_group_id = aws_security_group.ecs_sg.id
+  security_group_id = aws_security_group.ecs_sg[0].id
 
   type        = "ingress"
   from_port   = element(local.lb_ingress_container_health_check_ports, count.index)
@@ -432,7 +434,7 @@ locals {
     FARGATE = []
   }
 
-  ecs_service_agg_security_groups = compact(concat(list(aws_security_group.ecs_sg.id), var.additional_security_group_ids))
+  ecs_service_agg_security_groups = var.manage_ecs_security_group ? compact(concat(list(aws_security_group.ecs_sg[0].id), var.additional_security_group_ids)) : compact(var.additional_security_group_ids)
 }
 
 resource "aws_ecs_service" "main" {
