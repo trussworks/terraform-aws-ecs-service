@@ -216,3 +216,9 @@ variable "service_registries" {
   }))
   default = []
 }
+
+variable "health_check_grace_period_seconds" {
+  description = "Grace period within which failed health checks will be ignored at container start. Only applies to services with an attached loadbalancer."
+  default     = null
+  type        = number
+}
