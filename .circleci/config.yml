@@ -1,5 +1,5 @@
 references:
-  circleci_docker: &circleci_docker trussworks/circleci:efb1042e31538677779971798e0912390f699e72
+  circleci_docker: &circleci_docker trussworks/circleci:f697f3f2436b7516571f27f234d82ad1657bcc1d
 jobs:
   terratest:
     docker:
