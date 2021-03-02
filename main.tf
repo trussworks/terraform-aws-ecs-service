@@ -486,6 +486,8 @@ resource "aws_ecs_service" "main" {
     }
   }
 
+  health_check_grace_period_seconds = var.associate_alb || var.associate_nlb ? var.health_check_grace_period_seconds : null
+
   dynamic "service_registries" {
     for_each = var.service_registries
     content {
