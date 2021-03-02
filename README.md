@@ -114,6 +114,26 @@ module "app_ecs_service" {
 |------|---------|
 | aws | >= 3.0 |
 
+## Modules
+
+No Modules.
+
+## Resources
+
+| Name |
+|------|
+| [aws_cloudwatch_log_group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) |
+| [aws_cloudwatch_metric_alarm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_metric_alarm) |
+| [aws_ecs_service](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_service) |
+| [aws_ecs_task_definition](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ecs_task_definition) |
+| [aws_ecs_task_definition](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_task_definition) |
+| [aws_iam_policy_document](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) |
+| [aws_iam_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) |
+| [aws_iam_role_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) |
+| [aws_region](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) |
+| [aws_security_group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) |
+| [aws_security_group_rule](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule) |
+
 ## Inputs
 
 | Name | Description | Type | Default | Required |
@@ -141,6 +161,7 @@ module "app_ecs_service" {
 | fargate\_platform\_version | The platform version on which to run your service. Only applicable when using Fargate launch type. | `string` | `"LATEST"` | no |
 | fargate\_task\_cpu | Number of cpu units used in initial task definition. Default is minimum. | `number` | `256` | no |
 | fargate\_task\_memory | Amount (in MiB) of memory used in initial task definition. Default is minimum. | `number` | `512` | no |
+| health\_check\_grace\_period\_seconds | Grace period within which failed health checks will be ignored at container start. Only applies to services with an attached loadbalancer. | `number` | `null` | no |
 | hello\_world\_container\_ports | List of ports for the hello world container app to listen on. The app currently supports listening on two ports. | `list(number)` | <pre>[<br>  8080,<br>  8081<br>]</pre> | no |
 | kms\_key\_id | KMS customer managed key (CMK) ARN for encrypting application logs. | `string` | n/a | yes |
 | lb\_target\_groups | List of load balancer target group objects containing the lb\_target\_group\_arn, container\_port and container\_health\_check\_port. The container\_port is the port on which the container will receive traffic. The container\_health\_check\_port is an additional port on which the container can receive a health check. The lb\_target\_group\_arn is either Application Load Balancer (ALB) or Network Load Balancer (NLB) target group ARN tasks will register with. | <pre>list(<br>    object({<br>      container_port              = number<br>      container_health_check_port = number<br>      lb_target_group_arn         = string<br>      }<br>    )<br>  )</pre> | `[]` | no |
@@ -169,7 +190,6 @@ module "app_ecs_service" {
 | task\_role | The IAM role object assumed by Amazon ECS container tasks. |
 | task\_role\_arn | The ARN of the IAM role assumed by Amazon ECS container tasks. |
 | task\_role\_name | The name of the IAM role assumed by Amazon ECS container tasks. |
-
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 
 ## Upgrade Path
