@@ -191,6 +191,7 @@ No modules.
 | <a name="output_awslogs_group"></a> [awslogs\_group](#output\_awslogs\_group) | Name of the CloudWatch Logs log group containers should use. |
 | <a name="output_awslogs_group_arn"></a> [awslogs\_group\_arn](#output\_awslogs\_group\_arn) | ARN of the CloudWatch Logs log group containers should use. |
 | <a name="output_ecs_security_group_id"></a> [ecs\_security\_group\_id](#output\_ecs\_security\_group\_id) | Security Group ID assigned to the ECS tasks. |
+| <a name="output_ecs_service_id"></a> [ecs\_service\_id](#output\_ecs\_service\_id) | ARN of the ECS service. |
 | <a name="output_task_definition_arn"></a> [task\_definition\_arn](#output\_task\_definition\_arn) | Full ARN of the Task Definition (including both family and revision). |
 | <a name="output_task_definition_family"></a> [task\_definition\_family](#output\_task\_definition\_family) | The family of the Task Definition. |
 | <a name="output_task_execution_role"></a> [task\_execution\_role](#output\_task\_execution\_role) | The role object of the task execution role that the Amazon ECS container agent and the Docker daemon can assume. |
