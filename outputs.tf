@@ -53,3 +53,7 @@ output "awslogs_group_arn" {
   value       = aws_cloudwatch_log_group.main.arn
 }
 
+output "ecs_service_id" {
+  description = "ARN of the ECS service."
+  value       = aws_ecs_service.main.id
+}
