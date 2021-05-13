@@ -92,6 +92,12 @@ variable "ecs_subnet_ids" {
   type        = list(string)
 }
 
+variable "ec2_create_task_execution_role" {
+  description = "Set to true to create ecs task execution role to ECS EC2 Tasks."
+  type        = bool
+  default     = false
+}
+
 variable "assign_public_ip" {
   description = "Whether this instance should be accessible from the public internet. Default is false."
   default     = false

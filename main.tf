@@ -352,14 +352,14 @@ resource "aws_iam_role" "task_role" {
 }
 
 resource "aws_iam_role" "task_execution_role" {
-  count = var.ecs_use_fargate ? 1 : 0
+  count = var.ecs_use_fargate ? 1 : var.ec2_create_task_execution_role ? 1 : 0
 
   name               = "ecs-task-execution-role-${var.name}-${var.environment}"
   assume_role_policy = data.aws_iam_policy_document.ecs_assume_role_policy.json
 }
 
 resource "aws_iam_role_policy" "task_execution_role_policy" {
-  count = var.ecs_use_fargate ? 1 : 0
+  count = var.ecs_use_fargate ? 1 : var.ec2_create_task_execution_role ? 1 : 0
 
   name   = "${aws_iam_role.task_execution_role[0].name}-policy"
   role   = aws_iam_role.task_execution_role[0].name
