@@ -434,7 +434,7 @@ locals {
     FARGATE = []
   }
 
-  ecs_service_agg_security_groups = var.manage_ecs_security_group ? compact(concat(list(aws_security_group.ecs_sg[0].id), var.additional_security_group_ids)) : compact(var.additional_security_group_ids)
+  ecs_service_agg_security_groups = var.manage_ecs_security_group ? compact(concat(tolist([aws_security_group.ecs_sg[0].id]), var.additional_security_group_ids)) : compact(var.additional_security_group_ids)
 }
 
 resource "aws_ecs_service" "main" {
