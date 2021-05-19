@@ -217,6 +217,12 @@ variable "service_registries" {
   default = []
 }
 
+variable "manage_ecs_security_group" {
+  description = "Enable creation and management of the ECS security group and rules"
+  default     = true
+  type        = bool
+}
+
 variable "health_check_grace_period_seconds" {
   description = "Grace period within which failed health checks will be ignored at container start. Only applies to services with an attached loadbalancer."
   default     = null
