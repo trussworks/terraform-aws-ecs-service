@@ -160,6 +160,7 @@ No modules.
 | <a name="input_cloudwatch_alarm_name"></a> [cloudwatch\_alarm\_name](#input\_cloudwatch\_alarm\_name) | Generic name used for CPU and Memory Cloudwatch Alarms | `string` | `""` | no |
 | <a name="input_container_definitions"></a> [container\_definitions](#input\_container\_definitions) | Container definitions provided as valid JSON document. Default uses golang:alpine running a simple hello world. | `string` | `""` | no |
 | <a name="input_container_image"></a> [container\_image](#input\_container\_image) | The image of the container. | `string` | `"golang:alpine"` | no |
+| <a name="input_ec2_create_task_execution_role"></a> [ec2\_create\_task\_execution\_role](#input\_ec2\_create\_task\_execution\_role) | Set to true to create ecs task execution role to ECS EC2 Tasks. | `bool` | `false` | no |
 | <a name="input_ecr_repo_arns"></a> [ecr\_repo\_arns](#input\_ecr\_repo\_arns) | The ARNs of the ECR repos.  By default, allows all repositories. | `list(string)` | <pre>[<br>  "*"<br>]</pre> | no |
 | <a name="input_ecs_cluster"></a> [ecs\_cluster](#input\_ecs\_cluster) | ECS cluster object for this task. | <pre>object({<br>    arn  = string<br>    name = string<br>  })</pre> | n/a | yes |
 | <a name="input_ecs_instance_role"></a> [ecs\_instance\_role](#input\_ecs\_instance\_role) | The name of the ECS instance role. | `string` | `""` | no |
