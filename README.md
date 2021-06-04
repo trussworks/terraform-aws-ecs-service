@@ -160,6 +160,7 @@ No modules.
 | <a name="input_cloudwatch_alarm_name"></a> [cloudwatch\_alarm\_name](#input\_cloudwatch\_alarm\_name) | Generic name used for CPU and Memory Cloudwatch Alarms | `string` | `""` | no |
 | <a name="input_container_definitions"></a> [container\_definitions](#input\_container\_definitions) | Container definitions provided as valid JSON document. Default uses golang:alpine running a simple hello world. | `string` | `""` | no |
 | <a name="input_container_image"></a> [container\_image](#input\_container\_image) | The image of the container. | `string` | `"golang:alpine"` | no |
+| <a name="input_ec2_create_task_execution_role"></a> [ec2\_create\_task\_execution\_role](#input\_ec2\_create\_task\_execution\_role) | Set to true to create ecs task execution role to ECS EC2 Tasks. | `bool` | `false` | no |
 | <a name="input_ecr_repo_arns"></a> [ecr\_repo\_arns](#input\_ecr\_repo\_arns) | The ARNs of the ECR repos.  By default, allows all repositories. | `list(string)` | <pre>[<br>  "*"<br>]</pre> | no |
 | <a name="input_ecs_cluster"></a> [ecs\_cluster](#input\_ecs\_cluster) | ECS cluster object for this task. | <pre>object({<br>    arn  = string<br>    name = string<br>  })</pre> | n/a | yes |
 | <a name="input_ecs_instance_role"></a> [ecs\_instance\_role](#input\_ecs\_instance\_role) | The name of the ECS instance role. | `string` | `""` | no |
@@ -170,7 +171,6 @@ No modules.
 | <a name="input_fargate_platform_version"></a> [fargate\_platform\_version](#input\_fargate\_platform\_version) | The platform version on which to run your service. Only applicable when using Fargate launch type. | `string` | `"LATEST"` | no |
 | <a name="input_fargate_task_cpu"></a> [fargate\_task\_cpu](#input\_fargate\_task\_cpu) | Number of cpu units used in initial task definition. Default is minimum. | `number` | `256` | no |
 | <a name="input_fargate_task_memory"></a> [fargate\_task\_memory](#input\_fargate\_task\_memory) | Amount (in MiB) of memory used in initial task definition. Default is minimum. | `number` | `512` | no |
-| <a name="input_ec2_create_task_execution_role"></a> [ec2\_create\_task\_execution\_role](#ec2\_create\_task\_execution\_role) | Set to true to create ecs task execution role to ECS EC2 Tasks. Default is false. | `bool` | `false` | no |
 | <a name="input_health_check_grace_period_seconds"></a> [health\_check\_grace\_period\_seconds](#input\_health\_check\_grace\_period\_seconds) | Grace period within which failed health checks will be ignored at container start. Only applies to services with an attached loadbalancer. | `number` | `null` | no |
 | <a name="input_hello_world_container_ports"></a> [hello\_world\_container\_ports](#input\_hello\_world\_container\_ports) | List of ports for the hello world container app to listen on. The app currently supports listening on two ports. | `list(number)` | <pre>[<br>  8080,<br>  8081<br>]</pre> | no |
 | <a name="input_kms_key_id"></a> [kms\_key\_id](#input\_kms\_key\_id) | KMS customer managed key (CMK) ARN for encrypting application logs. | `string` | n/a | yes |
