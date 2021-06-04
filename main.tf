@@ -352,8 +352,8 @@ resource "aws_iam_role" "task_role" {
 }
 
 resource "aws_iam_role" "task_execution_role" {
-  # if using fargate, create aws_iam_role resource
-  # if not using fargate, check whether value of ec2_create_task_execution_role is True/False.
+  # if ecs_use_fargate is True, create aws_iam_role resource
+  # if ecs_use_fargate is False, check whether value of ec2_create_task_execution_role is True/False.
   # if True, set to 1 creating the resource, if False, set to 0, not creating the resource
   count = var.ecs_use_fargate ? 1 : var.ec2_create_task_execution_role ? 1 : 0
 
@@ -362,8 +362,8 @@ resource "aws_iam_role" "task_execution_role" {
 }
 
 resource "aws_iam_role_policy" "task_execution_role_policy" {
-  # if using fargate, create aws_iam_role_policy resource
-  # if not using fargate, check whether value of ec2_create_task_execution_role is True/False.
+  # if ecs_use_fargate is True, create aws_iam_role_policy resource
+  # if ecs_use_fargate is False, check whether value of ec2_create_task_execution_role is True/False.
   # if True, set to 1 creating the resource, if False, set to 0, not creating the resource
   count = var.ecs_use_fargate ? 1 : var.ec2_create_task_execution_role ? 1 : 0
 
