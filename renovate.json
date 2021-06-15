@@ -2,13 +2,17 @@
   "extends": [
     "config:base"
   ],
+  "labels": [
+    "dependencies"
+  ],
   "packageRules": [
     {
       "automerge": true,
       "matchUpdateTypes": [
         "patch",
         "pin",
-        "digest"
+        "digest",
+        "minor"
       ]
     },
     {
@@ -20,6 +24,9 @@
         "minor"
       ]
     }
+  ],
+  "postUpdateOptions": [
+    "gomodTidy"
   ],
   "prConcurrentLimit": 2,
   "schedule": [
