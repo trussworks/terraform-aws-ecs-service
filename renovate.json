@@ -16,9 +16,11 @@
       ]
     },
     {
-      "groupName": "terraform",
+      "groupName": "dependencies",
       "managers": [
-        "terraform"
+        "terraform",
+        "gomod",
+        "pre-commit"
       ],
       "matchUpdateTypes": [
         "minor"
