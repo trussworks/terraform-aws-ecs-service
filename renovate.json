@@ -23,7 +23,8 @@
         "pre-commit"
       ],
       "matchUpdateTypes": [
-        "minor"
+        "minor",
+        "patch"
       ]
     }
   ],
