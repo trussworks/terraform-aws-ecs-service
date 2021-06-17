@@ -1,0 +1,41 @@
+{
+  "extends": [
+    "config:base"
+  ],
+  "labels": [
+    "dependencies"
+  ],
+  "packageRules": [
+    {
+      "automerge": true,
+      "matchUpdateTypes": [
+        "patch",
+        "pin",
+        "digest",
+        "minor"
+      ]
+    },
+    {
+      "groupName": "dependencies",
+      "managers": [
+        "terraform",
+        "gomod",
+        "pre-commit"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ]
+    }
+  ],
+  "postUpdateOptions": [
+    "gomodTidy"
+  ],
+  "prConcurrentLimit": 2,
+  "schedule": [
+    "every weekday",
+    "after 9am and before 5pm"
+  ],
+  "separateMinorPatch": true,
+  "timezone": "America/Los_Angeles"
+}
