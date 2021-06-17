@@ -16,6 +16,7 @@
       ]
     },
     {
+      "automerge": true,
       "groupName": "dependencies",
       "managers": [
         "terraform",
