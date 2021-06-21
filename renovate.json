@@ -16,6 +16,14 @@
       ]
     },
     {
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "reviewers": [
+        "team:waddlers"
+      ]
+    },
+    {
       "automerge": true,
       "groupName": "dependencies",
       "managers": [
