@@ -15,23 +15,15 @@ import (
 
 // Retrieve tasks associated with a cluster
 func GetTasks(t *testing.T, region string, clusterName string) *ecs.ListTasksOutput {
-	taskList, err := GetTasksE(t, region, clusterName)
-	require.NoError(t, err)
-	return taskList
-}
-
-func GetTasksE(t *testing.T, region string, clusterName string) (*ecs.ListTasksOutput, error) {
 	var returnTaskList *ecs.ListTasksOutput
 	ecsClient, err := aws.NewEcsClientE(t, region)
-	if err != nil {
-		return returnTaskList, err
-	}
+	require.Nil(t, err, "Error creating ECS client")
 
 	params := &ecs.ListTasksInput{
 		Cluster: awssdk.String(clusterName),
 	}
 
-	// Need to spin and wait to allow time for resources to get up
+	// Need to spin and wait 30s to allow time for resources to get up
 	maxRetries := 3
 	retryDuration, _ := time.ParseDuration("30s")
 	_, err = retry.DoWithRetryE(t, "Get tasks", maxRetries, retryDuration,
@@ -45,32 +37,23 @@ func GetTasksE(t *testing.T, region string, clusterName string) (*ecs.ListTasksO
 			return "Retrieved tasks", nil
 		},
 	)
-	if err != nil {
-		return returnTaskList, err
-	}
+	require.Nil(t, err, err)
 
-	return returnTaskList, nil
+	return returnTaskList
 }
 
 // Retrieve ENI from task ARNs and cluster
 func GetEni(t *testing.T, region string, cluster string, taskArns []*string) *string {
-	eni, err := GetEniE(t, region, cluster, taskArns)
-	require.NoError(t, err)
-	return eni
-}
-
-func GetEniE(t *testing.T, region string, cluster string, taskArns []*string) (*string, error) {
 	var eniDetail *string
 	ecsClient, err := aws.NewEcsClientE(t, region)
-	if err != nil {
-		return nil, err
-	}
+	require.Nil(t, err, err)
 
 	params := &ecs.DescribeTasksInput{
 		Cluster: awssdk.String(cluster),
 		Tasks:   taskArns,
 	}
 
+	// Retry 3 times at 30s each
 	maxRetries := 3
 	retryDuration, _ := time.ParseDuration("30s")
 	_, err = retry.DoWithRetryE(t, "Get public elastic network interface", maxRetries, retryDuration,
@@ -89,30 +72,21 @@ func GetEniE(t *testing.T, region string, cluster string, taskArns []*string) (*
 			}
 		},
 	)
-	if err != nil {
-		return eniDetail, err
-	}
-	return eniDetail, nil
+	require.Nil(t, err, err)
+
+	return eniDetail
 }
 
 // Retrieve Public IP from ENI
 func GetPublicIP(t *testing.T, region string, enis []string) *string {
-	publicIP, err := GetPublicIPE(t, region, enis)
-	require.NoError(t, err)
-	return publicIP
-}
-
-func GetPublicIPE(t *testing.T, region string, enis []string) (*string, error) {
 	ec2Client := aws.NewEc2Client(t, region)
 
 	params := &ec2.DescribeNetworkInterfacesInput{
 		NetworkInterfaceIds: awssdk.StringSlice(enis),
 	}
 	eniDetail, err := ec2Client.DescribeNetworkInterfaces(params)
-	if err != nil {
-		return nil, err
-	}
+	require.Nil(t, err, err)
 
 	publicIP := eniDetail.NetworkInterfaces[0].Association.PublicIp
-	return publicIP, nil
+	return publicIP
 }
