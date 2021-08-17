@@ -8,6 +8,7 @@
   "packageRules": [
     {
       "automerge": true,
+      "description": "Automerge all updates except major versions",
       "matchUpdateTypes": [
         "patch",
         "pin",
@@ -16,6 +17,7 @@
       ]
     },
     {
+      "description": "Tag the waddlers Github Team for major updates",
       "matchUpdateTypes": [
         "major"
       ],
@@ -25,11 +27,15 @@
     },
     {
       "automerge": true,
+      "description": "Group minor and patch updates into a single PR",
       "groupName": "dependencies",
       "managers": [
         "terraform",
         "gomod",
-        "pre-commit"
+        "pre-commit",
+        "circleci",
+        "dockerfile",
+        "github-actions"
       ],
       "matchUpdateTypes": [
         "minor",
@@ -42,7 +48,7 @@
   ],
   "prConcurrentLimit": 2,
   "schedule": [
-    "every weekday",
+    "every weekend",
     "after 9am and before 5pm"
   ],
   "separateMinorPatch": true,
