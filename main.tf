@@ -392,9 +392,51 @@ resource "aws_ecs_task_definition" "main" {
   requires_compatibilities = compact([var.ecs_use_fargate ? "FARGATE" : ""])
   cpu                      = var.ecs_use_fargate ? var.fargate_task_cpu : ""
   memory                   = var.ecs_use_fargate ? var.fargate_task_memory : ""
-  execution_role_arn       = join("", aws_iam_role.task_execution_role.*.arn)
+  execution_role_arn       = var.ec2_create_task_execution_role ? join("", aws_iam_role.task_execution_role.*.arn) : var.execution_role_arn
 
   container_definitions = var.container_definitions == "" ? local.default_container_definitions : var.container_definitions
+
+  dynamic "volume" {
+    for_each = var.volumes
+    iterator = vol
+
+    content {
+      name      = vol.value.name
+      host_path = lookup(vol.value, "host_path", null)
+
+      dynamic "docker_volume_configuration" {
+        for_each = lookup(vol.value, "docker_volume_configuration", null) != null ? [1] : []
+
+        content {
+          scope = lookup(
+            lookup(vol.value, "docker_volume_configuration", {}),
+            "scope",
+            null
+          )
+          autoprovision = lookup(
+            lookup(vol.value, "docker_volume_configuration", {}),
+            "autoprovision",
+            null
+          )
+          driver = lookup(
+            lookup(vol.value, "docker_volume_configuration", {}),
+            "driver",
+            null
+          )
+          driver_opts = lookup(
+            lookup(vol.value, "docker_volume_configuration", {}),
+            "driver_opts",
+            null
+          )
+          labels = lookup(
+            lookup(vol.value, "docker_volume_configuration", {}),
+            "labels",
+            null
+          )
+        }
+      }
+    }
+  }
 
   lifecycle {
     ignore_changes = [

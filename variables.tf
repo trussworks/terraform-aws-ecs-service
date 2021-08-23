@@ -234,3 +234,13 @@ variable "health_check_grace_period_seconds" {
   default     = null
   type        = number
 }
+
+variable "volumes" {
+  default     = []
+  description = "Configuration block for volumes that containers in your task may use."
+}
+
+variable "execution_role_arn" {
+  description = "The Amazon Resource Name (ARN) of the task execution role that the Amazon ECS container agent and the Docker daemon can assume."
+  default     = null
+}
