@@ -443,7 +443,6 @@ resource "aws_ecs_task_definition" "main" {
       requires_compatibilities,
       cpu,
       memory,
-      execution_role_arn,
       container_definitions,
     ]
   }
