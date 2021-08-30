@@ -76,6 +76,12 @@ variable "ecs_cluster" {
   })
 }
 
+variable "ecs_enable_execute_command" {
+  description = "Whether to enable Amazon ECS Exec for the tasks within the service"
+  default     = false
+  type        = bool
+}
+
 variable "ecs_instance_role" {
   description = "The name of the ECS instance role."
   default     = ""

@@ -450,6 +450,8 @@ resource "aws_ecs_service" "main" {
   launch_type      = local.ecs_service_launch_type
   platform_version = local.fargate_platform_version
 
+  enable_execute_command = var.ecs_enable_execute_command
+
   # Use latest active revision
   task_definition = "${aws_ecs_task_definition.main.family}:${max(
     aws_ecs_task_definition.main.revision,

@@ -163,6 +163,7 @@ No modules.
 | <a name="input_ec2_create_task_execution_role"></a> [ec2\_create\_task\_execution\_role](#input\_ec2\_create\_task\_execution\_role) | Set to true to create ecs task execution role to ECS EC2 Tasks. | `bool` | `false` | no |
 | <a name="input_ecr_repo_arns"></a> [ecr\_repo\_arns](#input\_ecr\_repo\_arns) | The ARNs of the ECR repos.  By default, allows all repositories. | `list(string)` | <pre>[<br>  "*"<br>]</pre> | no |
 | <a name="input_ecs_cluster"></a> [ecs\_cluster](#input\_ecs\_cluster) | ECS cluster object for this task. | <pre>object({<br>    arn  = string<br>    name = string<br>  })</pre> | n/a | yes |
+| <a name="input_ecs_enable_execute_command"></a> [ecs\_enable\_execute\_command](#input\_ecs\_enable\_execute\_command) | Whether to enable Amazon ECS Exec for the tasks within the service | `bool` | `false` | no |
 | <a name="input_ecs_instance_role"></a> [ecs\_instance\_role](#input\_ecs\_instance\_role) | The name of the ECS instance role. | `string` | `""` | no |
 | <a name="input_ecs_subnet_ids"></a> [ecs\_subnet\_ids](#input\_ecs\_subnet\_ids) | Subnet IDs for the ECS tasks. | `list(string)` | n/a | yes |
 | <a name="input_ecs_use_fargate"></a> [ecs\_use\_fargate](#input\_ecs\_use\_fargate) | Whether to use Fargate for the task definition. | `bool` | `false` | no |
