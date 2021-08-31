@@ -12,6 +12,7 @@ import (
 	"github.com/gruntwork-io/terratest/modules/random"
 	"github.com/gruntwork-io/terratest/modules/terraform"
 	test_structure "github.com/gruntwork-io/terratest/modules/test-structure"
+	"github.com/stretchr/testify/require"
 )
 
 func TestTerraformAwsEcsServiceNoLoadBalancer(t *testing.T) {
@@ -29,9 +30,10 @@ func TestTerraformAwsEcsServiceNoLoadBalancer(t *testing.T) {
 
 		// Variables to pass to our Terraform code using -var options
 		Vars: map[string]interface{}{
-			"test_name": ecsServiceName,
-			"vpc_azs":   vpcAzs,
-			"region":    awsRegion,
+			"test_name":       ecsServiceName,
+			"vpc_azs":         vpcAzs,
+			"region":          awsRegion,
+			"ecs_exec_enable": false,
 		},
 		EnvVars: map[string]string{
 			"AWS_DEFAULT_REGION": awsRegion,
@@ -191,4 +193,37 @@ func TestTerraformAwsEcsServiceNlb(t *testing.T) {
 		maxRetries,
 		timeBetweenRetries,
 	)
+}
+
+func TestTerraformAwsEcsServiceEcsExec(t *testing.T) {
+	t.Parallel()
+
+	tempTestFolder := test_structure.CopyTerraformFolderToTemp(t, "../", "examples/no-load-balancer")
+
+	ecsServiceName := fmt.Sprintf("terratest-simple-%s", strings.ToLower(random.UniqueId()))
+	awsRegion := "us-west-2"
+	vpcAzs := aws.GetAvailabilityZones(t, awsRegion)[:3]
+
+	terraformOptions := &terraform.Options{
+		// The path to where our Terraform code is located
+		TerraformDir: tempTestFolder,
+
+		// Variables to pass to our Terraform code using -var options
+		Vars: map[string]interface{}{
+			"test_name":       ecsServiceName,
+			"vpc_azs":         vpcAzs,
+			"region":          awsRegion,
+			"ecs_exec_enable": true,
+		},
+		EnvVars: map[string]string{
+			"AWS_DEFAULT_REGION": awsRegion,
+		},
+	}
+
+	defer terraform.Destroy(t, terraformOptions)
+	terraform.InitAndApply(t, terraformOptions)
+
+	// Test by execing uname on the running container
+	err := EcsExecCommand(t, awsRegion, ecsServiceName, "uname")
+	require.Nil(t, err, err)
 }

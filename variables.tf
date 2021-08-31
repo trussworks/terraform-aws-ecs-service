@@ -76,12 +76,6 @@ variable "ecs_cluster" {
   })
 }
 
-variable "ecs_enable_execute_command" {
-  description = "Whether to enable Amazon ECS Exec for the tasks within the service"
-  default     = false
-  type        = bool
-}
-
 variable "ecs_instance_role" {
   description = "The name of the ECS instance role."
   default     = ""
@@ -239,4 +233,10 @@ variable "health_check_grace_period_seconds" {
   description = "Grace period within which failed health checks will be ignored at container start. Only applies to services with an attached loadbalancer."
   default     = null
   type        = number
+}
+
+variable "ecs_exec_enable" {
+  description = "Enable the ability to execute commands on the containers via Amazon ECS Exec"
+  default     = false
+  type        = bool
 }
