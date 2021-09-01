@@ -83,6 +83,7 @@ module "ecs-service" {
   ecs_subnet_ids   = module.vpc.public_subnets
   ecs_vpc_id       = module.vpc.vpc_id
   ecs_use_fargate  = true
+  ecs_exec_enable  = var.ecs_exec_enable
   assign_public_ip = true
   additional_security_group_ids = [
     aws_security_group.ecs_allow_http.id

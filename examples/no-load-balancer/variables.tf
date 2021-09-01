@@ -9,3 +9,8 @@ variable "test_name" {
 variable "vpc_azs" {
   type = list(string)
 }
+
+variable "ecs_exec_enable" {
+  type = bool
+}
+

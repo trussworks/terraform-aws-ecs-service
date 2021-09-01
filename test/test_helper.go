@@ -2,6 +2,7 @@ package test
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 	"time"
 
@@ -89,4 +90,35 @@ func GetPublicIP(t *testing.T, region string, enis []string) *string {
 
 	publicIP := eniDetail.NetworkInterfaces[0].Association.PublicIp
 	return publicIP
+}
+
+func EcsExecCommand(t *testing.T, region string, cluster string, command string) error {
+	ecsClient, err := aws.NewEcsClientE(t, region)
+	if err != nil {
+		return err
+	}
+
+	tasksOutput := GetTasks(t, region, cluster)
+	taskSplit := strings.Split(*tasksOutput.TaskArns[0], "/")
+	task := taskSplit[len(taskSplit)-1]
+
+	params := &ecs.ExecuteCommandInput{
+		Cluster:     awssdk.String(cluster),
+		Command:     awssdk.String(command),
+		Task:        awssdk.String(task),
+		Interactive: awssdk.Bool(true),
+	}
+
+	maxRetries := 3
+	retryDuration, _ := time.ParseDuration("30s")
+	_, err = retry.DoWithRetryE(t, fmt.Sprintf("Execute ECS command with params %v", params), maxRetries, retryDuration, func() (string, error) {
+		req, _ := ecsClient.ExecuteCommandRequest(params)
+		err = req.Send()
+		if err != nil {
+			return "failed to execute command", err
+		}
+		return fmt.Sprintf("Executed command %s", command), nil
+	},
+	)
+	return err
 }

@@ -375,6 +375,59 @@ resource "aws_iam_role_policy" "task_execution_role_policy" {
 }
 
 #
+# ECS Exec
+#
+
+data "aws_iam_policy_document" "task_role_ecs_exec" {
+  count = var.ecs_exec_enable ? 1 : 0
+  statement {
+    sid    = "AllowECSExec"
+    effect = "Allow"
+
+    actions = [
+      "ssmmessages:CreateControlChannel",
+      "ssmmessages:CreateDataChannel",
+      "ssmmessages:OpenControlChannel",
+      "ssmmessages:OpenDataChannel"
+    ]
+
+    resources = ["*"]
+  }
+
+  statement {
+    sid = "AllowDescribeLogGroups"
+    actions = [
+      "logs:DescribeLogGroups",
+    ]
+
+    resources = ["*"]
+  }
+
+  statement {
+    sid = "AllowECSExecLogging"
+    actions = [
+      "logs:CreateLogStream",
+      "logs:DescribeLogStreams",
+      "logs:PutLogEvents",
+    ]
+    resources = ["${aws_cloudwatch_log_group.main.arn}:*"]
+  }
+}
+
+resource "aws_iam_policy" "task_role_ecs_exec" {
+  count       = var.ecs_exec_enable ? 1 : 0
+  name        = "${aws_iam_role.task_role.name}-ecs-exec"
+  description = "Allow ECS Exec with Cloudwatch logging when attached to an ECS task role"
+  policy      = join("", data.aws_iam_policy_document.task_role_ecs_exec.*.json)
+}
+
+resource "aws_iam_role_policy_attachment" "task_role_ecs_exec" {
+  count      = var.ecs_exec_enable ? 1 : 0
+  role       = join("", aws_iam_role.task_role.*.name)
+  policy_arn = join("", aws_iam_policy.task_role_ecs_exec.*.arn)
+}
+
+#
 # ECS
 #
 
@@ -447,8 +500,9 @@ resource "aws_ecs_service" "main" {
   name    = var.name
   cluster = var.ecs_cluster.arn
 
-  launch_type      = local.ecs_service_launch_type
-  platform_version = local.fargate_platform_version
+  launch_type            = local.ecs_service_launch_type
+  platform_version       = local.fargate_platform_version
+  enable_execute_command = var.ecs_exec_enable
 
   # Use latest active revision
   task_definition = "${aws_ecs_task_definition.main.family}:${max(
