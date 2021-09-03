@@ -216,3 +216,16 @@ variable "service_registries" {
   }))
   default = []
 }
+
+variable "enable_ecs_managed_tags" {
+  description = "Whether to enable Amazon ECS managed tags for the tasks within the service."
+  default     = false
+  type        = bool
+}
+
+variable "propagate_tags" {
+  description = "Specifies whether to propagate the tags from the task definition or the service to the tasks. The valid values are SERVICE and TASK_DEFINITION."
+  default     = "TASK_DEFINITION"
+  type        = string
+}
+

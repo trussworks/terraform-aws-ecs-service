@@ -494,6 +494,9 @@ resource "aws_ecs_service" "main" {
     data.aws_ecs_task_definition.main.revision,
   )}"
 
+  enable_ecs_managed_tags = var.enable_ecs_managed_tags
+  propagate_tags          = var.propagate_tags
+
   desired_count                      = var.tasks_desired_count
   deployment_minimum_healthy_percent = var.tasks_minimum_healthy_percent
   deployment_maximum_percent         = var.tasks_maximum_percent
@@ -562,6 +565,9 @@ resource "aws_ecs_service" "main_no_lb" {
     aws_ecs_task_definition.main.revision,
     data.aws_ecs_task_definition.main.revision,
   )}"
+
+  enable_ecs_managed_tags = var.enable_ecs_managed_tags
+  propagate_tags          = var.propagate_tags
 
   desired_count                      = var.tasks_desired_count
   deployment_minimum_healthy_percent = var.tasks_minimum_healthy_percent
