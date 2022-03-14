@@ -1,0 +1,5 @@
+# See https://github.blog/2017-07-06-introducing-code-owners/
+# Order is important. The last matching pattern has the most precedence.
+
+# All terraform changes require review by the infra team
+*     @onemedical/infrastructure
