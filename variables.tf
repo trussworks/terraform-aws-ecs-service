@@ -206,6 +206,17 @@ variable "lb_target_groups" {
   )
 }
 
+variable "container_volumes" {
+  description = "Volumes that containers in your task may use."
+  default     = []
+  type = list(
+    object({
+      name = string
+    })
+  )
+
+}
+
 variable "hello_world_container_ports" {
   description = "List of ports for the hello world container app to listen on. The app currently supports listening on two ports."
   type        = list(number)
