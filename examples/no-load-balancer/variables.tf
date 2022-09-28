@@ -13,4 +13,3 @@ variable "vpc_azs" {
 variable "ecs_exec_enable" {
   type = bool
 }
-

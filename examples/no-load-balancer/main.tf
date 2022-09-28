@@ -116,4 +116,3 @@ resource "aws_security_group_rule" "ecs_allow_http" {
   protocol    = "tcp"
   cidr_blocks = ["0.0.0.0/0"]
 }
-
