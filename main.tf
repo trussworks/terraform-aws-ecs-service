@@ -449,6 +449,13 @@ resource "aws_ecs_task_definition" "main" {
 
   container_definitions = var.container_definitions == "" ? local.default_container_definitions : var.container_definitions
 
+  dynamic "volume" {
+    for_each = var.container_volumes
+    content {
+      name = volume.value.name
+    }
+  }
+
   lifecycle {
     ignore_changes = [
       requires_compatibilities,
