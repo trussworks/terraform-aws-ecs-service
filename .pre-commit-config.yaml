@@ -19,17 +19,19 @@ repos:
     hooks:
       - id: markdownlint
 
+  - repo: https://github.com/detailyang/pre-commit-shell
+    rev: 1.0.5
+    hooks:
+      - id: shell-lint
+
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.75.0
+    rev: v1.76.0
     hooks:
       - id: terraform_docs
       - id: terraform_fmt
 
   - repo: https://github.com/golangci/golangci-lint
-    rev: v1.49.0
+    rev: v1.50.1
     hooks:
       - id: golangci-lint
         entry: golangci-lint run --fix --timeout 300s
-        types: [go]
-        language: golang
-        pass_filenames: false
