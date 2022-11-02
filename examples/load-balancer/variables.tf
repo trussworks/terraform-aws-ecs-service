@@ -17,5 +17,3 @@ variable "associate_alb" {
 variable "associate_nlb" {
   type = bool
 }
-
-
