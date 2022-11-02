@@ -34,3 +34,4 @@ repos:
     rev: v1.50.1
     hooks:
       - id: golangci-lint
+        entry: golangci-lint run --fix --timeout 300s
