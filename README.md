@@ -1,9 +1,9 @@
 Terraform module that creates an ECS service with the following features
 
-* Runs an ECS service with or without an AWS load balancer.
-* Stream logs to a CloudWatch log group encrypted with a KMS key.
-* Associate multiple target groups with Network Load Balancers (NLB) and Application Load Balancers (ALB).
-* Supports running ECS tasks on EC2 instances or Fargate.
+- Runs an ECS service with or without an AWS load balancer.
+- Stream logs to a CloudWatch log group encrypted with a KMS key.
+- Associate multiple target groups with Network Load Balancers (NLB) and Application Load Balancers (ALB).
+- Supports running ECS tasks on EC2 instances or Fargate.
 
 ## Default container definition (hello world app)
 
@@ -105,14 +105,14 @@ module "app_ecs_service" {
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 3.34 |
+| terraform | >= 0.13 |
+| aws | >= 3.34 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 3.34 |
+| aws | >= 3.34 |
 
 ## Modules
 
@@ -150,63 +150,63 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_additional_security_group_ids"></a> [additional\_security\_group\_ids](#input\_additional\_security\_group\_ids) | In addition to the security group created for the service, a list of security groups the ECS service should also be added to. | `list(string)` | `[]` | no |
-| <a name="input_alb_security_group"></a> [alb\_security\_group](#input\_alb\_security\_group) | Application Load Balancer (ALB) security group ID to allow traffic from. | `string` | `""` | no |
-| <a name="input_assign_public_ip"></a> [assign\_public\_ip](#input\_assign\_public\_ip) | Whether this instance should be accessible from the public internet. Default is false. | `bool` | `false` | no |
-| <a name="input_associate_alb"></a> [associate\_alb](#input\_associate\_alb) | Whether to associate an Application Load Balancer (ALB) with the ECS service. | `bool` | `false` | no |
-| <a name="input_associate_nlb"></a> [associate\_nlb](#input\_associate\_nlb) | Whether to associate a Network Load Balancer (NLB) with the ECS service. | `bool` | `false` | no |
-| <a name="input_cloudwatch_alarm_actions"></a> [cloudwatch\_alarm\_actions](#input\_cloudwatch\_alarm\_actions) | The list of actions to take for cloudwatch alarms | `list(string)` | `[]` | no |
-| <a name="input_cloudwatch_alarm_cpu_enable"></a> [cloudwatch\_alarm\_cpu\_enable](#input\_cloudwatch\_alarm\_cpu\_enable) | Enable the CPU Utilization CloudWatch metric alarm | `bool` | `true` | no |
-| <a name="input_cloudwatch_alarm_cpu_threshold"></a> [cloudwatch\_alarm\_cpu\_threshold](#input\_cloudwatch\_alarm\_cpu\_threshold) | The CPU Utilization threshold for the CloudWatch metric alarm | `number` | `80` | no |
-| <a name="input_cloudwatch_alarm_mem_enable"></a> [cloudwatch\_alarm\_mem\_enable](#input\_cloudwatch\_alarm\_mem\_enable) | Enable the Memory Utilization CloudWatch metric alarm | `bool` | `true` | no |
-| <a name="input_cloudwatch_alarm_mem_threshold"></a> [cloudwatch\_alarm\_mem\_threshold](#input\_cloudwatch\_alarm\_mem\_threshold) | The Memory Utilization threshold for the CloudWatch metric alarm | `number` | `80` | no |
-| <a name="input_cloudwatch_alarm_name"></a> [cloudwatch\_alarm\_name](#input\_cloudwatch\_alarm\_name) | Generic name used for CPU and Memory Cloudwatch Alarms | `string` | `""` | no |
-| <a name="input_container_definitions"></a> [container\_definitions](#input\_container\_definitions) | Container definitions provided as valid JSON document. Default uses golang:alpine running a simple hello world. | `string` | `""` | no |
-| <a name="input_container_image"></a> [container\_image](#input\_container\_image) | The image of the container. | `string` | `"golang:alpine"` | no |
-| <a name="input_container_volumes"></a> [container\_volumes](#input\_container\_volumes) | Volumes that containers in your task may use. | <pre>list(<br>    object({<br>      name = string<br>    })<br>  )</pre> | `[]` | no |
-| <a name="input_ec2_create_task_execution_role"></a> [ec2\_create\_task\_execution\_role](#input\_ec2\_create\_task\_execution\_role) | Set to true to create ecs task execution role to ECS EC2 Tasks. | `bool` | `false` | no |
-| <a name="input_ecr_repo_arns"></a> [ecr\_repo\_arns](#input\_ecr\_repo\_arns) | The ARNs of the ECR repos.  By default, allows all repositories. | `list(string)` | <pre>[<br>  "*"<br>]</pre> | no |
-| <a name="input_ecs_cluster"></a> [ecs\_cluster](#input\_ecs\_cluster) | ECS cluster object for this task. | <pre>object({<br>    arn  = string<br>    name = string<br>  })</pre> | n/a | yes |
-| <a name="input_ecs_exec_enable"></a> [ecs\_exec\_enable](#input\_ecs\_exec\_enable) | Enable the ability to execute commands on the containers via Amazon ECS Exec | `bool` | `false` | no |
-| <a name="input_ecs_instance_role"></a> [ecs\_instance\_role](#input\_ecs\_instance\_role) | The name of the ECS instance role. | `string` | `""` | no |
-| <a name="input_ecs_subnet_ids"></a> [ecs\_subnet\_ids](#input\_ecs\_subnet\_ids) | Subnet IDs for the ECS tasks. | `list(string)` | n/a | yes |
-| <a name="input_ecs_use_fargate"></a> [ecs\_use\_fargate](#input\_ecs\_use\_fargate) | Whether to use Fargate for the task definition. | `bool` | `false` | no |
-| <a name="input_ecs_vpc_id"></a> [ecs\_vpc\_id](#input\_ecs\_vpc\_id) | VPC ID to be used by ECS. | `string` | n/a | yes |
-| <a name="input_environment"></a> [environment](#input\_environment) | Environment tag, e.g prod. | `string` | n/a | yes |
-| <a name="input_fargate_platform_version"></a> [fargate\_platform\_version](#input\_fargate\_platform\_version) | The platform version on which to run your service. Only applicable when using Fargate launch type. | `string` | `"LATEST"` | no |
-| <a name="input_fargate_task_cpu"></a> [fargate\_task\_cpu](#input\_fargate\_task\_cpu) | Number of cpu units used in initial task definition. Default is minimum. | `number` | `256` | no |
-| <a name="input_fargate_task_memory"></a> [fargate\_task\_memory](#input\_fargate\_task\_memory) | Amount (in MiB) of memory used in initial task definition. Default is minimum. | `number` | `512` | no |
-| <a name="input_health_check_grace_period_seconds"></a> [health\_check\_grace\_period\_seconds](#input\_health\_check\_grace\_period\_seconds) | Grace period within which failed health checks will be ignored at container start. Only applies to services with an attached loadbalancer. | `number` | `null` | no |
-| <a name="input_hello_world_container_ports"></a> [hello\_world\_container\_ports](#input\_hello\_world\_container\_ports) | List of ports for the hello world container app to listen on. The app currently supports listening on two ports. | `list(number)` | <pre>[<br>  8080,<br>  8081<br>]</pre> | no |
-| <a name="input_kms_key_id"></a> [kms\_key\_id](#input\_kms\_key\_id) | KMS customer managed key (CMK) ARN for encrypting application logs. | `string` | n/a | yes |
-| <a name="input_lb_target_groups"></a> [lb\_target\_groups](#input\_lb\_target\_groups) | List of load balancer target group objects containing the lb\_target\_group\_arn, container\_port and container\_health\_check\_port. The container\_port is the port on which the container will receive traffic. The container\_health\_check\_port is an additional port on which the container can receive a health check. The lb\_target\_group\_arn is either Application Load Balancer (ALB) or Network Load Balancer (NLB) target group ARN tasks will register with. | <pre>list(<br>    object({<br>      container_port              = number<br>      container_health_check_port = number<br>      lb_target_group_arn         = string<br>      }<br>    )<br>  )</pre> | `[]` | no |
-| <a name="input_logs_cloudwatch_group"></a> [logs\_cloudwatch\_group](#input\_logs\_cloudwatch\_group) | CloudWatch log group to create and use. Default: /ecs/{name}-{environment} | `string` | `""` | no |
-| <a name="input_logs_cloudwatch_retention"></a> [logs\_cloudwatch\_retention](#input\_logs\_cloudwatch\_retention) | Number of days you want to retain log events in the log group. | `number` | `90` | no |
-| <a name="input_manage_ecs_security_group"></a> [manage\_ecs\_security\_group](#input\_manage\_ecs\_security\_group) | Enable creation and management of the ECS security group and rules | `bool` | `true` | no |
-| <a name="input_name"></a> [name](#input\_name) | The service name. | `string` | n/a | yes |
-| <a name="input_nlb_subnet_cidr_blocks"></a> [nlb\_subnet\_cidr\_blocks](#input\_nlb\_subnet\_cidr\_blocks) | List of Network Load Balancer (NLB) CIDR blocks to allow traffic from. | `list(string)` | `[]` | no |
-| <a name="input_service_registries"></a> [service\_registries](#input\_service\_registries) | List of service registry objects as per <https://www.terraform.io/docs/providers/aws/r/ecs_service.html#service_registries-1>. List can only have a single object until <https://github.com/terraform-providers/terraform-provider-aws/issues/9573> is resolved. | <pre>list(object({<br>    registry_arn   = string<br>    container_name = string<br>    container_port = number<br>    port           = number<br>  }))</pre> | `[]` | no |
-| <a name="input_target_container_name"></a> [target\_container\_name](#input\_target\_container\_name) | Name of the container the Load Balancer should target. Default: {name}-{environment} | `string` | `""` | no |
-| <a name="input_tasks_desired_count"></a> [tasks\_desired\_count](#input\_tasks\_desired\_count) | The number of instances of a task definition. | `number` | `1` | no |
-| <a name="input_tasks_maximum_percent"></a> [tasks\_maximum\_percent](#input\_tasks\_maximum\_percent) | Upper limit on the number of running tasks. | `number` | `200` | no |
-| <a name="input_tasks_minimum_healthy_percent"></a> [tasks\_minimum\_healthy\_percent](#input\_tasks\_minimum\_healthy\_percent) | Lower limit on the number of running tasks. | `number` | `100` | no |
+| additional\_security\_group\_ids | In addition to the security group created for the service, a list of security groups the ECS service should also be added to. | `list(string)` | `[]` | no |
+| alb\_security\_group | Application Load Balancer (ALB) security group ID to allow traffic from. | `string` | `""` | no |
+| assign\_public\_ip | Whether this instance should be accessible from the public internet. Default is false. | `bool` | `false` | no |
+| associate\_alb | Whether to associate an Application Load Balancer (ALB) with the ECS service. | `bool` | `false` | no |
+| associate\_nlb | Whether to associate a Network Load Balancer (NLB) with the ECS service. | `bool` | `false` | no |
+| cloudwatch\_alarm\_actions | The list of actions to take for cloudwatch alarms | `list(string)` | `[]` | no |
+| cloudwatch\_alarm\_cpu\_enable | Enable the CPU Utilization CloudWatch metric alarm | `bool` | `true` | no |
+| cloudwatch\_alarm\_cpu\_threshold | The CPU Utilization threshold for the CloudWatch metric alarm | `number` | `80` | no |
+| cloudwatch\_alarm\_mem\_enable | Enable the Memory Utilization CloudWatch metric alarm | `bool` | `true` | no |
+| cloudwatch\_alarm\_mem\_threshold | The Memory Utilization threshold for the CloudWatch metric alarm | `number` | `80` | no |
+| cloudwatch\_alarm\_name | Generic name used for CPU and Memory Cloudwatch Alarms | `string` | `""` | no |
+| container\_definitions | Container definitions provided as valid JSON document. Default uses golang:alpine running a simple hello world. | `string` | `""` | no |
+| container\_image | The image of the container. | `string` | `"golang:alpine"` | no |
+| container\_volumes | Volumes that containers in your task may use. | ```list( object({ name = string }) )``` | `[]` | no |
+| ec2\_create\_task\_execution\_role | Set to true to create ecs task execution role to ECS EC2 Tasks. | `bool` | `false` | no |
+| ecr\_repo\_arns | The ARNs of the ECR repos.  By default, allows all repositories. | `list(string)` | ```[ "*" ]``` | no |
+| ecs\_cluster | ECS cluster object for this task. | ```object({ arn = string name = string })``` | n/a | yes |
+| ecs\_exec\_enable | Enable the ability to execute commands on the containers via Amazon ECS Exec | `bool` | `false` | no |
+| ecs\_instance\_role | The name of the ECS instance role. | `string` | `""` | no |
+| ecs\_subnet\_ids | Subnet IDs for the ECS tasks. | `list(string)` | n/a | yes |
+| ecs\_use\_fargate | Whether to use Fargate for the task definition. | `bool` | `false` | no |
+| ecs\_vpc\_id | VPC ID to be used by ECS. | `string` | n/a | yes |
+| environment | Environment tag, e.g prod. | `string` | n/a | yes |
+| fargate\_platform\_version | The platform version on which to run your service. Only applicable when using Fargate launch type. | `string` | `"LATEST"` | no |
+| fargate\_task\_cpu | Number of cpu units used in initial task definition. Default is minimum. | `number` | `256` | no |
+| fargate\_task\_memory | Amount (in MiB) of memory used in initial task definition. Default is minimum. | `number` | `512` | no |
+| health\_check\_grace\_period\_seconds | Grace period within which failed health checks will be ignored at container start. Only applies to services with an attached loadbalancer. | `number` | `null` | no |
+| hello\_world\_container\_ports | List of ports for the hello world container app to listen on. The app currently supports listening on two ports. | `list(number)` | ```[ 8080, 8081 ]``` | no |
+| kms\_key\_id | KMS customer managed key (CMK) ARN for encrypting application logs. | `string` | n/a | yes |
+| lb\_target\_groups | List of load balancer target group objects containing the lb\_target\_group\_arn, container\_port and container\_health\_check\_port. The container\_port is the port on which the container will receive traffic. The container\_health\_check\_port is an additional port on which the container can receive a health check. The lb\_target\_group\_arn is either Application Load Balancer (ALB) or Network Load Balancer (NLB) target group ARN tasks will register with. | ```list( object({ container_port = number container_health_check_port = number lb_target_group_arn = string } ) )``` | `[]` | no |
+| logs\_cloudwatch\_group | CloudWatch log group to create and use. Default: /ecs/{name}-{environment} | `string` | `""` | no |
+| logs\_cloudwatch\_retention | Number of days you want to retain log events in the log group. | `number` | `90` | no |
+| manage\_ecs\_security\_group | Enable creation and management of the ECS security group and rules | `bool` | `true` | no |
+| name | The service name. | `string` | n/a | yes |
+| nlb\_subnet\_cidr\_blocks | List of Network Load Balancer (NLB) CIDR blocks to allow traffic from. | `list(string)` | `[]` | no |
+| service\_registries | List of service registry objects as per <https://www.terraform.io/docs/providers/aws/r/ecs_service.html#service_registries-1>. List can only have a single object until <https://github.com/terraform-providers/terraform-provider-aws/issues/9573> is resolved. | ```list(object({ registry_arn = string container_name = string container_port = number port = number }))``` | `[]` | no |
+| target\_container\_name | Name of the container the Load Balancer should target. Default: {name}-{environment} | `string` | `""` | no |
+| tasks\_desired\_count | The number of instances of a task definition. | `number` | `1` | no |
+| tasks\_maximum\_percent | Upper limit on the number of running tasks. | `number` | `200` | no |
+| tasks\_minimum\_healthy\_percent | Lower limit on the number of running tasks. | `number` | `100` | no |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
-| <a name="output_awslogs_group"></a> [awslogs\_group](#output\_awslogs\_group) | Name of the CloudWatch Logs log group containers should use. |
-| <a name="output_awslogs_group_arn"></a> [awslogs\_group\_arn](#output\_awslogs\_group\_arn) | ARN of the CloudWatch Logs log group containers should use. |
-| <a name="output_ecs_security_group_id"></a> [ecs\_security\_group\_id](#output\_ecs\_security\_group\_id) | Security Group ID assigned to the ECS tasks. |
-| <a name="output_ecs_service_id"></a> [ecs\_service\_id](#output\_ecs\_service\_id) | ARN of the ECS service. |
-| <a name="output_task_definition_arn"></a> [task\_definition\_arn](#output\_task\_definition\_arn) | Full ARN of the Task Definition (including both family and revision). |
-| <a name="output_task_definition_family"></a> [task\_definition\_family](#output\_task\_definition\_family) | The family of the Task Definition. |
-| <a name="output_task_execution_role"></a> [task\_execution\_role](#output\_task\_execution\_role) | The role object of the task execution role that the Amazon ECS container agent and the Docker daemon can assume. |
-| <a name="output_task_execution_role_arn"></a> [task\_execution\_role\_arn](#output\_task\_execution\_role\_arn) | The ARN of the task execution role that the Amazon ECS container agent and the Docker daemon can assume. |
-| <a name="output_task_execution_role_name"></a> [task\_execution\_role\_name](#output\_task\_execution\_role\_name) | The name of the task execution role that the Amazon ECS container agent and the Docker daemon can assume. |
-| <a name="output_task_role"></a> [task\_role](#output\_task\_role) | The IAM role object assumed by Amazon ECS container tasks. |
-| <a name="output_task_role_arn"></a> [task\_role\_arn](#output\_task\_role\_arn) | The ARN of the IAM role assumed by Amazon ECS container tasks. |
-| <a name="output_task_role_name"></a> [task\_role\_name](#output\_task\_role\_name) | The name of the IAM role assumed by Amazon ECS container tasks. |
+| awslogs\_group | Name of the CloudWatch Logs log group containers should use. |
+| awslogs\_group\_arn | ARN of the CloudWatch Logs log group containers should use. |
+| ecs\_security\_group\_id | Security Group ID assigned to the ECS tasks. |
+| ecs\_service\_id | ARN of the ECS service. |
+| task\_definition\_arn | Full ARN of the Task Definition (including both family and revision). |
+| task\_definition\_family | The family of the Task Definition. |
+| task\_execution\_role | The role object of the task execution role that the Amazon ECS container agent and the Docker daemon can assume. |
+| task\_execution\_role\_arn | The ARN of the task execution role that the Amazon ECS container agent and the Docker daemon can assume. |
+| task\_execution\_role\_name | The name of the task execution role that the Amazon ECS container agent and the Docker daemon can assume. |
+| task\_role | The IAM role object assumed by Amazon ECS container tasks. |
+| task\_role\_arn | The ARN of the IAM role assumed by Amazon ECS container tasks. |
+| task\_role\_name | The name of the IAM role assumed by Amazon ECS container tasks. |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 
 ## Upgrade Path
@@ -215,9 +215,9 @@ No modules.
 
 In versions 5.x.x and prior, the following resources existed as arrays (toggled by a `count` meta-argument). With 6.0.0, each pair has been merged into a single resource.
 
-* `aws_cloudwatch_metric_alarm.alarm_cpu[0]` xor `aws_cloudwatch_metric_alarm.alarm_cpu_no_lb[0]` -> `aws_cloudwatch_metric_alarm.alarm_cpu`
-* `aws_cloudwatch_metric_alarm.alarm_mem[0]` xor `aws_cloudwatch_metric_alarm.alarm_mem_no_lb[0]` -> `aws_cloudwatch_metric_alarm.alarm_mem`
-* `aws_ecs_service.main[0]` xor `aws_ecs_service.main_no_lb[0]` -> `aws_ecs_service.main`
+- `aws_cloudwatch_metric_alarm.alarm_cpu[0]` xor `aws_cloudwatch_metric_alarm.alarm_cpu_no_lb[0]` -> `aws_cloudwatch_metric_alarm.alarm_cpu`
+- `aws_cloudwatch_metric_alarm.alarm_mem[0]` xor `aws_cloudwatch_metric_alarm.alarm_mem_no_lb[0]` -> `aws_cloudwatch_metric_alarm.alarm_mem`
+- `aws_ecs_service.main[0]` xor `aws_ecs_service.main_no_lb[0]` -> `aws_ecs_service.main`
 
 To upgrade to 6.0.0, you will need to perform a `terraform state mv` for any affected resources to avoid destruction and recreation. Alternatively, you can let Terraform delete/recreate the deployed resources.
 
@@ -292,7 +292,6 @@ module "app_ecs_service" {
 }
 ```
 
-
 ### 2.0.0 to 2.1.0
 
 In 2.1.0 KMS log encryption is required by default. This requires that you create and attach a new AWS KMS key ARN.
@@ -361,20 +360,4 @@ Install dependencies (macOS)
 
 ```shell
 brew install pre-commit go terraform terraform-docs
-```
-
-### Testing
-
-[Terratest](https://github.com/gruntwork-io/terratest) is being used for
-automated testing with this module. Tests in the `test` folder can be run
-locally by running the following command:
-
-```text
-make test
-```
-
-Or with aws-vault:
-
-```text
-AWS_VAULT_KEYCHAIN_NAME=<NAME> aws-vault exec <PROFILE> -- make test
 ```
