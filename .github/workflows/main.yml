@@ -1,4 +1,4 @@
-name: Tag Release
+name: 🏷 Tag and release
 
 on:
   push:
@@ -11,10 +11,23 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
-      - uses: onemedical/action-general-autotag@1.1.0
+      - name: 📥 Check out code
+        uses: actions/checkout@v3
+
+      - name: 🏷 Create a tag
+        id: create-tag
+        uses: butlerlogic/action-autotag@stable
         with:
-          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
-          source_file: 'version'
-          extraction_regex: "(\\d+\\.\\d+\\.\\d+)"
-          tag_format: 'v{version}'
+          strategy: regex
+          root: 'lib/crane/version.rb'
+          regex_pattern: "(\\d+\\.\\d+\\.\\d+)"
+          tag_prefix: "v"
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: 🦄 Create a release
+        uses: ncipollo/release-action@v1
+        with:
+          generateReleaseNotes: true
+          tag: ${{ steps.create-tag.outputs.tagname }}
+          token: ${{ secrets.GITHUB_TOKEN }}
