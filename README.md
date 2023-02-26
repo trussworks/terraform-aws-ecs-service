@@ -100,7 +100,7 @@ module "app_ecs_service" {
 }
 ```
 
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
@@ -207,7 +207,7 @@ No modules.
 | task\_role | The IAM role object assumed by Amazon ECS container tasks. |
 | task\_role\_arn | The ARN of the IAM role assumed by Amazon ECS container tasks. |
 | task\_role\_name | The name of the IAM role assumed by Amazon ECS container tasks. |
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->
 
 ## Upgrade Path
 
