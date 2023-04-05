@@ -1,6 +1,6 @@
 ## Story
 
-[story](https://jira.onemedical.com/browse/INFRA-123)
+[story](https://onemedical.atlassian.net/browse/INFRA-)
 
 ## Description
 
