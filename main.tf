@@ -465,6 +465,8 @@ resource "aws_ecs_task_definition" "main" {
       container_definitions,
     ]
   }
+
+  tags = var.task_definition_tags
 }
 
 # Create a data source to pull the latest active revision from

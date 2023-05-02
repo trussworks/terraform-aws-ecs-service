@@ -251,3 +251,9 @@ variable "ecs_exec_enable" {
   default     = false
   type        = bool
 }
+
+variable "task_definition_tags" {
+  description = "Tags to apply to the task definition"
+  type        = map(string)
+  default     = {}
+}
