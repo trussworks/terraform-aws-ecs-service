@@ -52,5 +52,6 @@
     "every weekend"
   ],
   "separateMinorPatch": true,
-  "timezone": "America/Los_Angeles"
+  "timezone": "America/Los_Angeles",
+  "schedule": ["before 4am"]
 }
