@@ -19,12 +19,6 @@ modify the `hello_world_container_ports` variable.
 In production usage, we expect deployment tooling to manage the container
 definitions going forward, not Terraform.
 
-## Terraform Versions
-
-Terraform 0.13 and 0.14. Pin module version to ~> 6.0. Submit pull-requests to master branch.
-
-Terraform 0.12 is deprecated.
-
 ## Usage
 
 ### ECS service associated with an Application Load Balancer (ALB)
@@ -105,7 +99,7 @@ module "app_ecs_service" {
 
 | Name | Version |
 |------|---------|
-| terraform | >= 0.13 |
+| terraform | >= 1.0 |
 | aws | >= 3.34 |
 
 ## Providers
