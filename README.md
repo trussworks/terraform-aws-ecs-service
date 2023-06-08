@@ -99,7 +99,7 @@ module "app_ecs_service" {
 
 | Name | Version |
 |------|---------|
-| terraform | >= 0.13 |
+| terraform | >= 1.0 |
 | aws | >= 3.34 |
 
 ## Providers
