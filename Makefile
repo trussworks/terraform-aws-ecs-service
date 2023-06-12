@@ -1,4 +1,4 @@
-.PHONY: ensure_pre_commit
+`.PHONY: ensure_pre_commit
 ensure_pre_commit: .git/hooks/pre-commit ## Ensure pre-commit is installed
 .git/hooks/pre-commit: /usr/local/bin/pre-commit
 	pre-commit install

@@ -112,7 +112,7 @@ module "app_ecs_service" {
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 3.34 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 5.2.0 |
 
 ## Modules
 
@@ -173,6 +173,7 @@ No modules.
 | <a name="input_ecs_use_fargate"></a> [ecs\_use\_fargate](#input\_ecs\_use\_fargate) | Whether to use Fargate for the task definition. | `bool` | `false` | no |
 | <a name="input_ecs_vpc_id"></a> [ecs\_vpc\_id](#input\_ecs\_vpc\_id) | VPC ID to be used by ECS. | `string` | n/a | yes |
 | <a name="input_environment"></a> [environment](#input\_environment) | Environment tag, e.g prod. | `string` | n/a | yes |
+| <a name="input_ephemeral_storage_size_in_gib"></a> [ephemeral\_storage\_size\_in\_gib](#input\_ephemeral\_storage\_size\_in\_gib) | The size of the ephemeral storage volume. Without explicit configuration, Amazon ECS tasks that are hosted on Fargate using platform version 1.4.0 or later receive a minimum of 20 GiB of ephemeral storage. This value can be configured from a minimum of 21 GiB up to a maximum of 200 GiB. | `number` | `null` | no |
 | <a name="input_fargate_platform_version"></a> [fargate\_platform\_version](#input\_fargate\_platform\_version) | The platform version on which to run your service. Only applicable when using Fargate launch type. | `string` | `"LATEST"` | no |
 | <a name="input_fargate_task_cpu"></a> [fargate\_task\_cpu](#input\_fargate\_task\_cpu) | Number of cpu units used in initial task definition. Default is minimum. | `number` | `256` | no |
 | <a name="input_fargate_task_memory"></a> [fargate\_task\_memory](#input\_fargate\_task\_memory) | Amount (in MiB) of memory used in initial task definition. Default is minimum. | `number` | `512` | no |
@@ -187,6 +188,7 @@ No modules.
 | <a name="input_nlb_subnet_cidr_blocks"></a> [nlb\_subnet\_cidr\_blocks](#input\_nlb\_subnet\_cidr\_blocks) | List of Network Load Balancer (NLB) CIDR blocks to allow traffic from. | `list(string)` | `[]` | no |
 | <a name="input_service_registries"></a> [service\_registries](#input\_service\_registries) | List of service registry objects as per <https://www.terraform.io/docs/providers/aws/r/ecs_service.html#service_registries-1>. List can only have a single object until <https://github.com/terraform-providers/terraform-provider-aws/issues/9573> is resolved. | <pre>list(object({<br>    registry_arn   = string<br>    container_name = string<br>    container_port = number<br>    port           = number<br>  }))</pre> | `[]` | no |
 | <a name="input_target_container_name"></a> [target\_container\_name](#input\_target\_container\_name) | Name of the container the Load Balancer should target. Default: {name}-{environment} | `string` | `""` | no |
+| <a name="input_task_definition_tags"></a> [task\_definition\_tags](#input\_task\_definition\_tags) | Tags to apply to the task definition | `map(string)` | `{}` | no |
 | <a name="input_tasks_desired_count"></a> [tasks\_desired\_count](#input\_tasks\_desired\_count) | The number of instances of a task definition. | `number` | `1` | no |
 | <a name="input_tasks_maximum_percent"></a> [tasks\_maximum\_percent](#input\_tasks\_maximum\_percent) | Upper limit on the number of running tasks. | `number` | `200` | no |
 | <a name="input_tasks_minimum_healthy_percent"></a> [tasks\_minimum\_healthy\_percent](#input\_tasks\_minimum\_healthy\_percent) | Lower limit on the number of running tasks. | `number` | `100` | no |

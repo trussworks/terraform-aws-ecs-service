@@ -257,3 +257,10 @@ variable "task_definition_tags" {
   type        = map(string)
   default     = {}
 }
+
+# See https://docs.aws.amazon.com/AmazonECS/latest/developerguide/fargate-task-storage.html#fargate-task-storage-pv14
+variable "ephemeral_storage_size_in_gib" {
+  description = "The size of the ephemeral storage volume. Without explicit configuration, Amazon ECS tasks that are hosted on Fargate using platform version 1.4.0 or later receive a minimum of 20 GiB of ephemeral storage. This value can be configured from a minimum of 21 GiB up to a maximum of 200 GiB."
+  type        = number
+  default     = null
+}

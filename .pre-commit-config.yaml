@@ -1,6 +1,6 @@
 repos:
-  - repo: git://github.com/pre-commit/pre-commit-hooks
-    rev: v4.0.1
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
     hooks:
       - id: check-json
       - id: check-merge-conflict
@@ -11,19 +11,19 @@ repos:
           - --autofix
       - id: trailing-whitespace
 
-  - repo: git://github.com/igorshubovych/markdownlint-cli
-    rev: v0.28.1
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.34.0
     hooks:
       - id: markdownlint
 
-  - repo: git://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.50.0
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.80.0
     hooks:
       - id: terraform_docs
       - id: terraform_fmt
 
-  - repo: git://github.com/golangci/golangci-lint
-    rev: v1.42.0
+  - repo: https://github.com/golangci/golangci-lint
+    rev: v1.53.2
     hooks:
       - id: golangci-lint
         args: [--timeout=3m]

@@ -49,9 +49,8 @@
   ],
   "prConcurrentLimit": 2,
   "schedule": [
-    "every weekend"
+    "before 4am"
   ],
   "separateMinorPatch": true,
-  "timezone": "America/Los_Angeles",
-  "schedule": ["before 4am"]
+  "timezone": "America/Los_Angeles"
 }
