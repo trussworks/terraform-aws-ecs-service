@@ -112,7 +112,7 @@ module "app_ecs_service" {
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 5.2.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 5.3.0 |
 
 ## Modules
 

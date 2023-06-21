@@ -1,30 +1,39 @@
-version: 2.1
+references:
+  circleci_docker: &circleci_docker trussworks/circleci:21d6483d75bdad5791fb2591ad1c1ff50000f406
 jobs:
-  pre-commit:
+  terratest:
     docker:
-      - image: ${AWS_ECR_ACCOUNT_URL}/circleci-terraform:tf1.0
-        aws_auth:
-          aws_access_key_id: $ECR_AWS_ACCESS_KEY_ID
-          aws_secret_access_key: $ECR_AWS_SECRET_ACCESS_KEY
+    - auth:
+        password: $DOCKER_PASSWORD
+        username: $DOCKER_USERNAME
+      image: *circleci_docker
     steps:
-      - checkout
-      - restore_cache:
-          keys:
-            - pre-commit-dot-cache-{{ checksum ".pre-commit-config.yaml" }}
-      - run:
-          name: Run pre-commit tests
-          command: |
-            terraform init
-            go version
-            pre-commit run -a --show-diff-on-failure
-      - save_cache:
-          key: pre-commit-dot-cache-{{ checksum ".pre-commit-config.yaml" }}
-          paths:
-            - '~/.cache/pre-commit'
-
+    - checkout
+    - restore_cache:
+        keys:
+        - pre-commit-dot-cache-{{ checksum ".pre-commit-config.yaml" }}
+        - go-mod-sources-v1-{{ checksum "go.sum" }}
+    - run:
+        command: |
+          temp_role=$(aws sts assume-role --role-arn arn:aws:iam::313564602749:role/circleci --role-session-name circleci)
+          export AWS_ACCESS_KEY_ID=$(echo $temp_role | jq .Credentials.AccessKeyId | xargs)
+          export AWS_SECRET_ACCESS_KEY=$(echo $temp_role | jq .Credentials.SecretAccessKey | xargs)
+          export AWS_SESSION_TOKEN=$(echo $temp_role | jq .Credentials.SessionToken | xargs)
+          make test
+        name: Assume role, run pre-commit and run terratest
+    - save_cache:
+        key: pre-commit-dot-cache-{{ checksum ".pre-commit-config.yaml" }}
+        paths:
+        - ~/.cache/pre-commit
+    - save_cache:
+        key: go-mod-sources-v1-{{ checksum "go.sum" }}
+        paths:
+        - ~/go/pkg/mod
+version: 2.1
 workflows:
   validate:
     jobs:
-      - pre-commit:
-          context:
-            - terraform-module
+    - terratest:
+        context:
+        - org-global
+  version: 2.1
