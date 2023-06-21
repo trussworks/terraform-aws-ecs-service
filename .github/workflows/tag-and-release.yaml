@@ -7,7 +7,8 @@ on:
   push:
     paths:
       - version
-    branches: [main, master]
+    branches:
+      - main
 
 
 permissions:
