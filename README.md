@@ -179,7 +179,7 @@ No modules.
 | manage\_ecs\_security\_group | Enable creation and management of the ECS security group and rules | `bool` | `true` | no |
 | name | The service name. | `string` | n/a | yes |
 | nlb\_subnet\_cidr\_blocks | List of Network Load Balancer (NLB) CIDR blocks to allow traffic from. | `list(string)` | `[]` | no |
-| service\_registries | List of service registry objects as per <https://www.terraform.io/docs/providers/aws/r/ecs_service.html#service_registries-1>. List can only have a single object until <https://github.com/terraform-providers/terraform-provider-aws/issues/9573> is resolved. | ```list(object({ registry_arn = string container_name = string container_port = number port = number }))``` | `[]` | no |
+| service\_registries | List of service registry objects as per <https://www.terraform.io/docs/providers/aws/r/ecs_service.html#service_registries-1>. List can only have a single object until <https://github.com/terraform-providers/terraform-provider-aws/issues/9573> is resolved. Either provide container\_name and container\_port or port | ```list(object({ registry_arn = string container_name = optional(string) container_port = optional(number) port = optional(number) }))``` | `[]` | no |
 | target\_container\_name | Name of the container the Load Balancer should target. Default: {name}-{environment} | `string` | `""` | no |
 | tasks\_desired\_count | The number of instances of a task definition. | `number` | `1` | no |
 | tasks\_maximum\_percent | Upper limit on the number of running tasks. | `number` | `200` | no |

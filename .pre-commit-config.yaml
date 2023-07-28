@@ -25,7 +25,7 @@ repos:
         exclude: README.m(ark)?d(own)?
 
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.33.0
+    rev: v0.35.0
     hooks:
       - id: markdownlint
 
@@ -35,6 +35,6 @@ repos:
       - id: shell-lint
 
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.77.1
+    rev: v1.81.0
     hooks:
       - id: terraform_fmt
