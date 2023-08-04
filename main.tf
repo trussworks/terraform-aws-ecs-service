@@ -557,6 +557,8 @@ resource "aws_ecs_service" "main" {
 
   enable_ecs_managed_tags = var.enable_ecs_managed_tags
 
+  deployment_circuit_breaker = var.deployment_circuit_breaker
+
   dynamic "service_registries" {
     for_each = var.service_registries
     content {
