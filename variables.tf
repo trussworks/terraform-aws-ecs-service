@@ -259,7 +259,7 @@ variable "enable_ecs_managed_tags" {
 }
 
 variable "ecs_deployment_circuit_breaker" {
-  description = "Configure the ecs deployment circuit breaker"
+  description = "Configure the ECS deployment circuit breaker"
   type = object({
     enable   = bool
     rollback = bool
