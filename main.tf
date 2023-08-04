@@ -555,6 +555,10 @@ resource "aws_ecs_service" "main" {
 
   health_check_grace_period_seconds = var.associate_alb || var.associate_nlb ? var.health_check_grace_period_seconds : null
 
+  enable_ecs_managed_tags = var.enable_ecs_managed_tags
+
+  deployment_circuit_breaker = var.deployment_circuit_breaker
+
   dynamic "service_registries" {
     for_each = var.service_registries
     content {

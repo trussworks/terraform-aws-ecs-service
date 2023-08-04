@@ -251,3 +251,21 @@ variable "ecs_exec_enable" {
   default     = false
   type        = bool
 }
+
+variable "enable_ecs_managed_tags" {
+  description = "Specifies whether to enable Amazon ECS managed tags for the tasks within the service"
+  default     = false
+  type        = bool
+}
+
+variable "ecs_deployment_circuit_breaker" {
+  description = "Configure the ECS deployment circuit breaker"
+  type = object({
+    enable   = bool
+    rollback = bool
+  })
+  default = {
+    enable   = false
+    rollback = false
+  }
+}
