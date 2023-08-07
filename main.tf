@@ -557,7 +557,10 @@ resource "aws_ecs_service" "main" {
 
   enable_ecs_managed_tags = var.enable_ecs_managed_tags
 
-  deployment_circuit_breaker = var.ecs_deployment_circuit_breaker
+  deployment_circuit_breaker {
+    enable   = var.ecs_deployment_circuit_breaker.enable
+    rollback = var.ecs_deployment_circuit_breaker.rollback
+  }
 
   dynamic "service_registries" {
     for_each = var.service_registries

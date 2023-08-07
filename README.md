@@ -100,13 +100,13 @@ module "app_ecs_service" {
 | Name | Version |
 |------|---------|
 | terraform | >= 1.0 |
-| aws | >= 3.34 |
+| aws | >= 4.6.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| aws | >= 3.34 |
+| aws | >= 4.6.0 |
 
 ## Modules
 
