@@ -92,12 +92,6 @@ resource "aws_cloudwatch_log_group" "main" {
   retention_in_days = var.logs_cloudwatch_retention
 
   kms_key_id = var.kms_key_id
-
-  tags = {
-    Name        = "${var.name}-${var.environment}"
-    Environment = var.environment
-    Automation  = "Terraform"
-  }
 }
 
 resource "aws_cloudwatch_metric_alarm" "alarm_cpu" {
@@ -151,12 +145,6 @@ resource "aws_security_group" "ecs_sg" {
   name        = "ecs-${var.name}-${var.environment}"
   description = "${var.name}-${var.environment} container security group"
   vpc_id      = var.ecs_vpc_id
-
-  tags = {
-    Name        = "ecs-${var.name}-${var.environment}"
-    Environment = var.environment
-    Automation  = "Terraform"
-  }
 }
 
 resource "aws_security_group_rule" "app_ecs_allow_outbound" {
