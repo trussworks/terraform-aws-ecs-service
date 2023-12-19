@@ -209,12 +209,6 @@ variable "lb_target_groups" {
 variable "container_volumes" {
   description = "Volumes that containers in your task may use."
   default     = []
-  type = list(
-    object({
-      name = string
-    })
-  )
-
 }
 
 variable "hello_world_container_ports" {
@@ -268,4 +262,10 @@ variable "ecs_deployment_circuit_breaker" {
     enable   = false
     rollback = false
   }
+}
+
+variable "efs_instance_id" {
+  description = "ID of the EFS instance volume"
+  type        = string
+  default     = ""
 }

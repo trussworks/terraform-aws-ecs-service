@@ -157,7 +157,7 @@ No modules.
 | cloudwatch\_alarm\_name | Generic name used for CPU and Memory Cloudwatch Alarms | `string` | `""` | no |
 | container\_definitions | Container definitions provided as valid JSON document. Default uses golang:alpine running a simple hello world. | `string` | `""` | no |
 | container\_image | The image of the container. | `string` | `"golang:alpine"` | no |
-| container\_volumes | Volumes that containers in your task may use. | ```list( object({ name = string }) )``` | `[]` | no |
+| container\_volumes | Volumes that containers in your task may use. | `list` | `[]` | no |
 | ec2\_create\_task\_execution\_role | Set to true to create ecs task execution role to ECS EC2 Tasks. | `bool` | `false` | no |
 | ecr\_repo\_arns | The ARNs of the ECR repos.  By default, allows all repositories. | `list(string)` | ```[ "*" ]``` | no |
 | ecs\_cluster | ECS cluster object for this task. | ```object({ arn = string name = string })``` | n/a | yes |
@@ -167,6 +167,7 @@ No modules.
 | ecs\_subnet\_ids | Subnet IDs for the ECS tasks. | `list(string)` | n/a | yes |
 | ecs\_use\_fargate | Whether to use Fargate for the task definition. | `bool` | `false` | no |
 | ecs\_vpc\_id | VPC ID to be used by ECS. | `string` | n/a | yes |
+| efs\_instance\_id | ID of the EFS instance volume | `string` | `""` | no |
 | enable\_ecs\_managed\_tags | Specifies whether to enable Amazon ECS managed tags for the tasks within the service | `bool` | `false` | no |
 | environment | Environment tag, e.g prod. | `string` | n/a | yes |
 | fargate\_platform\_version | The platform version on which to run your service. Only applicable when using Fargate launch type. | `string` | `"LATEST"` | no |
