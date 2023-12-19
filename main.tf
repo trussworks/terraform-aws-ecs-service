@@ -441,6 +441,21 @@ resource "aws_ecs_task_definition" "main" {
     for_each = var.container_volumes
     content {
       name = volume.value.name
+      dynamic "efs_volume_configuration" {
+        for_each = try([volume.value.efs_volume_configuration], [])
+
+        content {
+          authorization_config {
+            access_point_id = try(efs_volume_configuration.value.access_point_id, null)
+            iam             = try(efs_volume_configuration.value.iam, "ENABLED")
+          }
+
+          file_system_id          = var.efs_instance_id
+          root_directory          = try(efs_volume_configuration.value.root_directory, "/")
+          transit_encryption      = try(efs_volume_configuration.value.transit_encryption, "ENABLED")
+          transit_encryption_port = try(efs_volume_configuration.value.transit_encryption_port, null)
+        }
+      }
     }
   }
 
