@@ -2,4 +2,6 @@
 terraform.tfstate
 terraform.tfstate.backup
 terraform.tfstate.*.backup
+.terraform.lock.hcl
 vendor
+.vscode/
