@@ -406,13 +406,13 @@ resource "aws_iam_policy" "task_role_ecs_exec" {
   count       = var.ecs_exec_enable ? 1 : 0
   name        = "${aws_iam_role.task_role.name}-ecs-exec"
   description = "Allow ECS Exec with Cloudwatch logging when attached to an ECS task role"
-  policy      = join("", data.aws_iam_policy_document.task_role_ecs_exec.*.json)
+  policy      = one(data.aws_iam_policy_document.task_role_ecs_exec[*].json)
 }
 
 resource "aws_iam_role_policy_attachment" "task_role_ecs_exec" {
   count      = var.ecs_exec_enable ? 1 : 0
-  role       = join("", aws_iam_role.task_role.*.name)
-  policy_arn = join("", aws_iam_policy.task_role_ecs_exec.*.arn)
+  role       = one(aws_iam_role.task_role[*].name)
+  policy_arn = one(aws_iam_policy.task_role_ecs_exec[*].arn)
 }
 
 #
@@ -433,7 +433,7 @@ resource "aws_ecs_task_definition" "main" {
   requires_compatibilities = compact([var.ecs_use_fargate ? "FARGATE" : ""])
   cpu                      = var.ecs_use_fargate ? var.fargate_task_cpu : ""
   memory                   = var.ecs_use_fargate ? var.fargate_task_memory : ""
-  execution_role_arn       = join("", aws_iam_role.task_execution_role.*.arn)
+  execution_role_arn       = one(aws_iam_role.task_execution_role[*].arn)
 
   container_definitions = var.container_definitions == "" ? local.default_container_definitions : var.container_definitions
 

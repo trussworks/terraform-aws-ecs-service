@@ -1,16 +1,16 @@
 output "ecs_security_group_id" {
   description = "Security Group ID assigned to the ECS tasks."
-  value       = join("", aws_security_group.ecs_sg.*.id)
+  value       = one(aws_security_group.ecs_sg[*].id)
 }
 
 output "task_execution_role_arn" {
   description = "The ARN of the task execution role that the Amazon ECS container agent and the Docker daemon can assume."
-  value       = join("", aws_iam_role.task_execution_role.*.arn)
+  value       = one(aws_iam_role.task_execution_role[*].arn)
 }
 
 output "task_execution_role_name" {
   description = "The name of the task execution role that the Amazon ECS container agent and the Docker daemon can assume."
-  value       = join("", aws_iam_role.task_execution_role.*.name)
+  value       = one(aws_iam_role.task_execution_role[*].name)
 }
 
 output "task_role_arn" {

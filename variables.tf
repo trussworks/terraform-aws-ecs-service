@@ -1,17 +1,31 @@
-variable "name" {
-  description = "The service name."
-  type        = string
+variable "additional_security_group_ids" {
+  description = "In addition to the security group created for the service, a list of security groups the ECS service should also be added to."
+  default     = []
+  type        = list(string)
 }
 
-variable "environment" {
-  description = "Environment tag, e.g prod."
-  type        = string
-}
-
-variable "cloudwatch_alarm_name" {
-  description = "Generic name used for CPU and Memory Cloudwatch Alarms"
+variable "alb_security_group" {
+  description = "Application Load Balancer (ALB) security group ID to allow traffic from."
   default     = ""
   type        = string
+}
+
+variable "assign_public_ip" {
+  description = "Whether this instance should be accessible from the public internet. Default is false."
+  default     = false
+  type        = bool
+}
+
+variable "associate_alb" {
+  description = "Whether to associate an Application Load Balancer (ALB) with the ECS service."
+  default     = false
+  type        = bool
+}
+
+variable "associate_nlb" {
+  description = "Whether to associate a Network Load Balancer (NLB) with the ECS service."
+  default     = false
+  type        = bool
 }
 
 variable "cloudwatch_alarm_actions" {
@@ -44,28 +58,49 @@ variable "cloudwatch_alarm_mem_threshold" {
   type        = number
 }
 
-variable "logs_cloudwatch_retention" {
-  description = "Number of days you want to retain log events in the log group."
-  default     = 90
-  type        = number
-}
-
-variable "logs_cloudwatch_group" {
-  description = "CloudWatch log group to create and use. Default: /ecs/{name}-{environment}"
+variable "cloudwatch_alarm_name" {
+  description = "Generic name used for CPU and Memory Cloudwatch Alarms"
   default     = ""
   type        = string
+}
+
+variable "container_definitions" {
+  description = "Container definitions provided as valid JSON document. Default uses golang:alpine running a simple hello world."
+  default     = ""
+  type        = string
+}
+
+variable "container_image" {
+  description = "The image of the container."
+  default     = "golang:alpine"
+  type        = string
+}
+
+variable "container_volumes" {
+  description = "Volumes that containers in your task may use."
+  default     = []
+  type = list(object({
+    name = string
+    efs_volume_configuration = object({
+      access_point_id         = string
+      iam                     = string
+      root_directory          = string
+      transit_encryption      = string
+      transit_encryption_port = number
+    })
+  }))
+}
+
+variable "ec2_create_task_execution_role" {
+  description = "Set to true to create ecs task execution role to ECS EC2 Tasks."
+  type        = bool
+  default     = false
 }
 
 variable "ecr_repo_arns" {
   description = "The ARNs of the ECR repos.  By default, allows all repositories."
   type        = list(string)
   default     = ["*"]
-}
-
-variable "ecs_use_fargate" {
-  description = "Whether to use Fargate for the task definition."
-  default     = false
-  type        = bool
 }
 
 variable "ecs_cluster" {
@@ -76,14 +111,27 @@ variable "ecs_cluster" {
   })
 }
 
+variable "ecs_deployment_circuit_breaker" {
+  description = "Configure the ECS deployment circuit breaker"
+  type = object({
+    enable   = bool
+    rollback = bool
+  })
+  default = {
+    enable   = false
+    rollback = false
+  }
+}
+
+variable "ecs_exec_enable" {
+  description = "Enable the ability to execute commands on the containers via Amazon ECS Exec"
+  default     = false
+  type        = bool
+}
+
 variable "ecs_instance_role" {
   description = "The name of the ECS instance role."
   default     = ""
-  type        = string
-}
-
-variable "ecs_vpc_id" {
-  description = "VPC ID to be used by ECS."
   type        = string
 }
 
@@ -92,16 +140,32 @@ variable "ecs_subnet_ids" {
   type        = list(string)
 }
 
-variable "ec2_create_task_execution_role" {
-  description = "Set to true to create ecs task execution role to ECS EC2 Tasks."
-  type        = bool
+variable "ecs_use_fargate" {
+  description = "Whether to use Fargate for the task definition."
   default     = false
+  type        = bool
 }
 
-variable "assign_public_ip" {
-  description = "Whether this instance should be accessible from the public internet. Default is false."
+variable "ecs_vpc_id" {
+  description = "VPC ID to be used by ECS."
+  type        = string
+}
+
+variable "efs_instance_id" {
+  description = "ID of the EFS instance volume"
+  type        = string
+  default     = ""
+}
+
+variable "enable_ecs_managed_tags" {
+  description = "Specifies whether to enable Amazon ECS managed tags for the tasks within the service"
   default     = false
   type        = bool
+}
+
+variable "environment" {
+  description = "Environment tag, e.g prod."
+  type        = string
 }
 
 variable "fargate_platform_version" {
@@ -122,75 +186,21 @@ variable "fargate_task_memory" {
   type        = number
 }
 
-variable "tasks_desired_count" {
-  description = "The number of instances of a task definition."
-  default     = 1
+variable "health_check_grace_period_seconds" {
+  description = "Grace period within which failed health checks will be ignored at container start. Only applies to services with an attached loadbalancer."
+  default     = null
   type        = number
 }
 
-variable "tasks_minimum_healthy_percent" {
-  description = "Lower limit on the number of running tasks."
-  default     = 100
-  type        = number
-}
-
-variable "tasks_maximum_percent" {
-  description = "Upper limit on the number of running tasks."
-  default     = 200
-  type        = number
-}
-
-variable "container_image" {
-  description = "The image of the container."
-  default     = "golang:alpine"
-  type        = string
-}
-
-variable "container_definitions" {
-  description = "Container definitions provided as valid JSON document. Default uses golang:alpine running a simple hello world."
-  default     = ""
-  type        = string
-}
-
-variable "target_container_name" {
-  description = "Name of the container the Load Balancer should target. Default: {name}-{environment}"
-  default     = ""
-  type        = string
-}
-
-variable "associate_alb" {
-  description = "Whether to associate an Application Load Balancer (ALB) with the ECS service."
-  default     = false
-  type        = bool
-}
-
-variable "associate_nlb" {
-  description = "Whether to associate a Network Load Balancer (NLB) with the ECS service."
-  default     = false
-  type        = bool
-}
-
-variable "alb_security_group" {
-  description = "Application Load Balancer (ALB) security group ID to allow traffic from."
-  default     = ""
-  type        = string
-}
-
-variable "nlb_subnet_cidr_blocks" {
-  description = "List of Network Load Balancer (NLB) CIDR blocks to allow traffic from."
-  default     = []
-  type        = list(string)
+variable "hello_world_container_ports" {
+  description = "List of ports for the hello world container app to listen on. The app currently supports listening on two ports."
+  type        = list(number)
+  default     = [8080, 8081]
 }
 
 variable "kms_key_id" {
   description = "KMS customer managed key (CMK) ARN for encrypting application logs."
   type        = string
-}
-
-variable "additional_security_group_ids" {
-  description = "In addition to the security group created for the service, a list of security groups the ECS service should also be added to."
-  default     = []
-  type        = list(string)
 }
 
 variable "lb_target_groups" {
@@ -206,15 +216,33 @@ variable "lb_target_groups" {
   )
 }
 
-variable "container_volumes" {
-  description = "Volumes that containers in your task may use."
-  default     = []
+variable "logs_cloudwatch_group" {
+  description = "CloudWatch log group to create and use. Default: /ecs/{name}-{environment}"
+  default     = ""
+  type        = string
 }
 
-variable "hello_world_container_ports" {
-  description = "List of ports for the hello world container app to listen on. The app currently supports listening on two ports."
-  type        = list(number)
-  default     = [8080, 8081]
+variable "logs_cloudwatch_retention" {
+  description = "Number of days you want to retain log events in the log group."
+  default     = 90
+  type        = number
+}
+
+variable "manage_ecs_security_group" {
+  description = "Enable creation and management of the ECS security group and rules"
+  default     = true
+  type        = bool
+}
+
+variable "name" {
+  description = "The service name."
+  type        = string
+}
+
+variable "nlb_subnet_cidr_blocks" {
+  description = "List of Network Load Balancer (NLB) CIDR blocks to allow traffic from."
+  default     = []
+  type        = list(string)
 }
 
 variable "service_registries" {
@@ -228,44 +256,26 @@ variable "service_registries" {
   default = []
 }
 
-variable "manage_ecs_security_group" {
-  description = "Enable creation and management of the ECS security group and rules"
-  default     = true
-  type        = bool
+variable "target_container_name" {
+  description = "Name of the container the Load Balancer should target. Default: {name}-{environment}"
+  default     = ""
+  type        = string
 }
 
-variable "health_check_grace_period_seconds" {
-  description = "Grace period within which failed health checks will be ignored at container start. Only applies to services with an attached loadbalancer."
-  default     = null
+variable "tasks_desired_count" {
+  description = "The number of instances of a task definition."
+  default     = 1
   type        = number
 }
 
-variable "ecs_exec_enable" {
-  description = "Enable the ability to execute commands on the containers via Amazon ECS Exec"
-  default     = false
-  type        = bool
+variable "tasks_maximum_percent" {
+  description = "Upper limit on the number of running tasks."
+  default     = 200
+  type        = number
 }
 
-variable "enable_ecs_managed_tags" {
-  description = "Specifies whether to enable Amazon ECS managed tags for the tasks within the service"
-  default     = false
-  type        = bool
-}
-
-variable "ecs_deployment_circuit_breaker" {
-  description = "Configure the ECS deployment circuit breaker"
-  type = object({
-    enable   = bool
-    rollback = bool
-  })
-  default = {
-    enable   = false
-    rollback = false
-  }
-}
-
-variable "efs_instance_id" {
-  description = "ID of the EFS instance volume"
-  type        = string
-  default     = ""
+variable "tasks_minimum_healthy_percent" {
+  description = "Lower limit on the number of running tasks."
+  default     = 100
+  type        = number
 }
