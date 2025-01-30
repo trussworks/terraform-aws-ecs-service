@@ -308,6 +308,8 @@ resource "aws_iam_role_policy" "instance_role_policy" {
 # IAM - task
 #
 
+data "aws_caller_identity" "current" {}
+
 data "aws_iam_policy_document" "ecs_assume_role_policy" {
   statement {
     actions = ["sts:AssumeRole"]
@@ -315,6 +317,12 @@ data "aws_iam_policy_document" "ecs_assume_role_policy" {
     principals {
       type        = "Service"
       identifiers = ["ecs-tasks.amazonaws.com"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:SourceAccount"
+      values   = [data.aws_caller_identity.current.account_id]
     }
   }
 }
