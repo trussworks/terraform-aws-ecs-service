@@ -510,9 +510,10 @@ resource "aws_ecs_service" "main" {
   name    = var.name
   cluster = var.ecs_cluster.arn
 
-  launch_type            = local.ecs_service_launch_type
-  platform_version       = local.fargate_platform_version
-  enable_execute_command = var.ecs_exec_enable
+  launch_type                   = local.ecs_service_launch_type
+  platform_version              = local.fargate_platform_version
+  enable_execute_command        = var.ecs_exec_enable
+  availability_zone_rebalancing = var.availability_zone_rebalancing
 
   # Use latest active revision
   task_definition = "${aws_ecs_task_definition.main.family}:${max(

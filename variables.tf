@@ -3,6 +3,12 @@ variable "name" {
   type        = string
 }
 
+variable "availability_zone_rebalancing" {
+  description = "Allow ECS to automatically rebalance tasks across AZ's"
+  type        = string
+  default     = "DISABLED"
+}
+
 variable "environment" {
   description = "Environment tag, e.g prod."
   type        = string
