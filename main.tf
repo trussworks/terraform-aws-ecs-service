@@ -55,7 +55,7 @@ locals {
           logDriver = "awslogs"
           options = {
             "awslogs-group"         = local.awslogs_group
-            "awslogs-region"        = data.aws_region.current.name
+            "awslogs-region"        = data.aws_region.current.region
             "awslogs-stream-prefix" = "helloworld"
           }
         }
