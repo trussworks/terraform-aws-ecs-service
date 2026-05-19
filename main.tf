@@ -515,7 +515,8 @@ resource "aws_ecs_service" "main" {
   enable_execute_command        = var.ecs_exec_enable
   availability_zone_rebalancing = var.availability_zone_rebalancing
 
-  # Use latest active revision
+  # Use latest active revision. State refresh keeps this stable when CI/CD deploys
+  # newer revisions — the provider normalizes ARN format in 6.x, so no perma-change.
   task_definition = "${aws_ecs_task_definition.main.family}:${max(
     aws_ecs_task_definition.main.revision,
     data.aws_ecs_task_definition.main.revision,
@@ -574,9 +575,5 @@ resource "aws_ecs_service" "main" {
       container_port = service_registries.value.container_port
       port           = service_registries.value.port
     }
-  }
-
-  lifecycle {
-    ignore_changes = [task_definition]
   }
 }
