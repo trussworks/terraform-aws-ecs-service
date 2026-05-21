@@ -55,5 +55,5 @@ output "awslogs_group_arn" {
 
 output "ecs_service_id" {
   description = "ARN of the ECS service."
-  value       = aws_ecs_service.main.id
+  value       = local.ecs_service.id
 }

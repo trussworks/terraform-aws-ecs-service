@@ -111,7 +111,7 @@ resource "aws_cloudwatch_metric_alarm" "alarm_cpu" {
 
   dimensions = {
     "ClusterName" = var.ecs_cluster.name
-    "ServiceName" = aws_ecs_service.main.name
+    "ServiceName" = local.ecs_service.name
   }
 }
 
@@ -132,7 +132,7 @@ resource "aws_cloudwatch_metric_alarm" "alarm_mem" {
 
   dimensions = {
     "ClusterName" = var.ecs_cluster.name
-    "ServiceName" = aws_ecs_service.main.name
+    "ServiceName" = local.ecs_service.name
   }
 }
 
@@ -506,7 +506,9 @@ locals {
   ecs_service_agg_security_groups = var.manage_ecs_security_group ? compact(concat(tolist([aws_security_group.ecs_sg[0].id]), var.additional_security_group_ids)) : compact(var.additional_security_group_ids)
 }
 
+# Default: task definition updates are managed by CI/CD; Terraform ignores drift.
 resource "aws_ecs_service" "main" {
+  count   = var.manage_task_definition ? 0 : 1
   name    = var.name
   cluster = var.ecs_cluster.arn
 
@@ -515,8 +517,6 @@ resource "aws_ecs_service" "main" {
   enable_execute_command        = var.ecs_exec_enable
   availability_zone_rebalancing = var.availability_zone_rebalancing
 
-  # Use latest active revision. State refresh keeps this stable when CI/CD deploys
-  # newer revisions — the provider normalizes ARN format in 6.x, so no perma-change.
   task_definition = "${aws_ecs_task_definition.main.family}:${max(
     aws_ecs_task_definition.main.revision,
     data.aws_ecs_task_definition.main.revision,
@@ -528,7 +528,6 @@ resource "aws_ecs_service" "main" {
 
   dynamic "ordered_placement_strategy" {
     for_each = local.ecs_service_ordered_placement_strategy[local.ecs_service_launch_type]
-
     content {
       type  = ordered_placement_strategy.value.type
       field = ordered_placement_strategy.value.field
@@ -537,7 +536,6 @@ resource "aws_ecs_service" "main" {
 
   dynamic "placement_constraints" {
     for_each = local.ecs_service_placement_constraints[local.ecs_service_launch_type]
-
     content {
       type = placement_constraints.value.type
     }
@@ -576,4 +574,82 @@ resource "aws_ecs_service" "main" {
       port           = service_registries.value.port
     }
   }
+
+  lifecycle {
+    ignore_changes = [task_definition]
+  }
+}
+
+# manage_task_definition = true: Terraform tracks and applies task definition changes.
+resource "aws_ecs_service" "main_tf_managed" {
+  count   = var.manage_task_definition ? 1 : 0
+  name    = var.name
+  cluster = var.ecs_cluster.arn
+
+  launch_type                   = local.ecs_service_launch_type
+  platform_version              = local.fargate_platform_version
+  enable_execute_command        = var.ecs_exec_enable
+  availability_zone_rebalancing = var.availability_zone_rebalancing
+
+  task_definition = "${aws_ecs_task_definition.main.family}:${max(
+    aws_ecs_task_definition.main.revision,
+    data.aws_ecs_task_definition.main.revision,
+  )}"
+
+  desired_count                      = var.tasks_desired_count
+  deployment_minimum_healthy_percent = var.tasks_minimum_healthy_percent
+  deployment_maximum_percent         = var.tasks_maximum_percent
+
+  dynamic "ordered_placement_strategy" {
+    for_each = local.ecs_service_ordered_placement_strategy[local.ecs_service_launch_type]
+    content {
+      type  = ordered_placement_strategy.value.type
+      field = ordered_placement_strategy.value.field
+    }
+  }
+
+  dynamic "placement_constraints" {
+    for_each = local.ecs_service_placement_constraints[local.ecs_service_launch_type]
+    content {
+      type = placement_constraints.value.type
+    }
+  }
+
+  network_configuration {
+    subnets          = var.ecs_subnet_ids
+    security_groups  = local.ecs_service_agg_security_groups
+    assign_public_ip = var.assign_public_ip
+  }
+
+  dynamic "load_balancer" {
+    for_each = var.associate_alb || var.associate_nlb ? var.lb_target_groups : []
+    content {
+      container_name   = local.target_container_name
+      target_group_arn = load_balancer.value.lb_target_group_arn
+      container_port   = load_balancer.value.container_port
+    }
+  }
+
+  health_check_grace_period_seconds = var.associate_alb || var.associate_nlb ? var.health_check_grace_period_seconds : null
+
+  enable_ecs_managed_tags = var.enable_ecs_managed_tags
+
+  deployment_circuit_breaker {
+    enable   = var.ecs_deployment_circuit_breaker.enable
+    rollback = var.ecs_deployment_circuit_breaker.rollback
+  }
+
+  dynamic "service_registries" {
+    for_each = var.service_registries
+    content {
+      registry_arn   = service_registries.value.registry_arn
+      container_name = service_registries.value.container_name
+      container_port = service_registries.value.container_port
+      port           = service_registries.value.port
+    }
+  }
+}
+
+locals {
+  ecs_service = one(concat(aws_ecs_service.main, aws_ecs_service.main_tf_managed))
 }

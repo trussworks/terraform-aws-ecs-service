@@ -94,6 +94,59 @@ module "app_ecs_service" {
 }
 ```
 
+### Managing task definitions from Terraform
+
+By default, the ECS service ignores changes to `task_definition` so that CI/CD tooling can manage deployments without Terraform interfering. If you want Terraform to own task definition updates — for example, when making a significant infrastructure change like updating CPU or memory — you can set `manage_task_definition = true`.
+
+```hcl
+module "app_ecs_service" {
+  source = "trussworks/ecs-service/aws"
+
+  name        = "app"
+  environment = "prod"
+
+  ecs_cluster    = aws_ecs_cluster.mycluster
+  ecs_vpc_id     = module.vpc.vpc_id
+  ecs_subnet_ids = module.vpc.private_subnets
+  kms_key_id     = aws_kms_key.main.arn
+
+  manage_task_definition = true
+}
+```
+
+Note that `container_definitions` is always managed outside of Terraform regardless of this setting, due to a provider-level JSON normalization issue that would otherwise cause a perma-change.
+
+#### Toggling `manage_task_definition` on an existing service
+
+Because this toggle is implemented via two separate resources under the hood, switching the value requires a `moved` block to avoid the ECS service being destroyed and recreated. Add the appropriate block to your configuration before running `terraform apply`, then remove it afterward.
+
+**Enabling `manage_task_definition = true` for the first time** (upgrading directly from a version of this module that predates this variable):
+
+```hcl
+moved {
+  from = module.app_ecs_service.aws_ecs_service.main
+  to   = module.app_ecs_service.aws_ecs_service.main_tf_managed[0]
+}
+```
+
+**Enabling `manage_task_definition = true` after already running the new module version** (where `main` is already indexed):
+
+```hcl
+moved {
+  from = module.app_ecs_service.aws_ecs_service.main[0]
+  to   = module.app_ecs_service.aws_ecs_service.main_tf_managed[0]
+}
+```
+
+**Switching back to `manage_task_definition = false`**:
+
+```hcl
+moved {
+  from = module.app_ecs_service.aws_ecs_service.main_tf_managed[0]
+  to   = module.app_ecs_service.aws_ecs_service.main[0]
+}
+```
+
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
@@ -207,6 +260,19 @@ No modules.
 <!-- END_TF_DOCS -->
 
 ## Upgrade Path
+
+### 8.x.x to 9.0.0
+
+This version introduces the `manage_task_definition` variable and splits `aws_ecs_service.main` into a count-based resource. Existing deployments where `manage_task_definition` is not set (or is `false`) are handled automatically via a `moved` block in the module — no action required.
+
+If you are enabling `manage_task_definition = true` at the same time as upgrading, use this `moved` block before applying since `main` will not yet have a `[0]` index in your state:
+
+```hcl
+moved {
+  from = module.app_ecs_service.aws_ecs_service.main
+  to   = module.app_ecs_service.aws_ecs_service.main_tf_managed[0]
+}
+```
 
 ### 5.x.x to 6.0.0
 

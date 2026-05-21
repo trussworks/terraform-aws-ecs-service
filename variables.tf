@@ -224,6 +224,12 @@ variable "logs_cloudwatch_retention" {
   type        = number
 }
 
+variable "manage_task_definition" {
+  description = "If true, Terraform will track and apply changes to the task definition, including updating the ECS service when the task definition changes. If false (default), the ECS service ignores task definition changes so that CI/CD tooling can manage deployments independently. NOTE: Switching this value will cause the ECS service to be destroyed and recreated. To avoid downtime, use a moved block (see README)."
+  type        = bool
+  default     = false
+}
+
 variable "manage_ecs_security_group" {
   description = "Enable creation and management of the ECS security group and rules"
   default     = true
