@@ -241,6 +241,13 @@ variable "nlb_subnet_cidr_blocks" {
   type        = list(string)
 }
 
+variable "propagate_tags" {
+  description = "Whether to propagate tags. Allowe values are 'SERVICE' (default) or 'TASK_DEFINITION'."
+  default     = "SERVICE"
+  type        = string
+
+}
+
 variable "service_registries" {
   description = "List of service registry objects as per <https://www.terraform.io/docs/providers/aws/r/ecs_service.html#service_registries-1>. List can only have a single object until <https://github.com/terraform-providers/terraform-provider-aws/issues/9573> is resolved. Either provide container_name and container_port or port"
   type = list(object({

@@ -561,6 +561,8 @@ resource "aws_ecs_service" "main" {
 
   enable_ecs_managed_tags = var.enable_ecs_managed_tags
 
+  propagate_tags = var.propagate_tags
+
   deployment_circuit_breaker {
     enable   = var.ecs_deployment_circuit_breaker.enable
     rollback = var.ecs_deployment_circuit_breaker.rollback
@@ -579,4 +581,5 @@ resource "aws_ecs_service" "main" {
   lifecycle {
     ignore_changes = [task_definition]
   }
+
 }
